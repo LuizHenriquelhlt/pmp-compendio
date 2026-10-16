@@ -1,10 +1,11 @@
 /**
- * Busca de espécies.
+ * Busca do compêndio.
  *
  * Separada da página porque é a regra mais fácil de quebrar sem perceber: acento,
  * número com zeros à esquerda e nome de forma são três jeitos legítimos de procurar
  * o mesmo Pokémon.
  */
+import { nomeDoTipo, type IdTipo } from "./tipos"
 
 /** O mínimo que a busca precisa conhecer de uma espécie. */
 export type Buscavel = {
@@ -42,6 +43,25 @@ export function chaveDeBusca(especie: Buscavel): string {
 
 	if (especie.regiao != null) partes.push(normalizarParaBusca(especie.regiao))
 
+	return partes.join(" ")
+}
+
+/** O mínimo que a busca precisa conhecer de um Move. */
+export type MoveBuscavel = {
+	nome: string
+	tipo: IdTipo | null
+}
+
+/**
+ * Chave de busca de um Move: o nome e o nome do tipo em português.
+ *
+ * Os nomes de Move são em inglês (convenção do PMP), mas quem consulta pensa o tipo em
+ * português — "fogo" tem de achar Flamethrower. É a única tradução que a busca faz, e
+ * por isso o tipo entra na chave pelo nome, não pelo `id`.
+ */
+export function chaveDeBuscaDeMove(move: MoveBuscavel): string {
+	const partes = [ normalizarParaBusca(move.nome) ]
+	if (move.tipo != null) partes.push(normalizarParaBusca(nomeDoTipo(move.tipo)))
 	return partes.join(" ")
 }
 

@@ -26,6 +26,12 @@
 		</article>
 
 		<article>
+			<h2>{t("inicio.cartao.moves.titulo")}</h2>
+			<p>{t("inicio.cartao.moves.texto", { n: data.totalDeMoves.toLocaleString("pt-BR") })}</p>
+			<a href="/moves">{t("nav.moves")} →</a>
+		</article>
+
+		<article>
 			<h2>{t("inicio.cartao.dados.titulo")}</h2>
 			<p>{t("inicio.cartao.dados.texto")}</p>
 			<a href="/sobre">{t("nav.sobre")} →</a>

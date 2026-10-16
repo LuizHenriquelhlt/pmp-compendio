@@ -8,7 +8,12 @@
 // dados/relatorio.json, para correção na fonte (o módulo Foundry).
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs"
 import { join } from "node:path"
+import { interpretarEfeitos } from "./efeitos.mjs"
 import { criarInterpretadorDeEvolucao } from "./evolucao.mjs"
+import {
+	CHAVE_DE_TIPO_VARIAVEL, TIPO_DE_MOVE_POR_CHAVE, classificarResolucao, criarReparadorDeMoves,
+	interpretarAlcance, interpretarAtivacao, interpretarDados, interpretarDuracao, prioridadeDeclarada,
+} from "./moves.mjs"
 import { interpretarDeslocamento, interpretarSentidos, slug, textoSimples } from "./texto.mjs"
 
 const [ entrada = "dados-crus", saida = "dados" ] = process.argv.slice(2)
@@ -46,6 +51,12 @@ const relatorio = {
 	evolucoesSuspeitas: [],
 	tiposDesconhecidos: [],
 	tamanhosDesconhecidos: [],
+	tiposDeMoveDesconhecidos: [],
+	alcanceDeMoveTruncado: [],
+	prioridadeDeMoveDivergente: [],
+	dadosDeMoveNaoClassificados: [],
+	efeitosDeMoveNaoInterpretados: [],
+	textosDeMoveContaminados: [],
 }
 
 const dex = carregar("pokedex")
@@ -60,78 +71,33 @@ for (const documento of dex) {
 }
 
 // ------------------------------------------------------------------ Dicionário de Moves
-// As tabelas de nível do módulo chegam com nomes mesclados ("Vine Whip Focus Energy"),
-// com letras espaçadas ("Flash Ca n n o n") ou partidos entre linhas ("Take" / "Down
-// Flamethrower"). Reparamos segmentando o texto normalizado contra os Moves conhecidos.
-const MOVES_CONHECIDOS = new Map()
-for (const documento of carregar("moves")) {
-	if (flags(documento).move != null) MOVES_CONHECIDOS.set(normalizarMove(documento.name), documento.name)
-}
-
-function normalizarMove(texto) {
-	return texto.toLowerCase().replace(/[’']/g, "'").replace(/[^a-z0-9']/g, "")
-}
-
-/** Menor quantidade de Moves conhecidos que cobre a string inteira, ou `undefined`. */
-function segmentar(texto) {
-	const melhor = Array(texto.length + 1).fill(null)
-	melhor[0] = []
-
-	for (let i = 0; i < texto.length; i++) {
-		if (melhor[i] == null) continue
-		for (let j = i + 1; j <= texto.length; j++) {
-			const nome = MOVES_CONHECIDOS.get(texto.slice(i, j))
-			if (nome == null) continue
-			if (melhor[j] == null || melhor[j].length > melhor[i].length + 1) melhor[j] = [ ...melhor[i], nome ]
-		}
-	}
-
-	return melhor[texto.length] ?? undefined
-}
+// As listas de Moves das fichas de espécie são texto de PDF, e o reparo delas vive em
+// `moves.mjs` (com testes). Vale para as três listas: tabela de nível, TMs e Moves de Ovo
+// — as duas últimas passavam cruas até agora, e é por isso que a ficha mostrava
+// "T a k e D o w n" e "Double- Edge" onde o livro diz "Take Down" e "Double-Edge".
+const documentosDeMove = carregar("moves").filter((d) => flags(d).move != null)
+const reparadorDeMoves = criarReparadorDeMoves(documentosDeMove.map((d) => d.name))
 
 let movesReparados = 0
 const movesNaoResolvidos = new Set()
 
-function repararTabelaDeMoves(linhas, nomeDaEspecie) {
-	const saida = linhas.map((l) => ({ nivel: l.level, moves: [] }))
-	let pendente = "" // fragmento que sobrou da linha anterior
+function anotarNaoResolvidos(nomeDaEspecie, nomes) {
+	for (const nome of nomes) movesNaoResolvidos.add(`${nomeDaEspecie}: ${nome}`)
+}
 
-	linhas.forEach((linha, indice) => {
-		for (const bruto of linha.moves ?? []) {
-			const limpo = bruto.replace(/—/g, "").trim()
-			if (limpo === "") continue
+function listaDeMoves(brutos, nomeDaEspecie) {
+	const { resolvidos, naoResolvidos } = reparadorDeMoves.resolverLista(brutos)
+	anotarNaoResolvidos(nomeDaEspecie, naoResolvidos)
+	// O que não resolveu continua na ficha, como texto sem link: a lista do livro não
+	// deve encurtar porque o módulo contaminou uma entrada.
+	return [ ...resolvidos, ...naoResolvidos ]
+}
 
-			const chave = normalizarMove(limpo)
-			if (pendente === "" && MOVES_CONHECIDOS.has(chave)) {
-				saida[indice].moves.push(MOVES_CONHECIDOS.get(chave))
-				continue
-			}
-
-			const segmentos = segmentar(pendente + chave)
-			if (segmentos != null) {
-				// Havia fragmento pendente: o primeiro Move pertence à linha anterior.
-				if (pendente !== "" && indice > 0) {
-					saida[indice - 1].moves.push(segmentos[0])
-					saida[indice].moves.push(...segmentos.slice(1))
-				} else {
-					saida[indice].moves.push(...segmentos)
-				}
-				pendente = ""
-				movesReparados++
-			} else if (pendente === "") {
-				pendente = chave
-			} else {
-				movesNaoResolvidos.add(`${nomeDaEspecie}: ${limpo}`)
-				pendente = ""
-			}
-		}
-	})
-
-	if (pendente !== "") movesNaoResolvidos.add(`${nomeDaEspecie}: ${pendente}`)
-
-	return saida
-		.filter((l) => l.moves.length > 0)
-		.map((l) => ({ nivel: l.nivel, moves: [ ...new Set(l.moves) ] }))
+function tabelaDeMoves(linhas, nomeDaEspecie) {
+	const { tabela, naoResolvidos, reparados } = reparadorDeMoves.repararTabela(linhas)
+	anotarNaoResolvidos(nomeDaEspecie, naoResolvidos)
+	movesReparados += reparados
+	return tabela
 }
 
 // ------------------------------------------------------------------ Evolução
@@ -234,9 +200,9 @@ for (const documento of documentosDeEspecie) {
 		sentidos: interpretarSentidos(s.senses ?? ""),
 		habilidades: s.passiveAbility?.options ?? [],
 		habilidadeOculta: s.hiddenAbility != null && s.hiddenAbility !== "" ? s.hiddenAbility : null,
-		movesPorNivel: repararTabelaDeMoves(s.moveTable ?? [], documento.name),
-		tms: s.tms ?? [],
-		movesDeOvo: s.eggMoves ?? [],
+		movesPorNivel: tabelaDeMoves(s.moveTable ?? [], documento.name),
+		tms: listaDeMoves(s.tms ?? [], documento.name),
+		movesDeOvo: listaDeMoves(s.eggMoves ?? [], documento.name),
 		defesasAlteradas: Object.keys(s.typeDefenseOverrides ?? {}).length > 0 ? s.typeDefenseOverrides : null,
 		imagem: typeof documento.img === "string" && documento.img.startsWith("http") ? documento.img : null,
 	})
@@ -284,6 +250,90 @@ relatorio.formasOrfas = especies
 
 especies.sort((a, b) => a.numero - b.numero || a.nome.localeCompare(b.nome, "pt-BR"))
 
+// ------------------------------------------------------------------ Moves
+// O pack de Moves é bem mais estruturado que a Pokédex, mas quatro dos campos não querem
+// dizer o que o nome promete — ver o cabeçalho de `moves.mjs`. O que este laço faz é
+// aplicar essas correções e registrar, Move por Move, o que não deu para concluir.
+const moves = []
+const idsDeMoveUsados = new Set()
+
+for (const documento of documentosDeMove) {
+	const m = flags(documento).move
+
+	let id = slug(documento.name)
+	while (idsDeMoveUsados.has(id)) id = `${id}-2`
+	idsDeMoveUsados.add(id)
+
+	const tipoVariavel = m.moveType === CHAVE_DE_TIPO_VARIAVEL
+	const tipo = tipoVariavel ? null : TIPO_DE_MOVE_POR_CHAVE[m.moveType] ?? null
+	if (tipo == null && !tipoVariavel) {
+		relatorio.tiposDeMoveDesconhecidos.push({ move: documento.name, chave: m.moveType })
+	}
+
+	const descricao = textoSimples(m.description ?? "")
+	const niveisSuperiores = textoSimples(m.higherLevels ?? "")
+	const observacoes = textoSimples(m.observations ?? "")
+
+	const alcance = interpretarAlcance(m.range?.raw ?? "", m.range?.meters ?? 0, m.range?.melee === true)
+	if (alcance.truncado) {
+		relatorio.alcanceDeMoveTruncado.push({ move: documento.name, bruto: alcance.bruto })
+	}
+
+	const noTexto = prioridadeDeclarada(descricao)
+	const prioridade = m.priority ?? 0
+	if (noTexto != null && noTexto !== prioridade) {
+		relatorio.prioridadeDeMoveDivergente.push({ move: documento.name, campo: prioridade, texto: noTexto })
+	}
+
+	const { dano, cura, naoClassificado } = interpretarDados({
+		base: m.damage?.baseFormula ?? "",
+		escalonamento: m.damage?.scaling ?? [],
+		niveisSuperiores,
+		descricao,
+	})
+	if (naoClassificado != null) {
+		relatorio.dadosDeMoveNaoClassificados.push({ move: documento.name, texto: naoClassificado })
+	}
+
+	const { efeitos, naoInterpretado } = interpretarEfeitos(descricao)
+	for (const item of naoInterpretado) {
+		relatorio.efeitosDeMoveNaoInterpretados.push({ move: documento.name, ...item })
+	}
+
+	// Um crédito de arte vazado para dentro do texto de regra (Swallow, na v1.33.0).
+	// Fica visível na página como está: limpar em silêncio escondia o defeito da fonte.
+	const contaminado = [ descricao, niveisSuperiores, observacoes ].find((t) => /Arte feita por|Arte por/i.test(t))
+	if (contaminado != null) {
+		relatorio.textosDeMoveContaminados.push({ move: documento.name, texto: contaminado })
+	}
+
+	moves.push({
+		id,
+		nome: documento.name,
+		tipo,
+		tipoVariavel,
+		poder: { atributos: m.powerAbilities ?? [], texto: m.power ?? "" },
+		ativacao: interpretarAtivacao(m.activation?.raw ?? ""),
+		// Struggle é o único Move de PP ilimitado, e o módulo o grava como `max: 0`.
+		pp: m.pp?.unlimited === true ? null : m.pp?.max ?? m.pp?.value ?? 0,
+		duracao: interpretarDuracao(m.duration ?? ""),
+		alcance,
+		prioridade,
+		prioridadeNoTexto: noTexto != null && noTexto !== prioridade ? noTexto : null,
+		resolucoes: classificarResolucao(descricao),
+		dano,
+		cura,
+		efeitos,
+		descricao,
+		niveisSuperiores,
+		observacoes,
+		zPower: m.zPowerEffect != null && m.zPowerEffect !== "" ? m.zPowerEffect : null,
+		imagem: typeof documento.img === "string" && documento.img.startsWith("http") ? documento.img : null,
+	})
+}
+
+moves.sort((a, b) => a.nome.localeCompare(b.nome, "en"))
+
 // ------------------------------------------------------------------ Saídas
 // O índice é o que a listagem e a busca carregam; propositalmente enxuto.
 const indice = especies.map((e) => ({
@@ -299,6 +349,26 @@ const indice = especies.map((e) => ({
 	ca: e.ca,
 	pv: e.pv,
 	imagem: e.imagem,
+}))
+
+// A fatia de Move que a listagem e a busca carregam. O que fica de fora é o que só a
+// ficha usa — descrição, Níveis Superiores, observações e os efeitos detalhados.
+const indiceDeMoves = moves.map((m) => ({
+	id: m.id,
+	nome: m.nome,
+	tipo: m.tipo,
+	tipoVariavel: m.tipoVariavel,
+	pp: m.pp,
+	prioridade: m.prioridade,
+	alcance: m.alcance.texto,
+	metros: m.alcance.metros,
+	corpoACorpo: m.alcance.corpoACorpo,
+	ativacao: m.ativacao.texto,
+	modos: m.ativacao.modos,
+	resolucoes: m.resolucoes,
+	dano: m.dano?.base ?? null,
+	cura: m.cura?.base ?? null,
+	poder: m.poder.texto,
 }))
 
 const habilidades = {}
@@ -317,13 +387,20 @@ relatorio.movesNaoResolvidos = [ ...movesNaoResolvidos ]
 console.log(`\nGerado em ${saida}/:`)
 escrever("especies", especies)
 escrever("indice", indice)
+escrever("moves", moves)
+escrever("indice-moves", indiceDeMoves)
 escrever("habilidades", habilidades)
 writeFileSync(join(saida, "relatorio.json"), JSON.stringify(relatorio, null, 1))
 
 console.log(`\nQualidade do dado-fonte (detalhes em ${saida}/relatorio.json):`)
 console.log(`  tabelas de Moves reparadas: ${movesReparados}`)
-console.log(`  Moves não resolvidos: ${movesNaoResolvidos.size}`)
+console.log(`  nomes de Move não resolvidos nas fichas: ${movesNaoResolvidos.size}`)
 console.log(`  deslocamento truncado no módulo: ${relatorio.deslocamentoIncompleto.length} espécies`)
 console.log(`  evoluções com alvo não resolvido: ${relatorio.evolucoesNaoResolvidas.length}`)
 console.log(`  evoluções a conferir no livro: ${relatorio.evolucoesSuspeitas.length}`)
 console.log(`  formas sem antecessor declarado: ${relatorio.formasOrfas.length}`)
+console.log(`  alcance de Move truncado no módulo: ${relatorio.alcanceDeMoveTruncado.length}`)
+console.log(`  prioridade de Move divergente do texto: ${relatorio.prioridadeDeMoveDivergente.length}`)
+console.log(`  dados de Move sem classificar (dano ou cura): ${relatorio.dadosDeMoveNaoClassificados.length}`)
+console.log(`  efeitos de Move declarados e não interpretados: ${relatorio.efeitosDeMoveNaoInterpretados.length}`)
+console.log(`  textos de Move contaminados na fonte: ${relatorio.textosDeMoveContaminados.length}`)

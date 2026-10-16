@@ -145,7 +145,10 @@
 		{#if visiveis < filtradas.length}
 			<div class="mais">
 				<button type="button" onclick={() => visiveis += LOTE * 2}>
-					Mostrar mais ({(filtradas.length - visiveis).toLocaleString("pt-BR")} restantes)
+					{t("lista.mostrarMais")}
+					<span class="restantes">
+						({t("lista.mostrarMais.restantes", { n: (filtradas.length - visiveis).toLocaleString("pt-BR") })})
+					</span>
 				</button>
 			</div>
 		{/if}
@@ -273,5 +276,10 @@
 	.mais button:hover {
 		border-color: var(--marca);
 		color: var(--marca);
+	}
+
+	.restantes {
+		color: var(--texto-tenue);
+		font-weight: 600;
 	}
 </style>

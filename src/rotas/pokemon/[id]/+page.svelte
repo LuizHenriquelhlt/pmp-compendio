@@ -5,6 +5,7 @@
 	import { nomeDoTamanho } from "$pmp/tamanhos"
 	import BlocoDeAtributos from "$ui/BlocoDeAtributos.svelte"
 	import EmblemaTipo from "$ui/EmblemaTipo.svelte"
+	import ListaDeMoves from "$ui/ListaDeMoves.svelte"
 	import type { PageData } from "./$types"
 
 	let { data }: { data: PageData } = $props()
@@ -210,7 +211,7 @@
 				{/if}
 			</section>
 
-			{#if especie.movesPorNivel.length > 0}
+			{#if data.movesPorNivel.length > 0}
 				<section class="painel">
 					<h2>{t("especie.moves")}</h2>
 					<table>
@@ -221,10 +222,10 @@
 							</tr>
 						</thead>
 						<tbody>
-							{#each especie.movesPorNivel as linha (linha.nivel)}
+							{#each data.movesPorNivel as linha (linha.nivel)}
 								<tr>
 									<th scope="row" class="numero col-nivel">{linha.nivel}</th>
-									<td>{linha.moves.join(", ")}</td>
+									<td><ListaDeMoves moves={linha.moves} /></td>
 								</tr>
 							{/each}
 						</tbody>
@@ -232,17 +233,17 @@
 				</section>
 			{/if}
 
-			{#if especie.tms.length > 0}
+			{#if data.tms.length > 0}
 				<section class="painel">
-					<h2>{t("especie.tms")} <span class="quantidade">({especie.tms.length})</span></h2>
-					<p class="lista-larga">{especie.tms.join(", ")}</p>
+					<h2>{t("especie.tms")} <span class="quantidade">({data.tms.length})</span></h2>
+					<p class="lista-larga"><ListaDeMoves moves={data.tms} /></p>
 				</section>
 			{/if}
 
-			{#if especie.movesDeOvo.length > 0}
+			{#if data.movesDeOvo.length > 0}
 				<section class="painel">
-					<h2>{t("especie.movesDeOvo")} <span class="quantidade">({especie.movesDeOvo.length})</span></h2>
-					<p class="lista-larga">{especie.movesDeOvo.join(", ")}</p>
+					<h2>{t("especie.movesDeOvo")} <span class="quantidade">({data.movesDeOvo.length})</span></h2>
+					<p class="lista-larga"><ListaDeMoves moves={data.movesDeOvo} /></p>
 				</section>
 			{/if}
 		</div>

@@ -2,9 +2,9 @@
 
 *Referência do sistema **Pokémon Mundo Perfeito**, em português do Brasil.*
 
-Site estático de consulta para o PMP: statblocks de espécies, com busca e filtros,
-pensado para ser aberto no meio de uma sessão. Construído em [SvelteKit](https://svelte.dev/docs/kit),
-sem servidor e sem banco — tudo é gerado no build.
+Site estático de consulta para o PMP: statblocks de espécies e fichas de Move, com busca
+e filtros, pensado para ser aberto no meio de uma sessão. Construído em
+[SvelteKit](https://svelte.dev/docs/kit), sem servidor e sem banco — tudo é gerado no build.
 
 ## Conteúdo não acompanha o código
 
@@ -57,10 +57,19 @@ módulo Foundry          dados-crus/*.json          dados/*.json              bu
                desempacotar.mjs          construir.mjs              vite build
 ```
 
-O módulo guarda cada espécie em `flags["pokemon-mundo-perfeito"].species`, já com os
-campos tipados (`dexNumber`, `armorClass`, `hitPoints`, `moveTable`…). O pipeline lê
-desses campos e só interpreta texto onde o módulo guarda prosa: evolução, deslocamento
-e sentidos.
+O módulo guarda cada espécie em `flags["pokemon-mundo-perfeito"].species` e cada Move em
+`flags["pokemon-mundo-perfeito"].move`, já com os campos tipados (`dexNumber`,
+`armorClass`, `moveTable`, `moveType`, `pp`, `range`…). O pipeline lê desses campos e só
+interpreta texto onde o módulo guarda prosa — ou onde o campo não quer dizer o que o
+nome promete:
+
+| Campo do módulo | Por que não dá para usar direto |
+|---|---|
+| `damage.baseFormula`, `damage.scaling` | São "os dados do Move", não "os dados de dano": Recover guarda 2d6 de **cura** ali, e 16 Moves escalonam cura |
+| `category` | String vazia nos 833 Moves — a categoria de resolução só existe no texto |
+| `system.activities[].type` | É a modelagem do Foundry: 75 Moves marcados como `attack` são **disputas** no livro |
+| `activation.type` | Guarda só o primeiro modo: os 18 Moves de "1 ação / reação" ficam como `action` |
+| `priority` | Zerado em 3 Moves que declaram prioridade no próprio texto |
 
 **O pipeline não inventa dado.** O que não for possível interpretar com segurança vai
 para `dados/relatorio.json`, com o texto original, para conferência no livro e correção
@@ -69,14 +78,24 @@ na fonte. O relatório cobre:
 | Campo | O que lista |
 |---|---|
 | `deslocamentoIncompleto` | Espécies cujo deslocamento está truncado no módulo (66 na v1.33.0) |
-| `movesNaoResolvidos` | Nomes de Move que o reparo de tabela não reconheceu |
+| `movesNaoResolvidos` | Entradas das listas de Move das fichas que o reparo não reconheceu (29 na v1.33.0) |
 | `evolucoesNaoResolvidas` | Evoluções cujo alvo não existe no compêndio |
 | `evolucoesSuspeitas` | Evoluções em que o estágio não aumenta |
 | `formasOrfas` | Formas de estágio >1 para as quais nenhuma espécie evolui (23 na v1.33.0) |
-| `tiposDesconhecidos`, `tamanhosDesconhecidos` | Valores fora do vocabulário esperado |
+| `tiposDesconhecidos`, `tamanhosDesconhecidos`, `tiposDeMoveDesconhecidos` | Valores fora do vocabulário esperado |
+| `alcanceDeMoveTruncado` | Moves com o campo de alcance cortado na fonte (1 na v1.33.0) |
+| `prioridadeDeMoveDivergente` | Moves em que o campo `priority` discorda do texto (3 na v1.33.0) |
+| `dadosDeMoveNaoClassificados` | Moves cujos dados não deu para dizer se são de dano ou de cura (1 na v1.33.0) |
+| `efeitosDeMoveNaoInterpretados` | Frases que **declaram** um efeito mecânico que o parser não estruturou (24 na v1.33.0) |
+| `textosDeMoveContaminados` | Texto de regra com conteúdo vazado de outro lugar, como crédito de arte (1 na v1.33.0) |
 
-As três últimas categorias costumam apontar lacunas no texto do próprio livro, não
-falhas do pipeline — são a lista de trabalho para melhorar o módulo.
+Boa parte dessas categorias aponta lacunas no texto do próprio livro, não falhas do
+pipeline — são a lista de trabalho para melhorar o módulo.
+
+`efeitosDeMoveNaoInterpretados` merece nota: cada família de efeito tem um detector de
+**sinal** (largo) e um extrator (estreito), e só vai para o relatório a frase que declara
+o efeito sem que nada tenha sido extraído. É o que separa "o livro não declara isso" de
+"o livro declara e eu não entendi" — sem os dois limiares, a segunda some em silêncio.
 
 ## Estrutura
 
@@ -85,16 +104,23 @@ ferramentas/        pipeline de dados (Node puro, fora do app)
   desempacotar.mjs    packs LevelDB → JSON cru
   construir.mjs       JSON cru → formato do site
   evolucao.mjs        interpretação do texto de evolução (isolada por ser frágil)
+  moves.mjs           alcance, ativação, resolução, dados e reparo de nomes de Move
+  efeitos.mjs         efeitos mecânicos do texto do Move (a parte mais frágil de todas)
   texto.mjs           HTML→texto, slug, deslocamento, sentidos
 mensagens/          catálogos de interface, um por idioma
 src/
-  lib/pmp/            domínio: tipos, atributos, tamanhos, busca, espécie
+  lib/pmp/            domínio: tipos, atributos, tamanhos, busca, espécie, move
   lib/dados/          leitura dos JSONs durante o prerender (só servidor)
   lib/i18n/           acesso às mensagens
   lib/ui/             design system e componentes
   rotas/              páginas (SvelteKit)
 testes/             testes do pipeline
 ```
+
+Os três módulos de interpretação (`evolucao`, `moves`, `efeitos`) são separados de
+`construir.mjs` pela mesma razão: leem prosa do livro, cada padrão novo é uma chance de
+ler errado, e isolados cada padrão vira um teste. As entradas dos testes são frases do
+corpus real, não inventadas.
 
 Os dados são lidos de `dados/` **durante o prerender** e ficam assados em cada página.
 Eles não vão para `static/`: o site publicado contém as páginas renderizadas, não um

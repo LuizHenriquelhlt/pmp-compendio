@@ -10,6 +10,7 @@
 	const secoes = [
 		{ href: "/", rotulo: t("nav.inicio") },
 		{ href: "/pokemon", rotulo: t("nav.pokemon") },
+		{ href: "/moves", rotulo: t("nav.moves") },
 		{ href: "/sobre", rotulo: t("nav.sobre") },
 	]
 
