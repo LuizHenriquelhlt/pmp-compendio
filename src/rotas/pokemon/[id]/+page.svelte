@@ -1,0 +1,581 @@
+<script lang="ts">
+	import { t } from "$i18n"
+	import { formatarDeslocamentos, formatarGenero, formatarSentido } from "$pmp/especie"
+	import { descreverCondicoes } from "$pmp/evolucao"
+	import { nomeDoTamanho } from "$pmp/tamanhos"
+	import BlocoDeAtributos from "$ui/BlocoDeAtributos.svelte"
+	import EmblemaTipo from "$ui/EmblemaTipo.svelte"
+	import type { PageData } from "./$types"
+
+	let { data }: { data: PageData } = $props()
+
+	const especie = $derived(data.especie)
+	const numeroFormatado = $derived(String(especie.numero).padStart(3, "0"))
+
+	/** Ficha de identidade: só as linhas que a espécie realmente tem. */
+	const ficha = $derived.by(() => {
+		const linhas: { rotulo: string, valor: string }[] = [
+			{ rotulo: t("especie.tamanho"), valor: nomeDoTamanho(especie.tamanho) },
+		]
+
+		if (especie.alturaM != null) {
+			linhas.push({
+				rotulo: t("especie.altura"),
+				valor: `${especie.alturaM.toLocaleString("pt-BR", { maximumFractionDigits: 2 })}m`,
+			})
+		}
+
+		linhas.push(
+			{ rotulo: t("especie.nivelMinimo"), valor: String(especie.nivelMinimo) },
+			{ rotulo: t("especie.genero"), valor: formatarGenero(especie.genero) },
+			{
+				rotulo: t("especie.estagio"),
+				valor: t("especie.estagio.valor", { atual: especie.estagio.atual, total: especie.estagio.total }),
+			},
+		)
+
+		if (especie.gruposDeOvo.length > 0) {
+			linhas.push({ rotulo: t("especie.gruposDeOvo"), valor: especie.gruposDeOvo.join(", ") })
+		}
+
+		if (especie.regiao != null && especie.geracao != null) {
+			linhas.push({
+				rotulo: t("especie.procedencia"),
+				valor: t("especie.procedencia.valor", { regiao: especie.regiao, geracao: especie.geracao }),
+			})
+		}
+
+		return linhas
+	})
+
+	const pericias = $derived(
+		especie.todasAsPericias
+			? t("especie.pericias.todas")
+			: especie.pericias.length > 0
+				? especie.pericias.join(", ")
+				: t("especie.pericias.nenhuma"),
+	)
+</script>
+
+<svelte:head>
+	<title>{especie.nome} — {t("site.nome")}</title>
+	<meta name="description" content={especie.descricao} />
+</svelte:head>
+
+<article class="pagina">
+	<a class="voltar" href="/pokemon">← {t("especie.voltar")}</a>
+
+	<header class="cabecalho tipo-{especie.tipos[0]}">
+		<div class="arte">
+			{#if especie.imagem != null}
+				<img src={especie.imagem} alt={especie.nome} width="200" height="200" />
+			{/if}
+		</div>
+
+		<div class="identidade">
+			<p class="numero cadastro">{t("especie.numero", { n: numeroFormatado })}</p>
+			<h1>{especie.nome}</h1>
+
+			<div class="tipos">
+				{#each especie.tipos as tipo (tipo)}
+					<EmblemaTipo {tipo} tamanho="grande" />
+				{/each}
+			</div>
+
+			{#if especie.descricao !== ""}
+				<p class="descricao">{especie.descricao}</p>
+			{/if}
+		</div>
+	</header>
+
+	<!-- Os quatro números que o Mestre consulta no meio de uma batalha. -->
+	<section class="combate" aria-label="{t('especie.sr')}, {t('especie.ca')}, {t('especie.pv')}">
+		<div class="destaque">
+			<span class="rotulo">{t("especie.sr")}</span>
+			<span class="valor numero">{especie.srTexto}</span>
+		</div>
+		<div class="destaque">
+			<span class="rotulo">{t("especie.ca")}</span>
+			<span class="valor numero">{especie.ca}</span>
+		</div>
+		<div class="destaque">
+			<span class="rotulo">{t("especie.pv")}</span>
+			<span class="valor numero">{especie.pv}</span>
+		</div>
+		<div class="destaque">
+			<span class="rotulo">{t("especie.dadoDeVida")}</span>
+			<span class="valor numero">{especie.dadoDeVida}</span>
+		</div>
+	</section>
+
+	<div class="colunas">
+		<div class="coluna">
+			<section class="painel">
+				<h2>{t("especie.atributos")}</h2>
+				<BlocoDeAtributos atributos={especie.atributos} />
+			</section>
+
+			<section class="painel">
+				<h2>{t("especie.deslocamento")}</h2>
+				{#if especie.deslocamentos.length > 0}
+					<p>{formatarDeslocamentos(especie.deslocamentos)}</p>
+				{/if}
+
+				<!--
+					O módulo de origem trunca este campo em 66 espécies. Avisamos em vez de
+					adivinhar o modo que falta — e mostramos o texto original, para que quem
+					tem o livro possa conferir.
+				-->
+				{#if especie.deslocamentoIncompleto}
+					<p class="ressalva">{t("aviso.deslocamentoIncompleto", { bruto: especie.deslocamentoBruto })}</p>
+				{/if}
+			</section>
+
+			{#if especie.sentidos.length > 0}
+				<section class="painel">
+					<h2>{t("especie.sentidos")}</h2>
+					<p>{especie.sentidos.map(formatarSentido).join(", ")}</p>
+				</section>
+			{/if}
+
+			<section class="painel">
+				<h2>{t("especie.pericias")}</h2>
+				<p>{pericias}</p>
+			</section>
+
+			<section class="painel">
+				<h2>{t("especie.habilidades")}</h2>
+				<dl class="habilidades">
+					{#each data.habilidades as habilidade (habilidade.nome)}
+						<dt>
+							{habilidade.nome}
+							{#if habilidade.oculta}
+								<span class="etiqueta">{t("especie.habilidade.oculta")}</span>
+							{/if}
+						</dt>
+						<dd>{habilidade.texto}</dd>
+					{/each}
+				</dl>
+			</section>
+
+			{#if especie.defesasAlteradas != null}
+				<section class="painel">
+					<h2>{t("especie.defesas")}</h2>
+					<dl class="ficha">
+						{#each Object.entries(especie.defesasAlteradas) as [ chave, valor ] (chave)}
+							<dt>{chave}</dt>
+							<dd>{valor}</dd>
+						{/each}
+					</dl>
+				</section>
+			{/if}
+		</div>
+
+		<div class="coluna">
+			<section class="painel">
+				<h2>{t("especie.evolucao")}</h2>
+
+				{#if data.anteriores.length > 0}
+					<p class="de">
+						{t("especie.evoluiDe")}:
+						{#each data.anteriores as anterior, indice (anterior.id)}
+							<a href="/pokemon/{anterior.id}">{anterior.nome}</a>{indice < data.anteriores.length - 1 ? ", " : ""}
+						{/each}
+					</p>
+				{/if}
+
+				{#if especie.evolucoes.length > 0}
+					<ul class="evolucoes">
+						{#each especie.evolucoes as evolucao (evolucao.para)}
+							<li>
+								{#if evolucao.paraId != null}
+									<a class="alvo" href="/pokemon/{evolucao.paraId}">{evolucao.para}</a>
+								{:else}
+									<span class="alvo">{evolucao.para}</span>
+								{/if}
+								<span class="condicoes">
+									{#each descreverCondicoes(evolucao) as condicao (condicao)}
+										<span class="condicao">{condicao}</span>
+									{/each}
+								</span>
+							</li>
+						{/each}
+					</ul>
+				{:else if data.anteriores.length === 0}
+					<p class="tenue">{t("especie.evolucao.semEvolucao")}</p>
+				{/if}
+
+				{#if especie.evolucao !== ""}
+					<p class="texto-do-livro">{especie.evolucao}</p>
+				{/if}
+			</section>
+
+			{#if especie.movesPorNivel.length > 0}
+				<section class="painel">
+					<h2>{t("especie.moves")}</h2>
+					<table>
+						<thead>
+							<tr>
+								<th scope="col" class="col-nivel">{t("especie.moves.nivel")}</th>
+								<th scope="col">{t("especie.moves.adquiridos")}</th>
+							</tr>
+						</thead>
+						<tbody>
+							{#each especie.movesPorNivel as linha (linha.nivel)}
+								<tr>
+									<th scope="row" class="numero col-nivel">{linha.nivel}</th>
+									<td>{linha.moves.join(", ")}</td>
+								</tr>
+							{/each}
+						</tbody>
+					</table>
+				</section>
+			{/if}
+
+			{#if especie.tms.length > 0}
+				<section class="painel">
+					<h2>{t("especie.tms")} <span class="quantidade">({especie.tms.length})</span></h2>
+					<p class="lista-larga">{especie.tms.join(", ")}</p>
+				</section>
+			{/if}
+
+			{#if especie.movesDeOvo.length > 0}
+				<section class="painel">
+					<h2>{t("especie.movesDeOvo")} <span class="quantidade">({especie.movesDeOvo.length})</span></h2>
+					<p class="lista-larga">{especie.movesDeOvo.join(", ")}</p>
+				</section>
+			{/if}
+		</div>
+	</div>
+
+	<section class="painel ficha-identidade">
+		<dl class="ficha">
+			{#each ficha as linha (linha.rotulo)}
+				<dt>{linha.rotulo}</dt>
+				<dd>{linha.valor}</dd>
+			{/each}
+		</dl>
+	</section>
+</article>
+
+<style>
+	.voltar {
+		display: inline-block;
+		margin-bottom: 1rem;
+		color: var(--texto-suave);
+		font-size: var(--txt-pequeno);
+		font-weight: 600;
+		text-decoration: none;
+	}
+
+	.voltar:hover {
+		color: var(--marca);
+	}
+
+	.cabecalho {
+		display: grid;
+		grid-template-columns: auto 1fr;
+		gap: 1.5rem;
+		align-items: center;
+		padding: 1.5rem;
+		/* A cor do tipo primário tinge o cabeçalho de leve — identidade sem ruído.
+		   `color-mix` mantém a mistura legível nos dois temas, porque parte sempre
+		   da superfície vigente. */
+		background: color-mix(in oklab, var(--tipo-cor) 10%, var(--superficie));
+		border: 1px solid color-mix(in oklab, var(--tipo-cor) 25%, var(--borda));
+		border-radius: var(--raio-grande);
+	}
+
+	.arte {
+		display: grid;
+		place-items: center;
+		width: 9rem;
+		height: 9rem;
+		background: var(--superficie);
+		border-radius: var(--raio-grande);
+		box-shadow: var(--sombra-1);
+	}
+
+	.arte img {
+		width: 8rem;
+		height: 8rem;
+		object-fit: contain;
+	}
+
+	.identidade {
+		min-width: 0;
+	}
+
+	.cadastro {
+		color: var(--texto-tenue);
+		font-size: var(--txt-pequeno);
+		font-weight: 650;
+	}
+
+	h1 {
+		margin-block: 0.15rem 0.7rem;
+		overflow-wrap: break-word;
+	}
+
+	.tipos {
+		display: flex;
+		flex-wrap: wrap;
+		gap: 0.4rem;
+	}
+
+	.descricao {
+		max-width: var(--largura-leitura);
+		margin-top: 0.875rem;
+		color: var(--texto-suave);
+	}
+
+	.combate {
+		display: grid;
+		grid-template-columns: repeat(4, 1fr);
+		gap: 0.75rem;
+		margin-top: 1rem;
+	}
+
+	.destaque {
+		display: grid;
+		gap: 0.15rem;
+		padding: 0.875rem 0.5rem;
+		background: var(--superficie);
+		border: 1px solid var(--borda);
+		border-radius: var(--raio);
+		text-align: center;
+		box-shadow: var(--sombra-1);
+	}
+
+	.destaque .rotulo {
+		color: var(--texto-tenue);
+		font-size: var(--txt-miudo);
+		font-weight: 700;
+		text-transform: uppercase;
+		letter-spacing: 0.04em;
+	}
+
+	.destaque .valor {
+		font-size: var(--txt-ggg);
+		font-weight: 650;
+		line-height: 1.1;
+	}
+
+	.colunas {
+		display: grid;
+		grid-template-columns: 1fr 1fr;
+		gap: 1rem;
+		margin-top: 1rem;
+		align-items: start;
+	}
+
+	.coluna {
+		display: grid;
+		gap: 1rem;
+		/* Sem isso, uma lista longa de TMs estica a coluna e desalinha a outra. */
+		min-width: 0;
+	}
+
+	.painel {
+		padding: 1.25rem;
+		background: var(--superficie);
+		border: 1px solid var(--borda);
+		border-radius: var(--raio-grande);
+		box-shadow: var(--sombra-1);
+	}
+
+	.painel h2 {
+		margin-bottom: 0.75rem;
+		font-size: var(--txt-g);
+	}
+
+	.quantidade {
+		color: var(--texto-tenue);
+		font-size: var(--txt-pequeno);
+		font-weight: 600;
+	}
+
+	.painel p {
+		color: var(--texto-suave);
+	}
+
+	.ressalva {
+		margin-top: 0.6rem;
+		padding: 0.6rem 0.75rem;
+		background: var(--superficie-afundada);
+		border-left: 3px solid var(--borda-forte);
+		border-radius: 0 var(--raio) var(--raio) 0;
+		color: var(--texto-tenue) !important;
+		font-size: var(--txt-pequeno);
+	}
+
+	.tenue {
+		color: var(--texto-tenue) !important;
+		font-size: var(--txt-pequeno);
+	}
+
+	.lista-larga {
+		font-size: var(--txt-pequeno);
+		line-height: 1.7;
+	}
+
+	.habilidades {
+		display: grid;
+		gap: 0.875rem;
+		margin: 0;
+	}
+
+	.habilidades dt {
+		font-weight: 650;
+	}
+
+	.habilidades dd {
+		margin: 0.15rem 0 0;
+		color: var(--texto-suave);
+		font-size: var(--txt-pequeno);
+	}
+
+	.etiqueta {
+		display: inline-block;
+		margin-left: 0.4rem;
+		padding: 0.1em 0.5em;
+		background: var(--marca-suave);
+		border-radius: var(--raio-pilula);
+		color: var(--marca);
+		font-size: var(--txt-miudo);
+		font-weight: 700;
+		text-transform: uppercase;
+		letter-spacing: 0.04em;
+		vertical-align: 0.1em;
+	}
+
+	.ficha {
+		display: grid;
+		grid-template-columns: auto 1fr;
+		gap: 0.4rem 1.25rem;
+		margin: 0;
+		font-size: var(--txt-pequeno);
+	}
+
+	.ficha dt {
+		color: var(--texto-tenue);
+		font-weight: 650;
+	}
+
+	.ficha dd {
+		margin: 0;
+		color: var(--texto-suave);
+	}
+
+	.ficha-identidade {
+		margin-top: 1rem;
+	}
+
+	.de {
+		margin-bottom: 0.75rem;
+		font-size: var(--txt-pequeno);
+	}
+
+	.evolucoes {
+		display: grid;
+		gap: 0.6rem;
+		list-style: none;
+	}
+
+	.evolucoes li {
+		display: flex;
+		flex-wrap: wrap;
+		gap: 0.4rem;
+		align-items: center;
+		padding: 0.6rem 0.75rem;
+		background: var(--superficie-afundada);
+		border-radius: var(--raio);
+	}
+
+	.alvo {
+		font-weight: 650;
+	}
+
+	.condicoes {
+		display: flex;
+		flex-wrap: wrap;
+		gap: 0.3rem;
+	}
+
+	.condicao {
+		padding: 0.15em 0.55em;
+		background: var(--superficie);
+		border: 1px solid var(--borda);
+		border-radius: var(--raio-pilula);
+		color: var(--texto-suave);
+		font-size: var(--txt-miudo);
+	}
+
+	.texto-do-livro {
+		margin-top: 0.875rem;
+		padding-top: 0.875rem;
+		border-top: 1px solid var(--borda);
+		font-size: var(--txt-pequeno);
+		font-style: italic;
+	}
+
+	table {
+		width: 100%;
+		border-collapse: collapse;
+		font-size: var(--txt-pequeno);
+	}
+
+	th, td {
+		padding: 0.4rem 0.5rem;
+		text-align: left;
+		vertical-align: top;
+	}
+
+	thead th {
+		border-bottom: 1px solid var(--borda-forte);
+		color: var(--texto-tenue);
+		font-size: var(--txt-miudo);
+		font-weight: 700;
+		text-transform: uppercase;
+		letter-spacing: 0.04em;
+	}
+
+	tbody tr:not(:last-child) th, tbody tr:not(:last-child) td {
+		border-bottom: 1px solid var(--borda);
+	}
+
+	tbody th {
+		color: var(--texto);
+		font-weight: 650;
+	}
+
+	tbody td {
+		color: var(--texto-suave);
+	}
+
+	.col-nivel {
+		width: 4rem;
+	}
+
+	@media (width < 54rem) {
+		.colunas {
+			grid-template-columns: 1fr;
+		}
+	}
+
+	@media (width < 34rem) {
+		.cabecalho {
+			grid-template-columns: 1fr;
+			justify-items: center;
+			text-align: center;
+		}
+
+		.tipos {
+			justify-content: center;
+		}
+
+		.combate {
+			grid-template-columns: repeat(2, 1fr);
+		}
+	}
+</style>

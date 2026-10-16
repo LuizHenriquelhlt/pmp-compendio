@@ -1,0 +1,213 @@
+/*
+ * Fundamentos visuais do Compêndio PMP.
+ *
+ * Os tokens são declarados uma vez em `:root` no tema claro e redeclarados no escuro.
+ * O tema escuro responde tanto à preferência do sistema quanto ao atributo
+ * `data-tema` no <html>, nessa ordem de precedência — assim a escolha explícita do
+ * leitor sempre vence a do sistema operacional.
+ */
+
+:root {
+	color-scheme: light;
+
+	/* Superfícies, da mais ao fundo para a mais à frente. */
+	--fundo: oklch(0.98 0.005 260);
+	--superficie: oklch(1 0 0);
+	--superficie-afundada: oklch(0.96 0.008 260);
+	--superficie-realcada: oklch(0.99 0.004 260);
+
+	/* Texto, do mais ao menos enfático. */
+	--texto: oklch(0.24 0.02 260);
+	--texto-suave: oklch(0.46 0.02 260);
+	--texto-tenue: oklch(0.60 0.015 260);
+
+	--borda: oklch(0.90 0.01 260);
+	--borda-forte: oklch(0.82 0.015 260);
+
+	/* Cor de marca: um vermelho-Pokébola dessaturado o bastante para texto. */
+	--marca: oklch(0.55 0.19 25);
+	--marca-forte: oklch(0.47 0.18 25);
+	--marca-suave: oklch(0.95 0.03 25);
+	--marca-contraste: oklch(0.99 0 0);
+
+	--foco: oklch(0.60 0.17 250);
+
+	--sombra-1: 0 1px 2px oklch(0.24 0.02 260 / 0.06), 0 1px 3px oklch(0.24 0.02 260 / 0.04);
+	--sombra-2: 0 2px 4px oklch(0.24 0.02 260 / 0.06), 0 4px 12px oklch(0.24 0.02 260 / 0.07);
+
+	--raio: 0.5rem;
+	--raio-grande: 0.875rem;
+	--raio-pilula: 999px;
+
+	/* Escala tipográfica em passos de ~1.2. */
+	--txt-pequeno: 0.8125rem;
+	--txt-miudo: 0.6875rem;
+	--txt-base: 1rem;
+	--txt-g: 1.125rem;
+	--txt-gg: 1.375rem;
+	--txt-ggg: 1.75rem;
+	--txt-titulo: 2.25rem;
+
+	--fonte: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+	--fonte-numeros: ui-monospace, "SF Mono", "Cascadia Mono", "Roboto Mono", Menlo, monospace;
+
+	--largura-pagina: 72rem;
+	--largura-leitura: 44rem;
+}
+
+@media (prefers-color-scheme: dark) {
+	:root:not([data-tema="claro"]) {
+		color-scheme: dark;
+
+		--fundo: oklch(0.18 0.012 265);
+		--superficie: oklch(0.22 0.014 265);
+		--superficie-afundada: oklch(0.16 0.012 265);
+		--superficie-realcada: oklch(0.26 0.016 265);
+
+		--texto: oklch(0.95 0.008 265);
+		--texto-suave: oklch(0.76 0.012 265);
+		--texto-tenue: oklch(0.60 0.012 265);
+
+		--borda: oklch(0.32 0.016 265);
+		--borda-forte: oklch(0.42 0.02 265);
+
+		--marca: oklch(0.70 0.16 25);
+		--marca-forte: oklch(0.78 0.15 30);
+		--marca-suave: oklch(0.28 0.05 25);
+		--marca-contraste: oklch(0.16 0.01 25);
+
+		--foco: oklch(0.72 0.14 250);
+
+		--sombra-1: 0 1px 2px oklch(0 0 0 / 0.4);
+		--sombra-2: 0 2px 4px oklch(0 0 0 / 0.35), 0 6px 16px oklch(0 0 0 / 0.3);
+	}
+}
+
+:root[data-tema="escuro"] {
+	color-scheme: dark;
+
+	--fundo: oklch(0.18 0.012 265);
+	--superficie: oklch(0.22 0.014 265);
+	--superficie-afundada: oklch(0.16 0.012 265);
+	--superficie-realcada: oklch(0.26 0.016 265);
+
+	--texto: oklch(0.95 0.008 265);
+	--texto-suave: oklch(0.76 0.012 265);
+	--texto-tenue: oklch(0.60 0.012 265);
+
+	--borda: oklch(0.32 0.016 265);
+	--borda-forte: oklch(0.42 0.02 265);
+
+	--marca: oklch(0.70 0.16 25);
+	--marca-forte: oklch(0.78 0.15 30);
+	--marca-suave: oklch(0.28 0.05 25);
+	--marca-contraste: oklch(0.16 0.01 25);
+
+	--foco: oklch(0.72 0.14 250);
+
+	--sombra-1: 0 1px 2px oklch(0 0 0 / 0.4);
+	--sombra-2: 0 2px 4px oklch(0 0 0 / 0.35), 0 6px 16px oklch(0 0 0 / 0.3);
+}
+
+*, *::before, *::after {
+	box-sizing: border-box;
+}
+
+html {
+	-webkit-text-size-adjust: 100%;
+}
+
+body {
+	margin: 0;
+	background: var(--fundo);
+	color: var(--texto);
+	font-family: var(--fonte);
+	font-size: var(--txt-base);
+	line-height: 1.6;
+	/* `optimizeLegibility` quebraria a numeração tabular dos statblocks. */
+	text-rendering: optimizeSpeed;
+}
+
+h1, h2, h3, h4 {
+	margin: 0;
+	line-height: 1.25;
+	font-weight: 650;
+	letter-spacing: -0.01em;
+	text-wrap: balance;
+}
+
+h1 { font-size: var(--txt-titulo); }
+h2 { font-size: var(--txt-ggg); }
+h3 { font-size: var(--txt-gg); }
+h4 { font-size: var(--txt-g); }
+
+p {
+	margin: 0;
+	text-wrap: pretty;
+}
+
+ul, ol {
+	margin: 0;
+	padding: 0;
+}
+
+a {
+	color: var(--marca);
+	text-decoration-thickness: 1px;
+	text-underline-offset: 0.15em;
+}
+
+a:hover {
+	color: var(--marca-forte);
+}
+
+img {
+	max-width: 100%;
+	height: auto;
+}
+
+button, input, select {
+	font: inherit;
+	color: inherit;
+}
+
+/* Anel de foco único para todo o site, visível nos dois temas. */
+:focus-visible {
+	outline: 2px solid var(--foco);
+	outline-offset: 2px;
+	border-radius: 3px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+	*, *::before, *::after {
+		animation-duration: 0.01ms !important;
+		transition-duration: 0.01ms !important;
+		scroll-behavior: auto !important;
+	}
+}
+
+/* Visível só para leitores de tela. */
+.apenas-leitor-de-tela {
+	position: absolute;
+	width: 1px;
+	height: 1px;
+	margin: -1px;
+	padding: 0;
+	overflow: hidden;
+	clip-path: inset(50%);
+	white-space: nowrap;
+	border: 0;
+}
+
+.pagina {
+	width: 100%;
+	max-width: var(--largura-pagina);
+	margin-inline: auto;
+	padding-inline: 1rem;
+}
+
+/* Números de ficha: alinhados em coluna e de largura fixa. */
+.numero {
+	font-family: var(--fonte-numeros);
+	font-variant-numeric: tabular-nums;
+}

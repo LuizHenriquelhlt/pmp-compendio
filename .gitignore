@@ -1,0 +1,9 @@
+node_modules/
+/build
+/.svelte-kit
+/dist
+
+# Conteúdo do Pokémon Mundo Perfeito (direitos dos autores do sistema) — não publicar.
+# Regenere com `npm run dados` a partir do módulo Foundry.
+/dados-crus/
+/dados/

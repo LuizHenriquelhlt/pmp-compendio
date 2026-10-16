@@ -1,0 +1,30 @@
+{
+  "name": "pmp-compendio",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Compêndio PMP — referência do sistema Pokémon Mundo Perfeito",
+  "type": "module",
+  "scripts": {
+    "dev": "vite dev",
+    "build": "vite build",
+    "preview": "vite preview",
+    "verificar": "svelte-check --tsconfig ./tsconfig.json",
+    "teste": "vitest run",
+    "teste:observar": "vitest",
+    "dados:desempacotar": "node ferramentas/desempacotar.mjs",
+    "dados:construir": "node ferramentas/construir.mjs",
+    "dados": "npm run dados:desempacotar && npm run dados:construir"
+  },
+  "devDependencies": {
+    "@sveltejs/adapter-static": "^3.0.8",
+    "@sveltejs/kit": "^2.22.0",
+    "@sveltejs/vite-plugin-svelte": "^6.0.0",
+    "@types/node": "^22.10.0",
+    "classic-level": "^2.0.0",
+    "svelte": "^5.39.0",
+    "svelte-check": "^4.3.0",
+    "typescript": "^5.9.0",
+    "vite": "^7.0.0",
+    "vitest": "^3.2.0"
+  }
+}
