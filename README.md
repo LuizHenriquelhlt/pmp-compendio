@@ -459,3 +459,18 @@ para somar um idioma.
 Projeto de fã, sem fim lucrativo. Pokémon é marca registrada de Nintendo, Game Freak e
 The Pokémon Company; não há vínculo nem endosso de nenhuma delas, nem da Wizards of the
 Coast.
+
+## Licença
+
+O **código** deste repositório está sob a licença MIT — veja [LICENSE](LICENSE).
+
+A licença cobre o código, e só ele. Três coisas dentro ou ao redor do projeto têm dono
+diferente e **não** são MIT:
+
+- **O texto do Pokémon Mundo Perfeito**, que é da comunidade autora do sistema. É por
+  isso que o conteúdo gerado (`dados/`) fica fora do Git. As frases de regra que
+  aparecem em `testes/` são citações curtas, usadas como fixture para fixar o
+  comportamento dos parsers contra o texto real.
+- **A fonte Rubik**, em `static/fontes/`, sob SIL OFL — a licença acompanha os arquivos.
+- **A arte dos itens**, baixada da PokéAPI para `static/itens/` por quem roda o
+  pipeline, e também fora do Git.
