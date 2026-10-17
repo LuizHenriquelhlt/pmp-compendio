@@ -76,7 +76,7 @@
 					<span class="titulo">{secao.titulo}</span>
 					<span class="descricao">{secao.texto}</span>
 				</span>
-				<IconeDeSecao secao={secao.id} />
+				<IconeDeSecao secao={secao.id} tamanho={72} />
 			</a>
 		{/each}
 	</nav>
@@ -130,8 +130,8 @@
 		align-items: center;
 		justify-content: space-between;
 		overflow: hidden;
-		min-height: 7.5rem;
-		padding: 1.5rem 0 1.5rem 2rem;
+		min-height: 5rem;
+		padding: 1rem 0 1rem 1.75rem;
 		background: var(--superficie);
 		border: 1px solid var(--borda);
 		border-left: 6px solid var(--secao);
@@ -158,7 +158,7 @@
 	}
 
 	.titulo {
-		font-size: var(--txt-gg);
+		font-size: var(--txt-g);
 		font-weight: 700;
 		letter-spacing: -0.01em;
 	}
@@ -168,15 +168,17 @@
 	}
 
 	.descricao {
-		max-width: 46ch;
+		/* Mais larga agora que o cartão é baixo: a descrição cabe em uma ou duas linhas
+		   em vez de empurrar a altura. */
+		max-width: 60ch;
 		color: var(--texto-suave);
 		font-size: var(--txt-pequeno);
-		line-height: 1.5;
+		line-height: 1.45;
 	}
 
 	/* O ícone encosta na borda e é cortado pela curva da pílula, como no poke5e. */
 	.cartao :global(.icone) {
-		margin-right: -1.5rem;
+		margin-right: -1rem;
 	}
 
 	@media (width < 40rem) {
@@ -189,9 +191,9 @@
 		}
 
 		.cartao :global(.icone) {
-			width: 5rem;
-			height: 5rem;
-			margin-right: -0.75rem;
+			width: 3.5rem;
+			height: 3.5rem;
+			margin-right: -0.5rem;
 			opacity: 0.55;
 		}
 	}

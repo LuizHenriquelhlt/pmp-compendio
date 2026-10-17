@@ -45,9 +45,13 @@
 		<path d="M24 4 40 15l-4 25H12L8 15 24 4Z" />
 		<path d="M8 15l16 9 16-9M24 24v16" />
 	{:else if secao === "itens"}
-		<!-- Mochila, como a do poke5e para Items. -->
-		<path d="M12 17a12 12 0 0 1 24 0v24H12V17Z" />
-		<path d="M18 17v-4a6 6 0 0 1 12 0v4M18 29h12" />
+		<!--
+			Mochila. As alças saem POR FORA do corpo e o bolso é um retângulo próprio: na
+			primeira tentativa, com a alça rente ao topo, o glifo lia como uma porta.
+		-->
+		<path d="M14 18h20a4 4 0 0 1 4 4v18a2 2 0 0 1-2 2H12a2 2 0 0 1-2-2V22a4 4 0 0 1 4-4Z" />
+		<path d="M18 18v-3a6 6 0 0 1 12 0v3" />
+		<rect x="18" y="28" width="12" height="9" rx="2" />
 	{:else}
 		<!-- Dados da sua mesa: um d20 visto de frente. -->
 		<path d="M24 4 42 14v20L24 44 6 34V14L24 4Z" />
