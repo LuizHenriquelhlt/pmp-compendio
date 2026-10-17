@@ -115,10 +115,13 @@
 		<p>{t("catalogoHabilidades.subtitulo", { n: data.habilidades.length.toLocaleString("pt-BR") })}</p>
 		<!--
 			A contagem de habilidades sem regra fica no subtítulo, não escondida num filtro:
-			é quase um quarto do catálogo, e quem consulta merece saber disso antes de
-			procurar uma regra que o módulo não tem.
+			quando existe, quem consulta merece saber antes de procurar uma regra que o
+			módulo não tem. Some quando não há nenhuma — a v1.35.0 do módulo zerou as 74, e
+			"0 não têm a regra" é uma frase que só confunde.
 		-->
-		<p class="nota">{t("catalogoHabilidades.nota", { n: semRegra.toLocaleString("pt-BR") })}</p>
+		{#if semRegra > 0}
+			<p class="nota">{t("catalogoHabilidades.nota", { n: semRegra.toLocaleString("pt-BR") })}</p>
+		{/if}
 	</header>
 
 	<section class="controles" aria-label={t("filtro.titulo")}>
@@ -166,14 +169,21 @@
 			</select>
 		</div>
 
-		<div class="campo">
-			<label for="regra">{t("filtro.regra")}</label>
-			<select id="regra" bind:value={regra}>
-				<option value="">{t("filtro.regra.todas")}</option>
-				<option value="com">{t("filtro.regra.com")}</option>
-				<option value="sem">{t("filtro.regra.sem")}</option>
-			</select>
-		</div>
+		<!--
+			O filtro só existe quando há o que filtrar, como as outras listagens fazem com
+			tipo e atributo: sem nenhuma habilidade sem regra, as três opções devolveriam
+			sempre o mesmo conjunto.
+		-->
+		{#if semRegra > 0}
+			<div class="campo">
+				<label for="regra">{t("filtro.regra")}</label>
+				<select id="regra" bind:value={regra}>
+					<option value="">{t("filtro.regra.todas")}</option>
+					<option value="com">{t("filtro.regra.com")}</option>
+					<option value="sem">{t("filtro.regra.sem")}</option>
+				</select>
+			</div>
+		{/if}
 
 		<div class="campo">
 			<label for="ordem">{t("filtro.ordem")}</label>

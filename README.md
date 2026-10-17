@@ -114,7 +114,7 @@ variam nas 313. Tudo o mais é constante, e alguns campos enganam pelo nome:
 | `flags[…].category` (habilidade) | `"habilidade-passiva"` nas 313 — promete um vocabulário de categorias e entrega uma constante. Não há taxonomia de habilidade no módulo |
 | `species.passiveAbility.active` | É exatamente `options[0]` nas 1.149 espécies. No PMP o jogador **escolhe** entre as opções; publicar `active` inventa uma escolha que o livro não faz |
 | `mega.abilityChoices` | Não é escolha de Habilidade: o conteúdo é `{ options: ["str","dex"], delta: 5 }` — é o *ability score* do dnd5e, ou seja, **atributo** |
-| `system.description.value` (habilidade) | Em 74 das 313 não é regra, e sim a nota de que o módulo não achou a regra no livro |
+| `system.description.value` (habilidade) | Era a nota de "regra não encontrada" em 74 das 313 até a v1.34.0; a v1.35.0 preencheu todas. O tratamento continua no pipeline: o defeito pode voltar numa versão futura |
 
 Em compensação, as referências de habilidade das fichas de espécie vêm **limpas**: as
 2.662 entradas de `passiveAbility.options` e `hiddenAbility` casam com o pack nas 2.662,
@@ -183,11 +183,11 @@ As quatro formas de contaminação do texto, todas da extração do PDF:
 4. **A descrição de outro item emendada** (5): Balm Mushroom traz Pearl, Big Pearl e Pearl
    String juntos; Soul Dew e Everstone trazem a tabela dos Genesect Drives.
 
-Nos 10 contaminados a descrição **não é publicada**, como nas descrições de Mega e nas 74
-habilidades sem regra: publicá-la atribuiria ao item uma regra que não é dele. Os 7 do
+Nos 10 contaminados a descrição **não é publicada**, como nas descrições de Mega
+contaminadas: publicá-la atribuiria ao item uma regra que não é dele. Os 7 do
 caso 1 são aparados e publicados normalmente.
 
-A v1.34.0 trouxe um quinto padrão, e esse **carrega informação**: os 77 itens das
+A v1.35.0 trouxe um quinto padrão, e esse **carrega informação**: os 77 itens das
 expansões de Galar e Paldea têm o cabeçalho da seção do livro colado no fim da descrição
 ("Itens Evolutivos — Expansão da Nona Geração (Paldea)"). Em vez de descartar, o pipeline
 o extrai para `secao` e `expansao` — vira a taxonomia que a pasta não dá, com 12 seções
@@ -272,32 +272,32 @@ na fonte. O relatório cobre:
 
 | Campo | O que lista |
 |---|---|
-| `deslocamentoIncompleto` | Espécies cujo deslocamento está truncado no módulo (66 na v1.34.0) |
-| `movesNaoResolvidos` | Entradas das listas de Move das fichas que o reparo não reconheceu (29 na v1.34.0) |
+| `deslocamentoIncompleto` | Espécies cujo deslocamento está truncado no módulo (66 na v1.35.0) |
+| `movesNaoResolvidos` | Entradas das listas de Move das fichas que o reparo não reconheceu (29 na v1.35.0) |
 | `evolucoesNaoResolvidas` | Evoluções cujo alvo não existe no compêndio |
 | `evolucoesSuspeitas` | Evoluções em que o estágio não aumenta |
-| `formasOrfas` | Formas de estágio >1 para as quais nenhuma espécie evolui (23 na v1.34.0) |
+| `formasOrfas` | Formas de estágio >1 para as quais nenhuma espécie evolui (23 na v1.35.0) |
 | `tiposDesconhecidos`, `tamanhosDesconhecidos`, `tiposDeMoveDesconhecidos` | Valores fora do vocabulário esperado |
-| `alcanceDeMoveTruncado` | Moves com o campo de alcance cortado na fonte (1 na v1.34.0) |
-| `prioridadeDeMoveDivergente` | Moves em que o campo `priority` discorda do texto (3 na v1.34.0) |
-| `dadosDeMoveNaoClassificados` | Moves cujos dados não deu para dizer se são de dano ou de cura (1 na v1.34.0) |
-| `efeitosDeMoveNaoInterpretados` | Frases que **declaram** um efeito mecânico que o parser não estruturou (24 na v1.34.0) |
-| `textosDeMoveContaminados` | Texto de regra com conteúdo vazado de outro lugar, como crédito de arte (1 na v1.34.0) |
-| `habilidadesSemRegra` | Habilidades cuja regra o módulo não achou no livro, com a nota original (74 na v1.34.0) |
-| `efeitosDeHabilidadeNaoInterpretados` | Frases que declaram um efeito de habilidade que o parser não estruturou (13 na v1.34.0) |
-| `habilidadesSemPortador` | Habilidades que nenhuma espécie e nenhuma Mega têm (8 na v1.34.0) |
-| `habilidadesDeMegaNaoResolvidas` | Habilidades que uma pedra Mega nomeia e que não existem no pack (20 na v1.34.0: 8 nomes reais, 11 vezes a marca de pendência `"[ainda a ser lançada]"` e 1 truncada na fonte) |
-| `megasSemEspecieBase` | Megas cuja espécie-base não casa com a Pokédex, com os nomes candidatos (3 na v1.34.0) |
-| `descricoesDeMegaContaminadas` | Descrições de Mega com texto de outro documento do livro, com a marca que o denunciou e o original (4 na v1.34.0) |
-| `efeitosDeMegaNaoInterpretados` | Frases de `otherEffects` que declaram um efeito que o parser não estruturou (1 na v1.34.0: o tamanho "Imenso") |
-| `tiposDeMegaDesconhecidos`, `tamanhosDeMegaDesconhecidos`, `deslocamentosDeMegaDesconhecidos`, `camposDeMegaNaoInterpretados`, `categoriasDeMegaDesconhecidas` | Valores de Mega fora do vocabulário ou do formato esperado (0 na v1.34.0) |
-| `precosDeItemDivergentes` | Itens em que o número do módulo discorda do preço impresso (2 na v1.34.0, os dois 1000x menores) |
-| `textosDeItemContaminados` | Itens cujo texto carrega conteúdo de outra linha da tabela, com a marca e o original (10 na v1.34.0) |
-| `celulasDePrecoEmItens` | Células de preço aparadas do fim do texto (7 na v1.34.0) |
-| `textosDeItemCortados` | Itens cujo texto foi cortado antes de dizer a regra, com `onde` (começo ou fim) — 9 na v1.34.0 |
-| `referenciasDePaginaEmItens` | Itens que mandam virar a página do livro (6 na v1.34.0) |
-| `itensDeEvolucaoNaoResolvidos` | Itens citados numa evolução que não têm ficha (0 na v1.34.0) |
-| `movesDeClimaAusentes`, `movesDeHabilidadeNaoResolvidos` | Moves nomeados por uma habilidade que não existem no compêndio (0 na v1.34.0) |
+| `alcanceDeMoveTruncado` | Moves com o campo de alcance cortado na fonte (1 na v1.35.0) |
+| `prioridadeDeMoveDivergente` | Moves em que o campo `priority` discorda do texto (3 na v1.35.0) |
+| `dadosDeMoveNaoClassificados` | Moves cujos dados não deu para dizer se são de dano ou de cura (1 na v1.35.0) |
+| `efeitosDeMoveNaoInterpretados` | Frases que **declaram** um efeito mecânico que o parser não estruturou (24 na v1.35.0) |
+| `textosDeMoveContaminados` | Texto de regra com conteúdo vazado de outro lugar, como crédito de arte (1 na v1.35.0) |
+| `habilidadesSemRegra` | Habilidades cuja regra o módulo não achou no livro, com a nota original (**0** na v1.35.0; eram 74 na v1.34.0) |
+| `efeitosDeHabilidadeNaoInterpretados` | Frases que declaram um efeito de habilidade que o parser não estruturou (20 na v1.35.0 — subiu de 13 quando a v1.35.0 deu texto às 74 que não tinham) |
+| `habilidadesSemPortador` | Habilidades que nenhuma espécie e nenhuma Mega têm (8 na v1.35.0) |
+| `habilidadesDeMegaNaoResolvidas` | Habilidades que uma pedra Mega nomeia e que não existem no pack (20 na v1.35.0: 8 nomes reais, 11 vezes a marca de pendência `"[ainda a ser lançada]"` e 1 truncada na fonte) |
+| `megasSemEspecieBase` | Megas cuja espécie-base não casa com a Pokédex, com os nomes candidatos (3 na v1.35.0) |
+| `descricoesDeMegaContaminadas` | Descrições de Mega com texto de outro documento do livro, com a marca que o denunciou e o original (4 na v1.35.0) |
+| `efeitosDeMegaNaoInterpretados` | Frases de `otherEffects` que declaram um efeito que o parser não estruturou (1 na v1.35.0: o tamanho "Imenso") |
+| `tiposDeMegaDesconhecidos`, `tamanhosDeMegaDesconhecidos`, `deslocamentosDeMegaDesconhecidos`, `camposDeMegaNaoInterpretados`, `categoriasDeMegaDesconhecidas` | Valores de Mega fora do vocabulário ou do formato esperado (0 na v1.35.0) |
+| `precosDeItemDivergentes` | Itens em que o número do módulo discorda do preço impresso (2 na v1.35.0, os dois 1000x menores) |
+| `textosDeItemContaminados` | Itens cujo texto carrega conteúdo de outra linha da tabela, com a marca e o original (10 na v1.35.0) |
+| `celulasDePrecoEmItens` | Células de preço aparadas do fim do texto (7 na v1.35.0) |
+| `textosDeItemCortados` | Itens cujo texto foi cortado antes de dizer a regra, com `onde` (começo ou fim) — 9 na v1.35.0 |
+| `referenciasDePaginaEmItens` | Itens que mandam virar a página do livro (6 na v1.35.0) |
+| `itensDeEvolucaoNaoResolvidos` | Itens citados numa evolução que não têm ficha (0 na v1.35.0) |
+| `movesDeClimaAusentes`, `movesDeHabilidadeNaoResolvidos` | Moves nomeados por uma habilidade que não existem no compêndio (0 na v1.35.0) |
 
 Boa parte dessas categorias aponta lacunas no texto do próprio livro, não falhas do
 pipeline — são a lista de trabalho para melhorar o módulo.
