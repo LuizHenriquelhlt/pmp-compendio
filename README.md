@@ -30,7 +30,10 @@ npm run dados:desempacotar -- "../pokemon-mundo-perfeito"
 # 2. Normaliza para o formato do site (dados/)
 npm run dados:construir
 
-# 3. Sobe o site em http://localhost:5173
+# 3. Procura na PokéAPI a arte dos itens que o módulo deixou sem URL (opcional)
+npm run dados:arte
+
+# 4. Sobe o site em http://localhost:5173
 npm run dev
 ```
 
@@ -47,6 +50,7 @@ npm run dados:construir -- ../pmp-rpg/data/raw dados
 | Comando | O que faz |
 |---|---|
 | `npm run build` | Gera o site estático em `build/` (uma página por espécie, Move, Habilidade, Mega e item) |
+| `npm run dados:arte` | Procura na PokéAPI a arte dos itens sem URL no módulo (faz rede) |
 | `npm run preview` | Serve o build de produção |
 | `npm run teste` | Roda a suíte de testes |
 | `npm run verificar` | Checagem de tipos (`svelte-check`) |
@@ -160,7 +164,7 @@ Terastal e Dynamax), do qual `category: "item-treinador"` é a maior fatia:
 | `system.price.value: 0` | Não é "de graça": 31 itens-chave (Mega Pedra, Pedra-Chave, Bracelete-Z, Cristal-Z…) o livro não vende. É `null`, como o `armorClassDelta` das Megas |
 | `system.description.value` | A tabela do PDF vazou para dentro em 10 itens, de quatro jeitos — ver abaixo |
 | `folder` | É a taxonomia mais fraca do pack: 310 dos 420 caem num balde chamado "Itens"; Berries, Tera Shards, Hortelãs, Doces e Poções dividem 110 |
-| `img` | 190 dos 420 apontam para a biblioteca de ícones do próprio Foundry (`icons/equipment/…`), que não é publicada com o site; só os 230 que são URL viram imagem. Nenhum dos 77 itens novos da v1.34.0 tem arte publicável |
+| `img` | 190 dos 420 apontam para a biblioteca de ícones do próprio Foundry (`icons/equipment/…`), que não é publicada com o site. Destes, 66 são itens Pokémon que a PokéAPI tem e o módulo só não linkou — ver "A arte dos itens" |
 
 As quatro formas de contaminação do texto, todas da extração do PDF:
 
@@ -189,6 +193,37 @@ Cinco Berries (Iapapa, Aguav, Wiki, Figy e Mago) compartilham uma descrição co
 exatamente na palavra que as distingue — "causa confusão caso seja de Natureza" —, e seis
 itens mandam o leitor virar a página do livro ("veja a página seguinte"), que num site não
 existe. Os dois casos ficam visíveis e vão para o relatório.
+
+### A arte dos itens
+
+O módulo preenche `img` com uma URL da PokéAPI em 230 dos 420 itens e deixa os outros 190
+apontando para a biblioteca de ícones interna do Foundry, que não é publicada com o site.
+Mas boa parte desses 190 são itens Pokémon de verdade que a PokéAPI tem — o módulo só não
+linkou. `npm run dados:arte` acha e confere: **66 itens** ganham arte assim, subindo a
+cobertura de 230 para 296.
+
+Ela roda **fora** do pipeline de propósito, porque faz rede e `construir.mjs` precisa ser
+offline e determinístico. O resultado é `ferramentas/arte-de-item.json`, que o pipeline lê
+como qualquer outro dado — e que é opcional: sem ele o site constrói igual, só com menos
+ícones. Cada candidato leva um pedido HEAD e **só entra o que responder 200**, que é o que
+impede o site de voltar a mostrar 404 no lugar de um ícone.
+
+Os 124 que continuam sem arte não são um problema a resolver com outra fonte:
+
+- **A maior parte é equipamento de aventura que o PMP inventou** — Chaleira, Cantil,
+  Bússola, Canivete de Bolso, Tenda, Saco de Dormir, Pacote de Explorador. Não são itens
+  Pokémon; não existe arte oficial deles em fonte nenhuma, e o ícone genérico do Foundry
+  que o módulo escolheu é a arte certa para uma chaleira.
+- **As 20 Hortelãs** têm sprite na PokéAPI, mas o PMP renomeou as Naturezas e as remapeou
+  para atributos de D&D: "Teimoso" e "Astuto" não têm correspondente entre as 25 Naturezas
+  oficiais. Casar por semelhança publicaria uma associação que o livro não faz. O sprite
+  existir não é prova de que o mapeamento está certo — `timid-mint` existe, e isso não
+  torna a Hortelã da Astúcia uma Timid Mint.
+- **Cristal-Z, Mega Pedra e os 19 Tera Shards** são genéricos no PMP; a PokéAPI só tem os
+  específicos (um por tipo, um por espécie).
+
+A tabela de tradução de `arte.mjs` só aceita o que é **inequívoco** — as três máscaras de
+Ogerpon, os quatro Nectares, Orbe Tera, Pedra-Chave, Bracelete-Z, Pulseira Dynamax.
 
 **O pipeline não inventa dado.** O que não for possível interpretar com segurança vai
 para `dados/relatorio.json`, com o texto original, para conferência no livro e correção

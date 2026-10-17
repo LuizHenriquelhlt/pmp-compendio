@@ -7,3 +7,7 @@ node_modules/
 # Regenere com `npm run dados` a partir do módulo Foundry.
 /dados-crus/
 /dados/
+
+# O mapa de arte tem nomes de item do PMP como chaves — mesma regra. Regenere com
+# `npm run dados:arte`; sem ele o site constrói igual, só com menos ícones.
+/ferramentas/arte-de-item.json

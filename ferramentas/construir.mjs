@@ -822,6 +822,13 @@ const PASTA_DE_ITEM = new Map(documentosDeTreinador
 
 const NOMES_DE_ITEM = new Set(documentosDeItem.map((d) => d.name))
 
+// Arte achada na PokéAPI para os itens que o módulo deixou sem URL — ver `arte.mjs`, que
+// gera este arquivo conferindo cada sprite. Opcional: sem ele o site constrói igual, só
+// com menos ícones, e é por isso que a busca na rede não vive dentro do pipeline.
+const ARTE_DE_ITEM = existsSync("ferramentas/arte-de-item.json")
+	? JSON.parse(readFileSync("ferramentas/arte-de-item.json", "utf8"))
+	: {}
+
 const itens = []
 const idsDeItemUsados = new Set()
 
@@ -905,10 +912,13 @@ for (const documento of documentosDeItem) {
 		consumivel: documento.type === "consumable",
 		recipiente: documento.type === "container",
 		especie: documento.system?.type?.value ?? null,
-		// Só URL: 113 dos 343 apontam para a biblioteca de ícones do próprio Foundry
+		// Só URL: 190 dos 420 apontam para a biblioteca de ícones do próprio Foundry
 		// (`icons/equipment/…`), que não é publicada com o site e daria 404 em cada
-		// cartão. Mesmo filtro das outras fatias.
-		imagem: typeof documento.img === "string" && documento.img.startsWith("http") ? documento.img : null,
+		// cartão. Mesmo filtro das outras fatias. O que o módulo não preencheu, mas a
+		// PokéAPI tem, entra por `ARTE_DE_ITEM`.
+		imagem: typeof documento.img === "string" && documento.img.startsWith("http")
+			? documento.img
+			: ARTE_DE_ITEM[documento.name] ?? null,
 	})
 }
 

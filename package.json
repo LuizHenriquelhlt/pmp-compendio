@@ -14,6 +14,7 @@
     "teste:observar": "vitest",
     "dados:desempacotar": "node ferramentas/desempacotar.mjs",
     "dados:construir": "node ferramentas/construir.mjs",
+    "dados:arte": "node ferramentas/arte.mjs",
     "dados": "npm run dados:desempacotar && npm run dados:construir"
   },
   "devDependencies": {
