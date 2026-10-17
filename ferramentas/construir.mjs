@@ -13,7 +13,7 @@ import { criarInterpretadorDeEvolucao } from "./evolucao.mjs"
 import { CLIMA_POR_MOVE, interpretarHabilidade, regraAusente } from "./habilidades.mjs"
 import {
 	aparicaoDaCelulaDePreco, contaminacao, interpretarPreco, precoDivergente, referenciaDePagina,
-	textoCortado, tituloDeSecao,
+	textoComecaNoMeio, textoCortado, tituloDeSecao,
 } from "./itens.mjs"
 import {
 	contaminacaoNaDescricao, habilidadePendente, interpretarDeslocamentoConcedido,
@@ -889,8 +889,19 @@ for (const documento of documentosDeItem) {
 		relatorio.referenciasDePaginaEmItens.push({ item: documento.name, texto: descricao })
 	}
 
-	if (sujeira == null && textoCortado(descricao)) {
-		relatorio.textosDeItemCortados.push({ item: documento.name, texto: descricao })
+	// Cortado no fim (termina em preposição) ou no começo (abre no meio da frase). Os dois
+	// são a mesma coisa para quem lê: o módulo não tem a regra inteira. A página diz isso
+	// em vez de deixar o leitor achar que a frase pela metade é a regra.
+	const incompleto = sujeira == null
+		&& descricao !== ""
+		&& (textoCortado(descricao) || textoComecaNoMeio(descricao))
+
+	if (incompleto) {
+		relatorio.textosDeItemCortados.push({
+			item: documento.name,
+			onde: textoComecaNoMeio(descricao) ? "começo" : "fim",
+			texto: descricao,
+		})
 	}
 
 	itens.push({
@@ -898,6 +909,8 @@ for (const documento of documentosDeItem) {
 		nome: documento.name,
 		descricao,
 		textoContaminado: sujeira != null,
+		/** O módulo tem só um pedaço da regra — ver `textosDeItemCortados`. */
+		textoIncompleto: incompleto,
 		// `null` e não 0: 15 itens-chave do livro não são vendidos (Mega Pedra, Pedra-Chave,
 		// Bracelete-Z…), e "₽0" diria que são de graça.
 		preco,
@@ -992,8 +1005,10 @@ const indiceDeItens = itens.map((i) => ({
 	consumivel: i.consumivel,
 	recipiente: i.recipiente,
 	especie: i.especie,
-	// O cartão precisa saber que a ficha não tem texto para mostrar, sem carregar o texto.
+	// O cartão precisa saber que a ficha não tem texto inteiro para mostrar, sem carregar
+	// o texto.
 	textoContaminado: i.textoContaminado,
+	textoIncompleto: i.textoIncompleto,
 	imagem: i.imagem,
 }))
 

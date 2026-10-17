@@ -70,6 +70,14 @@
 				{:else if item.descricao === ""}
 					<p class="tenue">{t("item.semEfeito")}</p>
 				{:else}
+					<!--
+						Texto pela metade continua visível, ao contrário do contaminado: ele é o
+						que o livro tem, e não atribui ao item uma regra alheia. O que não pode
+						é o leitor achar que a frase truncada é a regra inteira.
+					-->
+					{#if item.textoIncompleto}
+						<p class="ressalva">{t("item.textoIncompleto")}</p>
+					{/if}
 					{#each paragrafos(item.descricao) as paragrafo (paragrafo)}
 						<p>{paragrafo}</p>
 					{/each}

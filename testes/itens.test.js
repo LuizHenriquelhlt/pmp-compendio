@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest"
 import {
 	aparicaoDaCelulaDePreco, contaminacao, interpretarPreco, precoDivergente,
-	referenciaDePagina, textoCortado, tituloDeSecao,
+	referenciaDePagina, textoComecaNoMeio, textoCortado, tituloDeSecao,
 } from "../ferramentas/itens.mjs"
 
 // As entradas destes testes são do corpus da v1.33.0, não inventadas. O pack de itens é o
@@ -230,5 +230,29 @@ Consumíveis — Expansão da Oitava Geração (Galar)`)
 		expect(lido.descricao).toBe(`Aumenta o nível de Dynamax.
 (Usado apenas na Opção 3.)`)
 		expect(lido.secao).toBe("Consumíveis")
+	})
+})
+
+describe("texto que começa no meio", () => {
+	// Extender: a descrição inteira que o módulo tem. Lida na ficha, não dá para saber o
+	// que é "ele" nem o que o item faz.
+	it("acha o fragmento do Extender", () => {
+		expect(textoComecaNoMeio("tenham sido ativados por ele, seja por Move ou por habilidade passiva."))
+			.toBe(true)
+	})
+
+	it.each([
+		"Restaura 2d4+2 PV.",
+		"Evolui Pikachu, Eevee, Eelektrik e Charjabug.",
+		// Abrir com número ou com sinal é legítimo no corpus.
+		"+1 na CA enquanto equipado.",
+		"10 usos antes de acabar.",
+		"Única entre as suas.",
+	])("não acusa %j", (texto) => {
+		expect(textoComecaNoMeio(texto)).toBe(false)
+	})
+
+	it("não acusa texto vazio", () => {
+		expect(textoComecaNoMeio("")).toBe(false)
 	})
 })

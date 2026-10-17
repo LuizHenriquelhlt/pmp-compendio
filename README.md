@@ -195,10 +195,17 @@ o extrai para `secao` e `expansao` — vira a taxonomia que a pasta não dá, co
 travessão e a forma "Expansão da … Geração (…)" na última linha, porque quatro itens
 antigos têm segundo parágrafo legítimo e não podem perder nada.
 
-Cinco Berries (Iapapa, Aguav, Wiki, Figy e Mago) compartilham uma descrição cortada
-exatamente na palavra que as distingue — "causa confusão caso seja de Natureza" —, e seis
-itens mandam o leitor virar a página do livro ("veja a página seguinte"), que num site não
-existe. Os dois casos ficam visíveis e vão para o relatório.
+Nove itens têm **só um pedaço da regra**, e esses continuam visíveis, ao contrário dos
+contaminados: o texto é o que o livro tem e não atribui ao item regra alheia — o que não
+pode é o leitor achar que a frase pela metade é a regra inteira, então a ficha avisa
+acima dela. Oito estão cortados no fim: cinco Berries (Iapapa, Aguav, Wiki, Figy e Mago)
+param exatamente na palavra que as distingue, "causa confusão caso seja de Natureza", e
+três param em "Fornece +1 em". Um está cortado no **começo** — a descrição inteira do
+Extender no módulo é "tenham sido ativados por ele, seja por Move ou por habilidade
+passiva", e sem o início não dá para saber o que é "ele".
+
+Seis itens mandam o leitor virar a página do livro ("veja a página seguinte"), que num
+site não existe. Ficam visíveis e vão para o relatório.
 
 ### A arte dos itens
 
@@ -287,7 +294,7 @@ na fonte. O relatório cobre:
 | `precosDeItemDivergentes` | Itens em que o número do módulo discorda do preço impresso (2 na v1.34.0, os dois 1000x menores) |
 | `textosDeItemContaminados` | Itens cujo texto carrega conteúdo de outra linha da tabela, com a marca e o original (10 na v1.34.0) |
 | `celulasDePrecoEmItens` | Células de preço aparadas do fim do texto (7 na v1.34.0) |
-| `textosDeItemCortados` | Itens cujo texto foi cortado antes de dizer a regra (8 na v1.34.0) |
+| `textosDeItemCortados` | Itens cujo texto foi cortado antes de dizer a regra, com `onde` (começo ou fim) — 9 na v1.34.0 |
 | `referenciasDePaginaEmItens` | Itens que mandam virar a página do livro (6 na v1.34.0) |
 | `itensDeEvolucaoNaoResolvidos` | Itens citados numa evolução que não têm ficha (0 na v1.34.0) |
 | `movesDeClimaAusentes`, `movesDeHabilidadeNaoResolvidos` | Moves nomeados por uma habilidade que não existem no compêndio (0 na v1.34.0) |

@@ -15,7 +15,7 @@
 	Mesma decisão dos outros cartões: o cartão inteiro é um link, para que a área de toque
 	seja o cartão todo e o leitor de tela anuncie um alvo em vez de quatro.
 -->
-<a class="cartao" class:sem-texto={item.textoContaminado} href="/itens/{item.id}">
+<a class="cartao" class:sem-texto={item.textoContaminado || item.textoIncompleto} href="/itens/{item.id}">
 	<div class="cabeca">
 		{#if item.imagem != null}
 			<!-- `alt` vazio: o nome vem ao lado, e repeti-lo faria o leitor de tela dizer
@@ -68,7 +68,8 @@
 		transition: box-shadow 150ms ease, transform 150ms ease, border-color 150ms ease;
 	}
 
-	/* Mesmo sinal do CartaoHabilidade: tracejado quando falta dado na fonte. */
+	/* Mesmo sinal do CartaoHabilidade: tracejado quando falta dado na fonte — texto
+	   contaminado por outra entrada ou cortado no meio de uma frase. */
 	.sem-texto {
 		border-left-style: dashed;
 		border-left-color: var(--borda-forte);

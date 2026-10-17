@@ -30,6 +30,16 @@ export type Item = {
 	 */
 	textoContaminado: boolean
 	/**
+	 * O módulo tem só um pedaço da regra.
+	 *
+	 * Nove itens na v1.34.0: oito cortados no fim (cinco Berries param em "caso seja de
+	 * Natureza", três em "Fornece +1 em") e um cortado no começo — a descrição inteira do
+	 * Extender é "tenham sido ativados por ele…", e sem o início não dá para saber o que
+	 * é "ele". O texto é publicado assim mesmo, com a ressalva ao lado: é o que o livro
+	 * tem, e metade da regra ainda ajuda quem conhece o item.
+	 */
+	textoIncompleto: boolean
+	/**
 	 * Preço em Pokédólares, ou `null` quando o livro não vende o item.
 	 *
 	 * `null` e não 0 de propósito: 15 itens-chave (Mega Pedra, Pedra-Chave, Bracelete-Z,

@@ -202,3 +202,18 @@ export function textoCortado(descricao = "") {
 	const limpo = descricao.trim()
 	return CORTES.some((padrao) => padrao.test(limpo))
 }
+
+/**
+ * O texto começa no MEIO de uma frase — o começo se perdeu na extração.
+ *
+ * Um item na v1.34.0: Extender, cuja descrição inteira no módulo é "tenham sido ativados
+ * por ele, seja por Move ou por habilidade passiva." Lido na ficha, não dá para saber o
+ * que é "ele" nem o que o item faz.
+ *
+ * O sinal é simples e seguro: em português a frase abre com maiúscula. Nenhuma das 410
+ * descrições publicadas começa com minúscula a não ser essa, e nenhuma começa com
+ * pontuação — os textos que abrem com número ou com "+" são legítimos ("+1 na CA").
+ */
+export function textoComecaNoMeio(descricao = "") {
+	return /^[a-zà-ÿ]/.test(descricao.trim())
+}
