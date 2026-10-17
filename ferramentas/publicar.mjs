@@ -3,7 +3,7 @@
  *
  * O Square Cloud recebe um .zip cuja RAIZ é a raiz do site: index.html e squarecloud.app
  * têm de estar no primeiro nível do arquivo, não dentro de uma pasta `build/`. É por isso
- * que este script zipa o CONTEÚDO de build/ e não a pasta — um zip com um nível a mais é
+ * que este script zipa o CONTEÚDO de build/ e não a pasta - um zip com um nível a mais é
  * o erro mais comum e o painel só diz "não achei index.html".
  *
  * O squarecloud.app vive na raiz do projeto (é configuração versionada, não artefato) e é
@@ -28,13 +28,13 @@ function pare(mensagem) {
 if (!existsSync(join(BUILD, "index.html"))) pare("Falta o build. Rode 'npm run build' antes.")
 if (!existsSync(CONFIG)) pare(`Falta o ${CONFIG} na raiz do projeto.`)
 
-// Um build sem o passo de portabilidade subiria e daria 404 em toda rota que não a raiz —
+// Um build sem o passo de portabilidade subiria e daria 404 em toda rota que não a raiz -
 // e o 404 só apareceria depois do upload. Melhor falhar aqui.
 if (existsSync(join(BUILD, "pokemon.html"))) {
 	pare("O build está na forma pasta.html. Rode 'npm run build' (que termina em ferramentas/portatil.mjs).")
 }
 if (!existsSync(join(BUILD, "pokemon", "index.html"))) {
-	pare(`Não achei ${BUILD}/pokemon/index.html — o build não parece completo.`)
+	pare(`Não achei ${BUILD}/pokemon/index.html - o build não parece completo.`)
 }
 
 const { SUBDOMAIN: subdominio } = conferirArquivo(CONFIG)

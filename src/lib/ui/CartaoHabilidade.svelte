@@ -12,7 +12,7 @@
 	/**
 	 * As pílulas do cartão: o que a habilidade concede, na ordem em que a ficha mostra.
 	 *
-	 * Ficam sem rótulo de propósito — o cartão tem espaço para o valor, não para
+	 * Ficam sem rótulo de propósito - o cartão tem espaço para o valor, não para
 	 * "Imune a" na frente de cada um. O rótulo aparece na ficha.
 	 */
 	const facetas = $derived([

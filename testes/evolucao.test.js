@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest"
 import { criarInterpretadorDeEvolucao } from "../ferramentas/evolucao.mjs"
 
-// Vocabulário mínimo, com os nomes ordenados do mais longo para o mais curto — é
+// Vocabulário mínimo, com os nomes ordenados do mais longo para o mais curto - é
 // assim que o pipeline os entrega, e a ordem importa para as formas regionais.
 const interpretar = criarInterpretadorDeEvolucao({
 	nomesDeEspecie: [

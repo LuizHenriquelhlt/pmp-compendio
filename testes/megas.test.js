@@ -4,8 +4,8 @@ import {
 	interpretarOutrosEfeitos, pesEmMetros, prosaDaDescricao,
 } from "../ferramentas/megas.mjs"
 
-// As frases destes testes são as DEZ entradas reais de `otherEffects` da v1.33.0 — o corpus
-// inteiro da família, não uma amostra — mais as aberturas e as contaminações reais de
+// As frases destes testes são as DEZ entradas reais de `otherEffects` da v1.33.0 - o corpus
+// inteiro da família, não uma amostra - mais as aberturas e as contaminações reais de
 // `description`. É o que lhes dá valor: cada uma destas entradas contradiz um campo
 // estruturado da própria pedra, e é por isso que o pipeline lê o texto aqui.
 
@@ -14,7 +14,7 @@ const textos = (...entradas) => interpretarOutrosEfeitos(entradas).textos
 const naoLido = (...entradas) => interpretarOutrosEfeitos(entradas).naoInterpretado
 
 describe("habilidade concedida", () => {
-	// Mega Floette tem `passiveAbility: ""` e a habilidade só aqui — e Fairy Aura EXISTE no
+	// Mega Floette tem `passiveAbility: ""` e a habilidade só aqui - e Fairy Aura EXISTE no
 	// pack. Quem lê só o campo publica "sem habilidade" e a ficha de Fairy Aura nunca
 	// descobre que uma Mega a concede.
 	it("lê a habilidade que só o texto declara", () => {
@@ -25,7 +25,7 @@ describe("habilidade concedida", () => {
 
 	// Mega Abomasnow, com `passiveAbility: ""`: a fonte cortou a frase no meio do
 	// parêntese. "Snow Warning" existe no pack, mas o nome capturado inclui o fragmento.
-	// Aparar no "(" devolveria o nome certo por sorte — marcamos o corte e deixamos o
+	// Aparar no "(" devolveria o nome certo por sorte - marcamos o corte e deixamos o
 	// relatório pedir a correção na fonte.
 	it("marca o nome truncado na fonte em vez de aparar o fragmento", () => {
 		expect(efeitos("Mantém a habilidade Snow Warning (torna-se Snow")).toEqual([
@@ -51,7 +51,7 @@ describe("habilidade concedida", () => {
 
 describe("tamanho", () => {
 	// A única frase da família no corpus, e ela NÃO casa: a escala do PMP é Minúsculo,
-	// Pequeno, Médio, Grande, Enorme e Gigantesco — `huge` é "Enorme". "Imenso" é uma
+	// Pequeno, Médio, Grande, Enorme e Gigantesco - `huge` é "Enorme". "Imenso" é uma
 	// sétima palavra, e mapeá-la para `huge` por parecença seria adivinhar um degrau da
 	// escala. Mega Hawlucha tem `size: null` no campo, então o tamanho só existe aqui.
 	it("não adivinha um degrau da escala para uma palavra fora do vocabulário", () => {
@@ -92,7 +92,7 @@ describe("deslocamento", () => {
 	})
 
 	// Mega Eelektross: `movementBonusFeet` é **0** e o bônus só existe no texto. Repare no
-	// ESPAÇO depois do `+` — um `/^\+\d+/` não casa.
+	// ESPAÇO depois do `+` - um `/^\+\d+/` não casa.
 	it("lê o bônus com espaço depois do sinal, que o campo zerado esconde", () => {
 		expect(efeitos("+ 10 pés (3 metros) em todos os seus deslocamentos")).toEqual([
 			{ tipo: "deslocamentoBonus", metros: 3 },
@@ -125,7 +125,7 @@ describe("deslocamento", () => {
 
 describe("pés em metros", () => {
 	// O fator não é escolha nossa: o corpus declara os dois lados três vezes, sempre
-	// 0,3 m/pé — a convenção do dnd5e em português (1,5 m por 5 pés). A Pokédex grava
+	// 0,3 m/pé - a convenção do dnd5e em português (1,5 m por 5 pés). A Pokédex grava
 	// deslocamento em metros em 1.148 das 1.149, sem uma única ocorrência de "pés".
 	it.each([
 		[ 40, 12 ],
@@ -149,7 +149,7 @@ describe("deslocamento concedido pelo campo", () => {
 			.toEqual({ modo: "voo", flutuacao: true, igualA: "caminhada" })
 	})
 
-	// Modo fora do vocabulário não vira dado — `construir.mjs` o manda para o relatório.
+	// Modo fora do vocabulário não vira dado - `construir.mjs` o manda para o relatório.
 	it("devolve nada para um modo que o compêndio não conhece", () => {
 		expect(interpretarDeslocamentoConcedido({ type: "teletransporte", equalTo: "caminhada" })).toBe(null)
 	})
@@ -158,7 +158,7 @@ describe("deslocamento concedido pelo campo", () => {
 describe("as três pedras especiais", () => {
 	// Sem sinal de família nenhuma: são regras de ATIVAÇÃO, não deltas. Estruturá-las seria
 	// modelar um vocabulário a partir de três frases; exibidas, continuam sendo a regra
-	// inteira. O relatório não deve listá-las — elas não declaram um efeito que o parser
+	// inteira. O relatório não deve listá-las - elas não declaram um efeito que o parser
 	// deixou passar.
 	it.each([
 		"Reversão Primal, não Mega Evolução: nível mínimo 10, 1 uso por descanso (2 usos a partir do "
@@ -222,7 +222,7 @@ describe("prosa da descrição", () => {
 
 describe("contaminação da descrição", () => {
 	// Mega Pinsir: a entrada da pedra Aerodactylite vazou para dentro. Aerodactylite não
-	// está no pack — é texto de Mega que o módulo não publica, na descrição de outra.
+	// está no pack - é texto de Mega que o módulo não publica, na descrição de outra.
 	it("acha a entrada de outra pedra", () => {
 		expect(contaminacaoNaDescricao("Mega Pinsir consegue erguer oponentes com até 10 vezes o seu "
 			+ "próprio peso. Aerodactylite Permite que Aerodactyl Mega Evolua para Mega Aerodactyl "
@@ -252,7 +252,7 @@ describe("contaminação da descrição", () => {
 			.toBe("segunda descrição de Mega")
 	})
 
-	// As 89 limpas não podem casar. Esta é a maior delas, até o fim — se as marcas fossem
+	// As 89 limpas não podem casar. Esta é a maior delas, até o fim - se as marcas fossem
 	// largas, a descrição mais longa seria a primeira a cair.
 	it("não acusa a maior descrição limpa do corpus", () => {
 		expect(contaminacaoNaDescricao("Meganium recebe os seguintes benefícios: O aroma que emana das "

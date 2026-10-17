@@ -44,7 +44,7 @@
 	/**
 	 * Os dois escalonamentos possíveis, cada um com o rótulo que diz DE QUE ele é.
 	 * O módulo guarda dano e cura no mesmo campo (`damage.scaling`) e dezesseis Moves
-	 * escalonam cura — publicá-los sob o rótulo de dano inventaria uma regra.
+	 * escalonam cura - publicá-los sob o rótulo de dano inventaria uma regra.
 	 */
 	const escalonamentos = $derived([
 		{ rotulo: t("move.escalonamento.dano"), dados: move.dano },
@@ -61,7 +61,7 @@
 </script>
 
 <svelte:head>
-	<title>{move.nome} — {t("site.nome")}</title>
+	<title>{move.nome} - {t("site.nome")}</title>
 	<meta name="description" content={paragrafos(move.descricao)[0] ?? move.nome} />
 </svelte:head>
 
@@ -101,7 +101,7 @@
 		</div>
 		<!--
 			Dano, cura ou poder, nessa ordem: doze Moves escalonam dados sem declarar a base
-			(o livro põe o valor só na prosa), e um bloco "Cura —" diria menos que o Poder do
+			(o livro põe o valor só na prosa), e um bloco "Cura -" diria menos que o Poder do
 			Move. O escalonamento continua no painel ao lado, com o rótulo certo.
 		-->
 		{#if move.dano?.base != null}

@@ -94,7 +94,7 @@ const dex = carregar("pokedex")
 const documentosDeEspecie = dex.filter((d) => flags(d).species != null)
 
 // ------------------------------------------------------------------ Geração e região
-// As "pastas" do pack são documentos cujo nome é "Geração 1 — Kanto".
+// As "pastas" do pack são documentos cujo nome é "Geração 1 - Kanto".
 const PROCEDENCIA_POR_PASTA = {}
 for (const documento of dex) {
 	const casa = (documento.name ?? "").match(/^Geração (\d+)\s*—\s*(.+)$/)
@@ -104,7 +104,7 @@ for (const documento of dex) {
 // ------------------------------------------------------------------ Dicionário de Moves
 // As listas de Moves das fichas de espécie são texto de PDF, e o reparo delas vive em
 // `moves.mjs` (com testes). Vale para as três listas: tabela de nível, TMs e Moves de Ovo
-// — as duas últimas passavam cruas até agora, e é por isso que a ficha mostrava
+// - as duas últimas passavam cruas até agora, e é por isso que a ficha mostrava
 // "T a k e D o w n" e "Double- Edge" onde o livro diz "Take Down" e "Double-Edge".
 const documentosDeMove = carregar("moves").filter((d) => flags(d).move != null)
 const reparadorDeMoves = criarReparadorDeMoves(documentosDeMove.map((d) => d.name))
@@ -136,7 +136,7 @@ function tabelaDeMoves(linhas, nomeDaEspecie) {
 // nível 6", "em qualquer nível quando sua Lealdade for +2", "com a ajuda de uma Thunder
 // Stone", "apenas durante a noite", ramificações separadas por vírgula ou "ou". Quebramos
 // em cláusulas, achamos a espécie-alvo pelo dicionário de nomes e extraímos as condições.
-// O que não for reconhecido vira `especial` — condição narrativa, para o Mestre resolver.
+// O que não for reconhecido vira `especial` - condição narrativa, para o Mestre resolver.
 const NOMES_DE_ESPECIE = [ ...new Set(documentosDeEspecie.map((d) => d.name)) ]
 	.sort((a, b) => b.length - a.length)
 
@@ -158,7 +158,7 @@ const interpretarEvolucao = criarInterpretadorDeEvolucao({
 // O módulo gravou espécies sem gênero como 50/50; a lista correta vem do PDF.
 const SEM_GENERO = new Set(carregarOpcional("sem-genero") ?? [])
 if (SEM_GENERO.size === 0) {
-	console.warn("  (sem dados-crus/sem-genero.json — espécies sem gênero sairão como 50/50)")
+	console.warn("  (sem dados-crus/sem-genero.json - espécies sem gênero sairão como 50/50)")
 }
 
 const especies = []
@@ -253,7 +253,7 @@ for (const especie of especies) {
 		}
 
 		// Evoluir não pode baixar nem manter o estágio. Quando acontece, ou o texto do
-		// livro está ambíguo, ou a espécie aponta para a forma errada — caso de várias
+		// livro está ambíguo, ou a espécie aponta para a forma errada - caso de várias
 		// formas regionais, cujo texto cita a evolução comum ("Growlithe de Hisui …
 		// evoluir para Arcanine", e não "Arcanine de Hisui"). Sinalizamos para conferência.
 		const alvo = ESPECIE_POR_ID.get(evolucao.paraId)
@@ -269,7 +269,7 @@ for (const especie of especies) {
 }
 
 // Formas que têm estágio evolutivo mas para as quais ninguém evolui. Não dá para
-// inventar a ligação — o texto do livro simplesmente não a declara —, então viram
+// inventar a ligação - o texto do livro simplesmente não a declara -, então viram
 // lista de conferência. Costumam ser de três tipos: forma regional cujo antecessor
 // cita a evolução comum ("evoluir para Arcanine", não "Arcanine de Hisui"), forma
 // alternativa escolhida na evolução (Wormadam, Meowstic Fêmea) e evolução por
@@ -283,7 +283,7 @@ especies.sort((a, b) => a.numero - b.numero || a.nome.localeCompare(b.nome, "pt-
 
 // ------------------------------------------------------------------ Moves
 // O pack de Moves é bem mais estruturado que a Pokédex, mas quatro dos campos não querem
-// dizer o que o nome promete — ver o cabeçalho de `moves.mjs`. O que este laço faz é
+// dizer o que o nome promete - ver o cabeçalho de `moves.mjs`. O que este laço faz é
 // aplicar essas correções e registrar, Move por Move, o que não deu para concluir.
 const moves = []
 const idsDeMoveUsados = new Set()
@@ -383,7 +383,7 @@ const indice = especies.map((e) => ({
 }))
 
 // A fatia de Move que a listagem e a busca carregam. O que fica de fora é o que só a
-// ficha usa — descrição, Níveis Superiores, observações e os efeitos detalhados.
+// ficha usa - descrição, Níveis Superiores, observações e os efeitos detalhados.
 const indiceDeMoves = moves.map((m) => ({
 	id: m.id,
 	nome: m.nome,
@@ -405,7 +405,7 @@ const indiceDeMoves = moves.map((m) => ({
 // ------------------------------------------------------------------ Habilidades
 // O pack `abilities` é o mais pobre dos três: de todos os campos do documento, só `name`,
 // `system.description.value` e o flag `placeholder` variam nas 313 habilidades. O resto é
-// constante — inclusive `flags["pokemon-mundo-perfeito"].category`, que é
+// constante - inclusive `flags["pokemon-mundo-perfeito"].category`, que é
 // `"habilidade-passiva"` em todas. O nome promete um vocabulário de categorias e entrega
 // uma constante: não existe taxonomia de habilidade no módulo, e tudo o que esta seção
 // estrutura além do nome sai do texto, em `habilidades.mjs`.
@@ -441,18 +441,18 @@ function resolverMoves(efeitos, nomeDaHabilidade) {
 // ------------------------------------------------------------------ Megas
 // O pack `mega-evolutions` é o MAIS estruturado dos quatro: treze campos de
 // `flags[…].mega` carregam dado (contra três no `abilities`), e nada do documento Foundry
-// em volta serve — `system.*` é constante nas 93. Então quase tudo aqui é leitura de
+// em volta serve - `system.*` é constante nas 93. Então quase tudo aqui é leitura de
 // campo, e a interpretação de texto fica restrita a `otherEffects` e `description`, nos
 // dois casos isolada em `megas.mjs` com testes.
 //
 // Quatro armadilhas que mudam o desenho desta seção, todas medidas sobre as 93 pedras:
 //
 //   1. `flags[…].species` e `flags[…].megaForm` (os duplicados de topo) NÃO EXISTEM nas
-//      três pedras especiais — a chave não está lá. Quem lê o flag de topo em vez de
+//      três pedras especiais - a chave não está lá. Quem lê o flag de topo em vez de
 //      `mega.*` perde Groudon, Kyogre e Rayquaza em silêncio. Lemos sempre de `mega.*`.
 //
 //   2. `mega.abilityChoices` não é escolha de Habilidade: o conteúdo é
-//      `{ options: ["str","dex"], delta: 5 }`, escolha de ATRIBUTO — o `ability` do dnd5e
+//      `{ options: ["str","dex"], delta: 5 }`, escolha de ATRIBUTO - o `ability` do dnd5e
 //      (ability score). O próprio módulo confirma, no `<li>` que gera: "+5 em FOR ou DES
 //      (à escolha do jogador)". Lido como habilidade, produz "str" e "dex" como nomes.
 //
@@ -466,7 +466,7 @@ function resolverMoves(efeitos, nomeDaHabilidade) {
 //      40 pés só no texto. É por isso que `otherEffects` é lido, e não descartado.
 //
 // `system.description.value` fica de fora por inteiro: agrupando os 475 `<li>` do corpus
-// em formas de frase, todas saem de um campo estruturado — nenhum fato vive só ali.
+// em formas de frase, todas saem de um campo estruturado - nenhum fato vive só ali.
 const NOMES_DE_HABILIDADE = new Set(documentosDeHabilidade.map((d) => d.name))
 const megasPorHabilidade = new Map()
 const documentosDeMega = carregarOpcional("mega-evolutions") ?? []
@@ -481,14 +481,14 @@ for (const documento of documentosDeMega) {
 	if (m == null) continue
 
 	// `id` pela FORMA, não pela pedra. Os dois dão 93 slugs distintos sem colisão, mas a
-	// forma é o que se procura e o que a ficha descreve — a pedra é o requisito. E a forma
+	// forma é o que se procura e o que a ficha descreve - a pedra é o requisito. E a forma
 	// gera URL legível onde a pedra não: `/megas/mega-charizard-x` contra
 	// `/megas/rayquazanite-nao-requer-mega-pedra`.
 	let id = slug(m.megaForm)
 	while (idsDeMegaUsados.has(id)) id = `${id}-2`
 	idsDeMegaUsados.add(id)
 
-	// `types` é sempre o par COMPLETO novo, nunca um delta — Mega Pinsir (`bug` →
+	// `types` é sempre o par COMPLETO novo, nunca um delta - Mega Pinsir (`bug` →
 	// `bug/flying`) repete `type1`. E `type2: null` com `type1` preenchido é MONOTIPO, não
 	// dado faltando: Mega Aggron vem de `steel/rock` e fica `steel`, e o módulo renderiza
 	// "Tipo muda para Aço", um nome só. Lista vazia = não troca de tipo (74 das 93).
@@ -554,7 +554,7 @@ for (const documento of documentosDeMega) {
 	}
 
 	// Deslocamento: o campo e o texto preenchem a MESMA lista, porque descrevem o mesmo
-	// fato de dois jeitos — `movementGrants` dá o modo e a base ("igual ao de caminhada"),
+	// fato de dois jeitos - `movementGrants` dá o modo e a base ("igual ao de caminhada"),
 	// a prosa dá o modo e um valor absoluto ("de 40 pés"). Separá-los em dois campos faria
 	// a ficha mostrar dois painéis para a mesma coisa.
 	const deslocamentosConcedidos = []
@@ -578,7 +578,7 @@ for (const documento of documentosDeMega) {
 		: null
 
 	// Habilidade concedida: 0, 1 ou 2 por pedra, e de DOIS campos. Quatro pedras têm
-	// `passiveAbility` vazia e duas delas declaram a habilidade em `otherEffects` — uma
+	// `passiveAbility` vazia e duas delas declaram a habilidade em `otherEffects` - uma
 	// (Mega Floette → Fairy Aura) nomeando uma habilidade que EXISTE no pack. Lendo só
 	// `passiveAbility`, a ficha diz "sem habilidade" para Mega Floette e a ficha de Fairy
 	// Aura nunca descobre que uma Mega a concede.
@@ -624,7 +624,7 @@ for (const documento of documentosDeMega) {
 	}
 
 	// ---------------------------------------------------------------- Espécie-base
-	// Nenhuma das 93 `megaForm` existe como espécie na Pokédex — as Megas não estão lá. A
+	// Nenhuma das 93 `megaForm` existe como espécie na Pokédex - as Megas não estão lá. A
 	// espécie-base existe em 90, e é para ela que o link aponta.
 	//
 	// O teste das 93 é feito aqui, UMA vez por pedra e independente da habilidade. Antes
@@ -636,7 +636,7 @@ for (const documento of documentosDeMega) {
 	if (especieId == null) {
 		// Os candidatos vêm da própria Pokédex (nomes que contêm a última palavra do nome
 		// procurado) e são o que falta para corrigir a fonte: "Meowstic" → Meowstic Macho /
-		// Meowstic Fêmea. Não são uma resolução — escolher um deles seria adivinhar, e no
+		// Meowstic Fêmea. Não são uma resolução - escolher um deles seria adivinhar, e no
 		// caso de Tatsugiri exigiria traduzir "(Curly Form)" para "Forma Curva".
 		const ultima = String(m.species ?? "").split(/\s+/).pop()?.toLowerCase() ?? ""
 		const candidatos = ultima === ""
@@ -654,7 +654,7 @@ for (const documento of documentosDeMega) {
 	// ---------------------------------------------------------------- Descrição
 	// Prosa de sabor: nenhuma das 93 repete os deltas, então descrição e deltas convivem
 	// na ficha sem dizer a mesma coisa duas vezes. A deixa que o módulo repete nas 93
-	// ("<espécie> recebe os seguintes benefícios:") sai fora — ver `prosaDaDescricao`.
+	// ("<espécie> recebe os seguintes benefícios:") sai fora - ver `prosaDaDescricao`.
 	const descricaoBruta = textoSimples(m.description ?? "")
 	const contaminacao = contaminacaoNaDescricao(descricaoBruta)
 
@@ -670,7 +670,7 @@ for (const documento of documentosDeMega) {
 		pedra: documento.name,
 		especie: m.species,
 		especieId,
-		// O número da espécie-base, para a listagem poder sair na ordem da Pokédex — que é
+		// O número da espécie-base, para a listagem poder sair na ordem da Pokédex - que é
 		// a ordem em que o livro apresenta as espécies. 0 nas três sem base resolvida.
 		numero: especieId != null ? ESPECIE_POR_ID.get(especieId)?.numero ?? 0 : 0,
 		// `category` é um dos raríssimos campos de categoria do módulo que de fato variam.
@@ -706,7 +706,7 @@ for (const documento of documentosDeMega) {
 		// para ver onde a regra acaba, aqui são até 2.600 caracteres DENTRO do único campo
 		// de prosa: a ficha de Mega Delphox mostraria "CA: 17" e a regra de Flower Veil
 		// como se fossem dela. A página diz o que aconteceu, com texto de interface, e o
-		// original inteiro fica no relatório — o mesmo trato das 74 habilidades sem regra.
+		// original inteiro fica no relatório - o mesmo trato das 74 habilidades sem regra.
 		descricao: contaminacao != null ? "" : prosaDaDescricao(descricaoBruta),
 		descricaoContaminada: contaminacao != null,
 		imagem: typeof m.tokenImage === "string" && m.tokenImage.startsWith("http") ? m.tokenImage : null,
@@ -792,7 +792,7 @@ const indiceDeHabilidades = habilidades.map((h) => ({
 	suprimeClima: h.efeitos.some((e) => e.tipo === "clima" && e.relacao === "suprime"),
 	concedeMove: h.efeitos.some((e) => e.tipo === "moveConcedido"),
 	// Quantas Megas concedem a habilidade. Entra no índice porque o cartão precisa dele
-	// para não dizer "sem portador" nas três habilidades cujo portador é uma forma Mega —
+	// para não dizer "sem portador" nas três habilidades cujo portador é uma forma Mega -
 	// ao contrário da contagem de espécies, que é relação inversa e se calcula na leitura.
 	megas: h.megas.length,
 }))
@@ -800,19 +800,19 @@ const indiceDeHabilidades = habilidades.map((h) => ({
 // ------------------------------------------------------------------ Itens
 // Os itens NÃO estão no pack chamado `items`, que tem dois documentos: uma pasta e o
 // Fator Terastal. Os 343 estão em `trainer-features.json`, um saco misto de 522
-// documentos e doze categorias — talentos, naturezas, classes de treinador, as mecânicas
-// Terastal e Dynamax — do qual `category: "item-treinador"` é uma fatia.
+// documentos e doze categorias - talentos, naturezas, classes de treinador, as mecânicas
+// Terastal e Dynamax - do qual `category: "item-treinador"` é uma fatia.
 //
 // A taxonomia vem da PASTA, e cobre só um quarto do catálogo: 259 dos 343 caem num balde
 // chamado "Itens", e as outras quatro pastas (Berries, Hortelãs, Doces, Poções) dividem
-// 84. É o mesmo padrão de `PROCEDENCIA_POR_PASTA` na Pokédex — o documento-pasta é um
+// 84. É o mesmo padrão de `PROCEDENCIA_POR_PASTA` na Pokédex - o documento-pasta é um
 // registro do próprio pack, com `type: "Item"` e sem `category`.
 //
 // Por isso o índice publica também `consumivel` e `especie` do dnd5e (`equipment` /
 // `consumable` / `container` cruzado com `trinket` / `food` / `potion`): essa divisão
 // separa os 343 de verdade, e é independente da pasta.
 //
-// O preço e o texto são lidos em `itens.mjs`, isolado e com testes — ver o cabeçalho de
+// O preço e o texto são lidos em `itens.mjs`, isolado e com testes - ver o cabeçalho de
 // lá para as quatro formas de contaminação da tabela do PDF.
 const documentosDeTreinador = carregarOpcional("trainer-features") ?? []
 const documentosDeItem = documentosDeTreinador.filter((d) => flags(d).category === "item-treinador")
@@ -824,7 +824,7 @@ const PASTA_DE_ITEM = new Map(documentosDeTreinador
 
 const NOMES_DE_ITEM = new Set(documentosDeItem.map((d) => d.name))
 
-// Arte achada na PokéAPI para os itens que o módulo deixou sem URL — ver `arte.mjs`, que
+// Arte achada na PokéAPI para os itens que o módulo deixou sem URL - ver `arte.mjs`, que
 // gera este arquivo conferindo cada sprite. Opcional: sem ele o site constrói igual, só
 // com menos ícones, e é por isso que a busca na rede não vive dentro do pipeline.
 const ARTE_DE_ITEM = existsSync("ferramentas/arte-de-item.json")
@@ -845,7 +845,7 @@ for (const documento of documentosDeItem) {
 	const preco = interpretarPreco(precoNoTexto)
 
 	// O módulo leu a vírgula de "₽20,000" como decimal e gravou 20. Publicamos o valor do
-	// TEXTO, que é a fonte, e relatamos — como `prioridadeDeMoveDivergente` nos Moves. Dá
+	// TEXTO, que é a fonte, e relatamos - como `prioridadeDeMoveDivergente` nos Moves. Dá
 	// para afirmar que a vírgula é separador de milhar porque nenhum dos 343 preços tem
 	// centavos.
 	if (precoDivergente(precoNoTexto, documento.system?.price?.value ?? 0)) {
@@ -880,7 +880,7 @@ for (const documento of documentosDeItem) {
 		relatorio.textosDeItemContaminados.push({ item: documento.name, marca: sujeira, texto: semCelula })
 	}
 
-	// Sem contaminação, o texto é publicado como está — inclusive a referência à página do
+	// Sem contaminação, o texto é publicado como está - inclusive a referência à página do
 	// livro, que é o livro falando de si e não defeito de extração. Contaminado, ele não
 	// vai para a página: a de Balm Mushroom traria as descrições de Pearl, Big Pearl e
 	// Pearl String emendadas, e a de Mega Pedra diria "durante a NÃO batalha", o oposto da
@@ -911,7 +911,7 @@ for (const documento of documentosDeItem) {
 		nome: documento.name,
 		descricao,
 		textoContaminado: sujeira != null,
-		/** O módulo tem só um pedaço da regra — ver `textosDeItemCortados`. */
+		/** O módulo tem só um pedaço da regra - ver `textosDeItemCortados`. */
 		textoIncompleto: incompleto,
 		// `null` e não 0: 15 itens-chave do livro não são vendidos (Mega Pedra, Pedra-Chave,
 		// Bracelete-Z…), e "₽0" diria que são de graça.
@@ -927,12 +927,12 @@ for (const documento of documentosDeItem) {
 		consumivel: documento.type === "consumable",
 		recipiente: documento.type === "container",
 		especie: documento.system?.type?.value ?? null,
-		// A arte vem do mapa que `arte.mjs` gera, e aponta para `static/itens/` — o site
+		// A arte vem do mapa que `arte.mjs` gera, e aponta para `static/itens/` - o site
 		// serve de si mesmo. Apontar direto para `raw.githubusercontent.com`, como o
 		// módulo faz, quebrava de forma intermitente: o endpoint `raw` não é CDN e
 		// estrangula quando a listagem pede algumas dezenas de imagens de uma vez.
 		//
-		// `null` enquanto `dados:arte` não rodar, e nos itens sem arte nenhuma — a página
+		// `null` enquanto `dados:arte` não rodar, e nos itens sem arte nenhuma - a página
 		// desenha um ícone próprio nesses casos.
 		imagem: ARTE_DE_ITEM[documento.name] ?? null,
 	})
@@ -943,7 +943,7 @@ itens.sort((a, b) => a.nome.localeCompare(b.nome, "pt-BR"))
 // O elo com a evolução. `interpretarEvolucao` já achava o nome do item no texto do livro,
 // mas não tinha catálogo onde resolvê-lo: o nome saía como texto solto. Agora vira link,
 // e a ficha do item mostra a relação inversa (quais espécies evoluem com ele), que é
-// calculada na leitura, como `evoluiDe` — a pedra declara o item, não o contrário.
+// calculada na leitura, como `evoluiDe` - a pedra declara o item, não o contrário.
 const ID_DE_ITEM_POR_NOME = new Map(itens.map((i) => [ i.nome, i.id ]))
 
 for (const especie of especies) {
@@ -957,7 +957,7 @@ for (const especie of especies) {
 	}
 }
 
-// A fatia de Mega que a listagem e a busca carregam. Fica de fora o que só a ficha usa —
+// A fatia de Mega que a listagem e a busca carregam. Fica de fora o que só a ficha usa -
 // a descrição, a prosa de `outrosTextos` e os fatos de deslocamento, que são de 5 a 10
 // casos cada e não sustentam filtro.
 //
@@ -981,7 +981,7 @@ const indiceDeMegas = megas.map((m) => ({
 	habilidadePendente: m.habilidadePendente,
 	// Só os atributos que SOBEM: um filtro "aumenta FOR" não deve trazer Mega Hawlucha,
 	// que tem `str: -2`. As opções de `abilityChoices` entram porque o jogador pode
-	// escolher aquele atributo — é um aumento possível, e o cartão marca a diferença.
+	// escolher aquele atributo - é um aumento possível, e o cartão marca a diferença.
 	atributosAumentados: [ ...new Set([
 		...m.atributos.filter((a) => a.delta > 0).map((a) => a.id),
 		...m.escolhasDeAtributo.flatMap((e) => e.opcoes),
@@ -1017,7 +1017,7 @@ const indiceDeItens = itens.map((i) => ({
 // ------------------------------------------------------------------ TMs
 // O número do TM não é campo: está no NOME do documento, "TM114: Grass Knot". São 321,
 // numerados de 1 a 321 sem repetição nem buraco, e os 321 Moves que eles ensinam existem
-// todos no compêndio — conferido.
+// todos no compêndio - conferido.
 //
 // A ficha de espécie lista os TMs por nome de Move, então o que o site precisa é a volta:
 // Move → número. Os 21 nomes das listas de espécie que não casam aqui são exatamente as
@@ -1046,10 +1046,21 @@ for (const documento of carregarOpcional("tms") ?? []) {
 	TM_POR_MOVE[move] = numero
 }
 
+/**
+ * O compêndio escreve hífen, nunca travessão - decisão tipográfica do projeto, que vale
+ * também para o texto que vem do módulo. A troca acontece AQUI, na gravação, e não na
+ * leitura: os parsers casam com o travessão que o módulo de fato usa (o título de seção em
+ * `itens.mjs`, a geração em `construir.mjs`, o marcador vazio em `moves.mjs`), e mexer
+ * nisso antes do parsing faria o pipeline deixar de reconhecer o próprio dado de entrada.
+ *
+ * Sobre o JSON já serializado em vez de caminhar pelo objeto: o travessão não faz parte da
+ * sintaxe do JSON, então só pode estar dentro de um valor de texto. Uma troca no texto
+ * inteiro é equivalente e não precisa conhecer o formato de cada catálogo.
+ */
 function escrever(nome, dados) {
-	writeFileSync(join(saida, `${nome}.json`), JSON.stringify(dados))
+	writeFileSync(join(saida, `${nome}.json`), JSON.stringify(dados).replaceAll("—", "-"))
 	const total = Array.isArray(dados) ? dados.length : Object.keys(dados).length
-	console.log(`  ${nome}.json — ${total} registros`)
+	console.log(`  ${nome}.json - ${total} registros`)
 }
 
 relatorio.movesNaoResolvidos = [ ...movesNaoResolvidos ]
@@ -1066,6 +1077,8 @@ escrever("indice-megas", indiceDeMegas)
 escrever("tms", TM_POR_MOVE)
 escrever("itens", itens)
 escrever("indice-itens", indiceDeItens)
+// Sem a normalização de travessão: o relatório existe para mostrar o que o módulo
+// escreveu de verdade, e trocar a pontuação esconderia parte do que ele deve revelar.
 writeFileSync(join(saida, "relatorio.json"), JSON.stringify(relatorio, null, 1))
 
 console.log(`\nQualidade do dado-fonte (detalhes em ${saida}/relatorio.json):`)

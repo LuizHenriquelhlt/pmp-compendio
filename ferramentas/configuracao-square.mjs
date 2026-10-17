@@ -3,7 +3,7 @@
  * precisam delas: o pacote .zip (`publicar.mjs`) e o repositório de publicação
  * (`publicar-github.mjs`). Regra duplicada é regra que diverge.
  *
- * Conferimos aqui porque o host só as aplica DEPOIS do upload — e uma delas não tem
+ * Conferimos aqui porque o host só as aplica DEPOIS do upload - e uma delas não tem
  * segunda chance: SUBDOMAIN é obrigatório no PRIMEIRO envio. Sem ele o deploy vira uma
  * aplicação comum, não um site, e não há conversão possível. DISPLAY_NAME só aceita letra
  * SEM acento, o que é fácil de esquecer num projeto escrito em português.
@@ -36,7 +36,7 @@ export function problemasNaConfiguracao(campos) {
 	if (!SUBDOMAIN) {
 		problemas.push(
 			"SUBDOMAIN está faltando. Ele TEM de ir no primeiro envio: sem ele o deploy vira\n" +
-			"  aplicação em vez de site, e não dá para converter depois — só apagando e subindo de novo.",
+			"  aplicação em vez de site, e não dá para converter depois - só apagando e subindo de novo.",
 		)
 	} else if (!/^[a-z0-9]([a-z0-9-]{0,61}[a-z0-9])?$/.test(SUBDOMAIN.toLowerCase())) {
 		problemas.push(`SUBDOMAIN inválido: "${SUBDOMAIN}" (letras, dígitos e hífen, sem começar nem terminar em hífen, até 63)`)

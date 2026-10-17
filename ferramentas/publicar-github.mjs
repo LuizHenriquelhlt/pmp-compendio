@@ -13,7 +13,7 @@
  *
  * O `.gitattributes` do repositório de publicação desliga qualquer conversão de fim de
  * linha (`* -text`). Aqui o `core.autocrlf` está ligado, e sem isso o Git reescreveria as
- * quebras de linha dos 2.815 HTML — o que é servido deixaria de ser byte a byte o que foi
+ * quebras de linha dos 2.815 HTML - o que é servido deixaria de ser byte a byte o que foi
  * construído, e os PNG correriam risco pior.
  *
  * Requer um build já feito e portátil: `npm run build` faz os dois.
@@ -44,7 +44,7 @@ if (existsSync(join(BUILD, "pokemon.html"))) {
 	pare("O build está na forma pasta.html. Rode 'npm run build' (que termina em ferramentas/portatil.mjs).")
 }
 if (!existsSync(join(BUILD, "pokemon", "index.html"))) {
-	pare(`Não achei ${BUILD}/pokemon/index.html — o build não parece completo.`)
+	pare(`Não achei ${BUILD}/pokemon/index.html - o build não parece completo.`)
 }
 
 const { SUBDOMAIN: subdominio } = conferirArquivo(CONFIG)
@@ -57,12 +57,12 @@ if (!existsSync(join(CLONE, ".git"))) {
 	execFileSync("git", ["clone", `https://github.com/${REPO}.git`, CLONE], { stdio: "inherit" })
 } else {
 	// `fetch` + `reset` em vez de `pull`: o conteúdo daqui é descartável e gerado, então
-	// o que o remoto diz sempre ganha — não há merge que faça sentido entre dois builds.
+	// o que o remoto diz sempre ganha - não há merge que faça sentido entre dois builds.
 	git(["fetch", "origin"])
 	try {
 		git(["reset", "--hard", `origin/${RAMO}`])
 	} catch {
-		console.log(`(${RAMO} ainda não existe no remoto — primeiro envio)`)
+		console.log(`(${RAMO} ainda não existe no remoto - primeiro envio)`)
 	}
 }
 
@@ -92,7 +92,7 @@ git(["add", "-A"])
 
 const pendente = git(["status", "--porcelain"])
 if (pendente === "") {
-	console.log("nada mudou desde o último envio — o site publicado já é este build")
+	console.log("nada mudou desde o último envio - o site publicado já é este build")
 	process.exit(0)
 }
 

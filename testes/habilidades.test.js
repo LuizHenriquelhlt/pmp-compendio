@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest"
 import { CLIMA_POR_MOVE, interpretarHabilidade, regraAusente } from "../ferramentas/habilidades.mjs"
 
-// As frases destes testes são do corpus da v1.33.0, não inventadas — é o que lhes dá
+// As frases destes testes são do corpus da v1.33.0, não inventadas - é o que lhes dá
 // valor. Vários casos aqui são armadilhas que uma leitura ingênua inverte: a habilidade
 // que diz que NÃO concede imunidade, a que concede imunidade ao OPONENTE, e as duas cujo
 // único assunto é o clima e que são justamente as que não nomeiam nenhum.
@@ -122,7 +122,7 @@ describe("imunidade", () => {
 	})
 
 	describe("o que o livro declara e o parser não estrutura", () => {
-		// O recorte da família são os vocabulários que o PMP publica — as condições de
+		// O recorte da família são os vocabulários que o PMP publica - as condições de
 		// status e os 18 tipos. Imunidade a acerto crítico, a dano indireto ou a Moves de
 		// som é regra do livro, e modelá-la exigiria inventar um vocabulário de
 		// categorias que o sistema não tem. Então vai para o relatório, com a frase.
@@ -155,7 +155,7 @@ describe("imunidade", () => {
 			expect(naoLido(sweetVeil)).toEqual([ { familia: "imunidade", frase: sweetVeil } ])
 		})
 
-		// Wonder Guard usa "dos tipos" (plural) para dizer o OPOSTO — quais tipos
+		// Wonder Guard usa "dos tipos" (plural) para dizer o OPOSTO - quais tipos
 		// conseguem atingi-lo. Daí o extrator exigir o singular "do tipo".
 		it("não lê os tipos que Wonder Guard diz que ATINGEM o portador", () => {
 			const wonderGuard = "Este Pokémon é imune a Moves que causam dano e que não sejam super eficazes. "
@@ -228,7 +228,7 @@ describe("clima", () => {
 		])
 	})
 
-	// Forecast muda de tipo conforme três climas. Listar os três é o que o livro diz —
+	// Forecast muda de tipo conforme três climas. Listar os três é o que o livro diz -
 	// aqui não há tabela achatada a desconfiar, a regra mesmo é tripla.
 	it("lê os três climas de uma regra que depende dos três", () => {
 		const forecast = "Na chuva, torna-se do tipo água; na luz solar intensa, torna-se do tipo fogo; "
@@ -268,7 +268,7 @@ describe("clima", () => {
 			.toEqual([ { tipo: "clima", relacao: "gera", clima: "chuva", move: "Rain Dance" } ])
 	})
 
-	// Sem nomear um clima, a frase não entra na família — é o que dispensa a lista de
+	// Sem nomear um clima, a frase não entra na família - é o que dispensa a lista de
 	// citações que as outras famílias precisam ter.
 	it.each([
 		"• Disguise não protege contra dano de clima.",

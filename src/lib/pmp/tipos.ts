@@ -1,7 +1,7 @@
 /**
  * Os 18 tipos elementais do PMP.
  *
- * Os `id` são os nomes em português — essa é a identidade canônica no compêndio, e
+ * Os `id` são os nomes em português - essa é a identidade canônica no compêndio, e
  * aparece nas URLs (`/tipos/fogo`). O módulo Foundry grava os tipos com chaves em
  * inglês; a conversão acontece uma única vez, no pipeline (`ferramentas/construir.mjs`).
  *

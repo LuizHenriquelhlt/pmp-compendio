@@ -20,7 +20,7 @@
 
 	/*
 	 * As chaves de busca são calculadas uma vez por conjunto de dados, não a cada
-	 * tecla digitada — que seria o gargalo óbvio desta página com 1149 espécies.
+	 * tecla digitada - que seria o gargalo óbvio desta página com 1149 espécies.
 	 * Derivado, e não constante, para continuar correto se a navegação trocar `data`.
 	 */
 	const chaves = $derived.by(() => new Map(data.especies.map((e) => [ e.id, chaveDeBusca(e) ])))
@@ -62,7 +62,7 @@
 </script>
 
 <svelte:head>
-	<title>{t("catalogo.titulo")} — {t("site.nome")}</title>
+	<title>{t("catalogo.titulo")} - {t("site.nome")}</title>
 	<meta name="description" content={t("catalogo.subtitulo", { n: String(data.especies.length) })} />
 </svelte:head>
 

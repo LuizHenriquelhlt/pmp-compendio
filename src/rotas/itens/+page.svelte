@@ -22,7 +22,7 @@
 
 	// Como nas outras listagens: as chaves são calculadas uma vez por conjunto de dados,
 	// não a cada tecla digitada. O grupo entra na chave porque é como se procura uma
-	// família inteira — "berry" tem de trazer as 53, e "fósseis" os quatro de Galar.
+	// família inteira - "berry" tem de trazer as 53, e "fósseis" os quatro de Galar.
 	const chaves = $derived.by(() => new Map(data.itens.map((i) =>
 		[ i.id, [ i.nome, i.grupo ?? "", i.secao ?? "" ].map(normalizarParaBusca).join(" ") ])))
 
@@ -78,7 +78,7 @@
 </script>
 
 <svelte:head>
-	<title>{t("catalogoItens.titulo")} — {t("site.nome")}</title>
+	<title>{t("catalogoItens.titulo")} - {t("site.nome")}</title>
 	<meta name="description" content={t("catalogoItens.subtitulo", { n: String(data.itens.length) })} />
 </svelte:head>
 

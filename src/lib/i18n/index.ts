@@ -1,7 +1,7 @@
 /**
  * Mensagens da interface.
  *
- * O compêndio nasce em português do Brasil — o PMP é um sistema brasileiro, e os `id`
+ * O compêndio nasce em português do Brasil - o PMP é um sistema brasileiro, e os `id`
  * do conteúdo são os nomes em português. Mesmo assim nenhum texto de interface fica
  * escrito direto no componente: tudo passa por `t()`, lendo de `mensagens/<locale>.json`.
  *

@@ -7,17 +7,17 @@
 // 1. **Acha o que falta.** O módulo preenche `img` com uma URL da PokéAPI em 230 dos 420
 //    itens e deixa os outros 190 apontando para a biblioteca de ícones interna do Foundry
 //    (`icons/equipment/…`), que não é publicada com o site. Boa parte desses 190 são itens
-//    Pokémon de verdade que a PokéAPI tem — o módulo só não linkou.
+//    Pokémon de verdade que a PokéAPI tem - o módulo só não linkou.
 //
 // 2. **Para de depender do GitHub em tempo de visita.** Antes o site apontava direto para
 //    `raw.githubusercontent.com`, e isso quebrava de forma intermitente: o endpoint `raw`
-//    não é uma CDN, e com algumas dezenas de imagens pedidas de uma vez ele estrangula —
+//    não é uma CDN, e com algumas dezenas de imagens pedidas de uma vez ele estrangula -
 //    o leitor via o ícone de imagem quebrada em alguns cartões, sempre em cartões
 //    diferentes. Baixando na geração, o site serve de si mesmo: nada quebra por rede, e o
 //    container fica servível offline, que é como ele é usado na mesa.
 //
 // Os arquivos vão para `static/itens/`, FORA do git: são arte de terceiros, e vale a
-// mesma regra de `dados/` — cada um gera na sua máquina.
+// mesma regra de `dados/` - cada um gera na sua máquina.
 import { existsSync, mkdirSync, readFileSync, readdirSync, rmSync, writeFileSync } from "node:fs"
 import { join } from "node:path"
 
@@ -34,7 +34,7 @@ const slug = (texto) => texto
  * Nome do item no PMP → nome na PokéAPI, para os casos em que o livro traduziu.
  *
  * A regra para entrar aqui é dura: a tradução tem de ser **inequívoca**, com um único
- * item Pokémon possível do outro lado. O sprite existir não basta como prova —
+ * item Pokémon possível do outro lado. O sprite existir não basta como prova -
  * `timid-mint` existe, mas isso não torna "Hortelã da Astúcia" a Timid Mint.
  *
  * Por isso NÃO estão aqui, embora tenham sprite na PokéAPI:
@@ -64,7 +64,7 @@ const TRADUCAO = {
  *
  * Os seis "doces de atributo" de Let's Go têm, no repositório da PokéAPI, um PNG de
  * 64×64 que não é um desenho: são quatro borrões de pixels coloridos espalhados. Os seis
- * compartilham exatamente 444–448 pixels opacos e a mesma distribuição — é a mesma imagem
+ * compartilham exatamente 444–448 pixels opacos e a mesma distribuição - é a mesma imagem
  * defeituosa em matizes diferentes. Conferidos a olho (health, courage e quick).
  *
  * Baixar e publicar isso enche o cartão de sujeira colorida, que foi o que o usuário viu.
@@ -93,7 +93,7 @@ const itens = JSON.parse(readFileSync(join(dados, "itens.json"), "utf8"))
  * Isto é essencial e não é detalhe: depois da primeira execução, `dados/itens.json` já
  * traz o caminho LOCAL que esta ferramenta gerou (`/itens/x.png`), não a URL do módulo.
  * Lendo de lá, a segunda execução não encontraria mais nenhuma URL `http`, cairia no
- * palpite por nome e perderia a arte de todo item cujo nome não casa com a PokéAPI — a
+ * palpite por nome e perderia a arte de todo item cujo nome não casa com a PokéAPI - a
  * cada ciclo um pouco mais. O pack cru é a única fonte que não se autodestrói.
  */
 const CRU = join("dados-crus", "trainer-features.json")
@@ -106,7 +106,7 @@ if (existsSync(CRU)) {
 		}
 	}
 } else {
-	console.warn(`  (não achei ${CRU} — sem as URLs originais do módulo, só o palpite por nome)`)
+	console.warn(`  (não achei ${CRU} - sem as URLs originais do módulo, só o palpite por nome)`)
 }
 
 // Pasta limpa a cada execução: um item que mudou de nome na fonte não pode deixar o
@@ -121,7 +121,7 @@ const indice = await fetch("https://pokeapi.co/api/v2/item?limit=3000")
 	.then((d) => new Set(d.results.map((x) => x.name)))
 	.catch(() => new Set())
 
-if (indice.size === 0) console.warn("  (não consegui consultar a PokéAPI — só a arte que o módulo já linka)")
+if (indice.size === 0) console.warn("  (não consegui consultar a PokéAPI - só a arte que o módulo já linka)")
 else console.log(`  catálogo da PokéAPI: ${indice.size} itens`)
 
 /**
@@ -159,8 +159,8 @@ for (let k = 0; k < comOrigem.length; k += 12) {
 
 			const bytes = Buffer.from(await resposta.arrayBuffer())
 
-			// Confere a assinatura PNG antes de gravar. Um 200 com corpo errado — página de
-			// erro, redirecionamento, resposta de estrangulamento — passaria por um HEAD, e
+			// Confere a assinatura PNG antes de gravar. Um 200 com corpo errado - página de
+			// erro, redirecionamento, resposta de estrangulamento - passaria por um HEAD, e
 			// foi assim que imagens quebradas chegaram ao site da primeira vez.
 			const ehPng = bytes.length > 8 && bytes.subarray(0, 8)
 				.equals(Buffer.from([ 0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a ]))
@@ -183,11 +183,11 @@ const ordenado = Object.fromEntries(Object.keys(mapa).sort((a, b) => a.localeCom
 writeFileSync(MAPA, `${JSON.stringify(ordenado, null, 1)}\n`)
 
 const total = readdirSync(PASTA).length
-console.log(`\n\n${PASTA}/ — ${total} imagens`)
-console.log(`${MAPA} — ${Object.keys(ordenado).length} itens com arte`)
+console.log(`\n\n${PASTA}/ - ${total} imagens`)
+console.log(`${MAPA} - ${Object.keys(ordenado).length} itens com arte`)
 if (falhas.length > 0) console.log(`  falharam: ${falhas.join(", ")}`)
 
 console.log(`\nContinuam sem arte: ${itens.length - Object.keys(ordenado).length}.`)
 console.log("  São, na maioria, equipamento de aventura que o PMP inventou (Chaleira, Cantil,")
 console.log("  Bússola, Tenda…): não são itens Pokémon e não há arte oficial em fonte nenhuma.")
-console.log("  O site desenha um ícone próprio para eles — ver `IconeDeItem.svelte`.")
+console.log("  O site desenha um ícone próprio para eles - ver `IconeDeItem.svelte`.")

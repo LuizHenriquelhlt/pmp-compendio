@@ -9,7 +9,7 @@
 	 * Os cartões da tela principal, no desenho do poke5e: uma pílula larga por seção, com
 	 * o nome à esquerda e um ícone grande à direita, cada uma na cor da sua seção.
 	 *
-	 * A lista vive aqui, e não no layout, porque a ordem é editorial — Pokémon primeiro
+	 * A lista vive aqui, e não no layout, porque a ordem é editorial - Pokémon primeiro
 	 * porque é o que mais se consulta, "Dados da sua mesa" por último porque é sobre o
 	 * projeto, não sobre o sistema.
 	 */
@@ -147,7 +147,7 @@
 
 	.cartao:hover {
 		/* `-forte` e não `--secao`: em repouso o filete já é da cor da seção, então um hover
-		   na MESMA cor não sinaliza nada por cor — só por sombra e deslocamento. O contorno
+		   na MESMA cor não sinaliza nada por cor - só por sombra e deslocamento. O contorno
 		   inteiro passa à versão forte, que escurece no tema claro e clareia no escuro.
 
 		   Isto vale aqui porque o cartão fica sobre `--superficie`. Sobre `--cromo`, que é

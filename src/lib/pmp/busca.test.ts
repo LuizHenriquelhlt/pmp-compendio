@@ -157,7 +157,7 @@ describe("chaveDeBuscaDeMega", () => {
 	})
 
 	// Groudon Primal não começa com "Mega", e a habilidade dela não tem ficha no pack
-	// (`id: null`) — o nome ainda tem de entrar na chave.
+	// (`id: null`) - o nome ainda tem de entrar na chave.
 	it("inclui a habilidade sem ficha e a forma que não começa com Mega", () => {
 		const groudon = chaveDeBuscaDeMega({
 			nome: "Groudon Primal",
@@ -172,7 +172,7 @@ describe("chaveDeBuscaDeMega", () => {
 		expect(corresponde(groudon, "desolate")).toBe(true)
 	})
 
-	// As 74 que não trocam de tipo têm `tipos: []` — a chave não pode quebrar sem eles.
+	// As 74 que não trocam de tipo têm `tipos: []` - a chave não pode quebrar sem eles.
 	it("funciona sem tipos e sem habilidade", () => {
 		const latias = chaveDeBuscaDeMega({
 			nome: "Mega Latias",

@@ -3,18 +3,18 @@
  *
  * Os tokens são declarados uma vez em `:root` no tema claro e redeclarados no escuro.
  * O tema escuro responde tanto à preferência do sistema quanto ao atributo
- * `data-tema` no <html>, nessa ordem de precedência — assim a escolha explícita do
+ * `data-tema` no <html>, nessa ordem de precedência - assim a escolha explícita do
  * leitor sempre vence a do sistema operacional.
  */
 
 /*
- * Rubik, a mesma do poke5e — é o traço que mais faz os dois parecerem parentes.
+ * Rubik, a mesma do poke5e - é o traço que mais faz os dois parecerem parentes.
  *
  * Hospedada aqui, e não no Google Fonts, pela mesma razão que a arte dos itens: o
  * container precisa funcionar offline, que é como ele é usado na mesa. `swap` para o
  * texto aparecer na fonte do sistema enquanto a Rubik carrega, em vez de ficar invisível.
  *
- * SIL Open Font License — a licença acompanha em `static/fontes/rubik/license.txt`.
+ * SIL Open Font License - a licença acompanha em `static/fontes/rubik/license.txt`.
  */
 @font-face {
 	font-family: "Rubik";
@@ -81,7 +81,7 @@
 
 	/*
 	 * Escala de espaçamento, MEDIDA do código e não desenhada: são os nove valores que
-	 * carregam papel estrutural, com o valor exato que já estava em uso — adotar os tokens
+	 * carregam papel estrutural, com o valor exato que já estava em uso - adotar os tokens
 	 * não move um pixel.
 	 *
 	 * Cobrem 205 dos 275 usos de gap/padding/margin. Os 70 restantes continuam em rem cru
@@ -116,7 +116,7 @@
 
 	/*
 	 * A inclinação do poke5e. Um ângulo só, usado nas faixas de cabeçalho e nos emblemas
-	 * de tipo — o conteúdo dentro é desinclinado pelo valor oposto, senão o texto sai
+	 * de tipo - o conteúdo dentro é desinclinado pelo valor oposto, senão o texto sai
 	 * torto junto com a caixa.
 	 */
 	--inclinacao: -18deg;
@@ -126,8 +126,8 @@
 	 * As cinco cores de seção, declaradas aqui com os dois temas em vez de dentro das
 	 * classes `.secao-*`.
 	 *
-	 * Antes cada classe aparecia TRÊS vezes — uma no tema claro, uma na media query e uma
-	 * no seletor `data-tema` — e as duas cópias escuras redefiniam só parte dos valores.
+	 * Antes cada classe aparecia TRÊS vezes - uma no tema claro, uma na media query e uma
+	 * no seletor `data-tema` - e as duas cópias escuras redefiniam só parte dos valores.
 	 * `--secao-*-forte` ficava com o valor claro no escuro, o que invertia a direção do
 	 * hover: mais escuro que a cor de repouso em vez de mais claro.
 	 *
@@ -138,7 +138,7 @@
 	 * NÃO existe `--secao-*-suave`, e é de propósito. O único lugar que quer um tom suave
 	 * da seção é a faixa diagonal do layout, que precisa desbotar até transparente e deriva
 	 * isso de uma fonte só, com `color-mix(in oklab, var(--secao) 16%, transparent)`. Dez
-	 * valores ajustados à mão seriam uma cópia do que essa expressão calcula — e cópia
+	 * valores ajustados à mão seriam uma cópia do que essa expressão calcula - e cópia
 	 * diverge. `--marca-suave` continua existindo porque tem consumidor de verdade: a
 	 * etiqueta da ficha de espécie, que é um fundo sólido, não um desbotamento.
 	 */
@@ -164,7 +164,7 @@
 	--secao: var(--marca);
 	--secao-forte: var(--marca-forte);
 
-	/* O cromo escuro — header e rodapé — é o mesmo nos dois temas, como no poke5e. */
+	/* O cromo escuro - header e rodapé - é o mesmo nos dois temas, como no poke5e. */
 	--cromo: oklch(0.26 0.012 265);
 	--cromo-texto: oklch(0.97 0.005 265);
 	--cromo-texto-suave: oklch(0.72 0.01 265);
@@ -355,13 +355,13 @@ button, input, select {
  *
  * Cada rota veste uma cor, como no poke5e: Pokémon vermelho, Moves azul, Habilidades
  * roxo, Megas verde, Itens âmbar. A classe vai no `<main>`, e tudo abaixo herda por
- * `--secao` — emblema, faixa de painel, realce de link, a faixa diagonal do topo.
+ * `--secao` - emblema, faixa de painel, realce de link, a faixa diagonal do topo.
  *
  * As cores são as da marca em matizes diferentes, não as do poke5e: ele tematiza por
  * tipo de Pokémon, e aqui a seção é que manda.
  *
  * Cada classe é uma linha por token porque os dois temas já estão resolvidos lá em cima,
- * em `--secao-<id>`. A classe não sabe que existe tema — é o que permite que o hover
+ * em `--secao-<id>`. A classe não sabe que existe tema - é o que permite que o hover
  * (`-forte`) exista no escuro sem uma terceira cópia de cada seletor.
  */
 .secao-pokemon {
@@ -396,7 +396,7 @@ button, input, select {
  *
  * O cabeçalho é a assinatura do poke5e: uma faixa escura inclinada que avança sobre a
  * borda do cartão. A faixa é um `::before` posicionado e inclinado, e o texto fica por
- * cima SEM inclinação — inclinar o texto junto o deixaria torto e difícil de ler.
+ * cima SEM inclinação - inclinar o texto junto o deixaria torto e difícil de ler.
  */
 .painel {
 	position: relative;
@@ -430,7 +430,7 @@ button, input, select {
  * A faixa: um bloco escuro com a ponta direita cortada na diagonal.
  *
  * O corte é `clip-path`, e não `transform: skewX`, de propósito. Inclinar a caixa
- * inclinaria o texto junto, obrigando a desinclinar num elemento interno — o que exigiria
+ * inclinaria o texto junto, obrigando a desinclinar num elemento interno - o que exigiria
  * mexer no HTML de todos os painéis de todas as fichas. O recorte dá a mesma diagonal do
  * poke5e sem tocar na marcação.
  */

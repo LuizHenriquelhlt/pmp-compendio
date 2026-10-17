@@ -9,19 +9,19 @@ import type { IdTipo } from "./tipos"
  * `ferramentas/construir.mjs`.
  *
  * O `id` é o slug da FORMA, não da pedra (`/megas/mega-charizard-x`). Os dois campos dão
- * 93 slugs distintos, mas a forma é o que se procura e o que a ficha descreve — a pedra é
- * o requisito para chegar nela —, e a forma gera URL legível onde a pedra não
+ * 93 slugs distintos, mas a forma é o que se procura e o que a ficha descreve - a pedra é
+ * o requisito para chegar nela -, e a forma gera URL legível onde a pedra não
  * (`/megas/rayquazanite-nao-requer-mega-pedra`).
  *
  * Os nomes de forma e de pedra ficam em inglês, como os de Move e de Habilidade: é assim
- * que o PMP os publica. Repare que **nem toda forma começa com "Mega"** — Groudon Primal e
+ * que o PMP os publica. Repare que **nem toda forma começa com "Mega"** - Groudon Primal e
  * Kyogre Primal não são Mega Evoluções, e montar o nome como `"Mega " + espécie` erraria
  * nos dois.
  */
 export type Mega = {
 	id: string
 	nome: string
-	/** Nome da Mega Pedra. Nas três especiais ela não é requisito — ver `categoria`. */
+	/** Nome da Mega Pedra. Nas três especiais ela não é requisito - ver `categoria`. */
 	pedra: string
 	especie: string
 	/**
@@ -44,14 +44,14 @@ export type Mega = {
 	/**
 	 * Delta de CA, que pode ser **negativo** (Mega Diancie perde 2, Mega Hawlucha 1).
 	 *
-	 * `null` só quando o módulo não gravou o campo — distinto de 0, que é o delta de 11
+	 * `null` só quando o módulo não gravou o campo - distinto de 0, que é o delta de 11
 	 * pedras e significa "a CA não muda".
 	 */
 	deltaCA: number | null
 	/** Deltas de atributo, na ordem canônica. Podem ser negativos. */
 	atributos: DeltaDeAtributo[]
 	/**
-	 * Bônus que o JOGADOR distribui — não é escolha de Habilidade.
+	 * Bônus que o JOGADOR distribui - não é escolha de Habilidade.
 	 *
 	 * `mega.abilityChoices` no módulo guarda `{ options: ["str","dex"], delta: 5 }`: é o
 	 * *ability score* do dnd5e, ou seja ATRIBUTO. O próprio módulo confirma na frase que
@@ -62,10 +62,10 @@ export type Mega = {
 	 */
 	escolhasDeAtributo: EscolhaDeAtributo[]
 	/**
-	 * As habilidades que a forma concede — 0, 1 ou 2.
+	 * As habilidades que a forma concede - 0, 1 ou 2.
 	 *
 	 * Vêm de DOIS campos do módulo: `passiveAbility` e `otherEffects`. Quatro pedras têm
-	 * `passiveAbility` vazia e duas delas declaram a habilidade só na prosa — Mega Floette
+	 * `passiveAbility` vazia e duas delas declaram a habilidade só na prosa - Mega Floette
 	 * ganha Fairy Aura, que existe no pack.
 	 */
 	habilidades: HabilidadeDeMega[]
@@ -73,7 +73,7 @@ export type Mega = {
 	 * O módulo gravou `"[ainda a ser lançada]"` onde deveria estar o nome da habilidade.
 	 *
 	 * É marca de trabalho a fazer na fonte, não nome: publicá-la como nome criaria uma
-	 * ficha chamada "[ainda a ser lançada]". Convive com `habilidades` preenchido — Mega
+	 * ficha chamada "[ainda a ser lançada]". Convive com `habilidades` preenchido - Mega
 	 * Hawlucha tem No Guard **e** uma segunda habilidade pendente.
 	 */
 	habilidadePendente: boolean
@@ -93,8 +93,8 @@ export type Mega = {
 	/**
 	 * A prosa de `otherEffects` que nenhuma família leu.
 	 *
-	 * São as regras de ativação das três pedras especiais — nível mínimo, usos por
-	 * descanso, condição de obediência — e a frase que o parser não estruturou. Exibidas,
+	 * São as regras de ativação das três pedras especiais - nível mínimo, usos por
+	 * descanso, condição de obediência - e a frase que o parser não estruturou. Exibidas,
 	 * continuam sendo a regra inteira.
 	 */
 	outrosTextos: string[]
@@ -102,7 +102,7 @@ export type Mega = {
 	 * Prosa de sabor, sem a deixa que o módulo repete nas 93 ("<espécie> recebe os
 	 * seguintes benefícios:").
 	 *
-	 * Vazia nas quatro em que o módulo gravou texto de outra entrada — ver
+	 * Vazia nas quatro em que o módulo gravou texto de outra entrada - ver
 	 * `descricaoContaminada`.
 	 */
 	descricao: string
@@ -116,7 +116,7 @@ export type Mega = {
 	 * descrição dela acaba.
 	 */
 	descricaoContaminada: boolean
-	/** Arte da forma (PokéAPI). Falta em duas das 93 — Mega Meowstic e Mega Tatsugiri. */
+	/** Arte da forma (PokéAPI). Falta em duas das 93 - Mega Meowstic e Mega Tatsugiri. */
 	imagem: string | null
 }
 
@@ -133,7 +133,7 @@ export type HabilidadeDeMega = { nome: string, id: string | null }
  * `metros` e `igualA` são exclusivos porque o módulo declara o valor de dois jeitos, em
  * dois lugares: `movementGrants` diz "igual ao de caminhada" e a prosa de `otherEffects`
  * diz "de 40 pés (12 metros)". A união os mantém exclusivos em vez de deixar os dois
- * campos opcionais e as duas ausências possíveis — a mesma decisão das duas variantes de
+ * campos opcionais e as duas ausências possíveis - a mesma decisão das duas variantes de
  * `imunidade` em `habilidade.ts`.
  *
  * `flutuacao` vem junto porque a Pokédex nunca usa a palavra como modo sozinho: ela
@@ -144,7 +144,7 @@ export type DeslocamentoConcedido =
 	& ({ metros: number, igualA?: never } | { igualA: Deslocamento["modo"] | null, metros?: never })
 
 /**
- * O que a pedra é, segundo `flags[…].category` — um dos raríssimos campos de categoria do
+ * O que a pedra é, segundo `flags[…].category` - um dos raríssimos campos de categoria do
  * módulo que de fato variam (90 `mega-stone`, 3 `mega-stone-especial`).
  *
  * `especial` **não** quer dizer "Primal": são duas Reversões Primal (Groudon, Kyogre) mais
@@ -164,7 +164,7 @@ export type MegaNoIndice = Omit<
 	 * Os atributos que a forma AUMENTA, achatados para o filtro.
 	 *
 	 * Só os positivos: "aumenta FOR" não deve trazer Mega Hawlucha, que perde 2 de FOR. As
-	 * opções de `escolhasDeAtributo` entram porque são aumento possível — é a escolha do
+	 * opções de `escolhasDeAtributo` entram porque são aumento possível - é a escolha do
 	 * jogador, e o cartão marca a diferença.
 	 */
 	atributosAumentados: IdAtributo[]
@@ -206,7 +206,7 @@ export function descreverEscolhaDeAtributo(escolha: EscolhaDeAtributo): string {
  *
  * Uma função só, e não quatro no componente, porque as quatro formas vêm de dois campos do
  * módulo e de uma leitura de prosa: quem monta a tela não deveria precisar saber de onde
- * cada uma veio. A ordem é a do ganho para a perda — primeiro o que a forma recebe.
+ * cada uma veio. A ordem é a do ganho para a perda - primeiro o que a forma recebe.
  */
 export function descreverDeslocamentoDeMega(mega: Pick<
 	Mega,
@@ -245,7 +245,7 @@ export function descreverDeslocamentoDeMega(mega: Pick<
 /**
  * Uma linha da tabela de atributos da ficha: o valor da espécie, o delta e o resultado.
  *
- * O resultado é publicado porque é o que a mesa precisa no meio de uma sessão — o livro
+ * O resultado é publicado porque é o que a mesa precisa no meio de uma sessão - o livro
  * imprime o statblock da espécie-base e o delta da pedra, e somar os dois é o que qualquer
  * jogador faz na hora. Mostrar `antes` ao lado deixa a conta à vista em vez de afirmar um
  * número sem procedência, e nas três Megas sem espécie-base resolvida `antes` e `depois`
@@ -259,7 +259,7 @@ export type LinhaDeAtributo = {
 	depois: number | null
 	/**
 	 * O atributo é uma das opções de `escolhasDeAtributo`, e por isso pode receber MAIS
-	 * que o delta fixo — quanto, só o jogador decide. O resultado mostrado é o do delta
+	 * que o delta fixo - quanto, só o jogador decide. O resultado mostrado é o do delta
 	 * fixo, e a ficha avisa à parte.
 	 */
 	naEscolha: boolean
@@ -268,7 +268,7 @@ export type LinhaDeAtributo = {
 /**
  * Os atributos que a pedra mexe, na ordem canônica, com o antes e o depois.
  *
- * Lista só os atributos que a pedra toca — um quadro com os seis, quatro deles sem delta,
+ * Lista só os atributos que a pedra toca - um quadro com os seis, quatro deles sem delta,
  * faria a tela parecer um statblock completo da forma, que o módulo não publica. Mega
  * Hawlucha é o caso que exige as duas colunas: `str: -2` fixo E `str` entre as opções de
  * escolha, dois fatos que se somam.

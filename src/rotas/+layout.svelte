@@ -27,7 +27,7 @@
 	 * A cor que a seção veste, como no poke5e.
 	 *
 	 * Sai do primeiro segmento da URL, e não de uma prop por página, para que toda rota
-	 * nova já nasça temática — inclusive as fichas, que são a maior parte das páginas.
+	 * nova já nasça temática - inclusive as fichas, que são a maior parte das páginas.
 	 * A home, o Sobre e o erro ficam sem classe e herdam a cor da marca.
 	 */
 	const SECOES_COM_COR = [ "pokemon", "moves", "habilidades", "megas", "itens" ]
@@ -183,7 +183,7 @@
 		color: var(--cromo-texto);
 	}
 
-	/* `aria-current` já carrega o estado — o estilo só o torna visível. A seção atual
+	/* `aria-current` já carrega o estado - o estilo só o torna visível. A seção atual
 	   acende na própria cor dela. */
 	nav a[aria-current="page"] {
 		background: var(--secao);

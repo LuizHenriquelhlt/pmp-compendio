@@ -15,7 +15,7 @@
 	"tema.alternar": "Alternar tema claro e escuro",
 
 	"busca.rotulo": "Buscar espécie",
-	"busca.exemplo": "Nome ou número — Charmander, 004, Galar…",
+	"busca.exemplo": "Nome ou número - Charmander, 004, Galar…",
 	"busca.limpar": "Limpar busca",
 
 	"inicio.secoes": "Seções do compêndio",
@@ -39,7 +39,7 @@
 	"filtro.tipo.todos": "Todos os tipos",
 	"filtro.geracao": "Geração",
 	"filtro.geracao.todas": "Todas as gerações",
-	"filtro.geracao.numero": "Geração {n} — {regiao}",
+	"filtro.geracao.numero": "Geração {n} - {regiao}",
 	"filtro.ordem": "Ordenar por",
 	"filtro.ordem.numero": "Número na Pokédex",
 	"filtro.ordem.nome": "Nome",
@@ -62,7 +62,7 @@
 	"especie.estagio": "Estágio evolutivo",
 	"especie.estagio.valor": "{atual} de {total}",
 	"especie.procedencia": "Procedência",
-	"especie.procedencia.valor": "{regiao} — Geração {geracao}",
+	"especie.procedencia.valor": "{regiao} - Geração {geracao}",
 	"especie.atributos": "Atributos",
 	"especie.pericias": "Perícias",
 	"especie.pericias.todas": "Proficiência em todas as perícias",
@@ -100,7 +100,7 @@
 	"catalogoMoves.nota": "Os nomes de Move ficam em inglês, como o PMP os publica.",
 
 	"buscaMoves.rotulo": "Buscar Move",
-	"buscaMoves.exemplo": "Nome ou tipo — Flamethrower, fogo…",
+	"buscaMoves.exemplo": "Nome ou tipo - Flamethrower, fogo…",
 
 	"filtro.ativacao": "Ativação",
 	"filtro.ativacao.todas": "Qualquer ativação",
@@ -173,7 +173,7 @@
 	"catalogoHabilidades.nota": "Os nomes ficam em inglês, como o PMP os publica. {n} não têm a regra no módulo de origem.",
 
 	"buscaHabilidades.rotulo": "Buscar Habilidade",
-	"buscaHabilidades.exemplo": "Nome ou mecânica — Levitate, paralisado, chuva…",
+	"buscaHabilidades.exemplo": "Nome ou mecânica - Levitate, paralisado, chuva…",
 
 	"filtro.imunidade": "Imunidade a",
 	"filtro.imunidade.todas": "Qualquer imunidade",
@@ -272,7 +272,7 @@
 	"mega.outrosEfeitos": "Outras regras",
 	"mega.descricao": "Descrição",
 	"mega.semDescricao": "A pedra não traz descrição.",
-	"mega.descricaoContaminada": "O módulo gravou, no campo de descrição desta pedra, texto que pertence a outro documento do livro — a descrição de outra Mega ou um bloco de estatísticas inteiro. O compêndio não publica esse texto para não atribuir a esta forma regras que não são dela; o original fica no relatório de qualidade dos dados.",
+	"mega.descricaoContaminada": "O módulo gravou, no campo de descrição desta pedra, texto que pertence a outro documento do livro - a descrição de outra Mega ou um bloco de estatísticas inteiro. O compêndio não publica esse texto para não atribuir a esta forma regras que não são dela; o original fica no relatório de qualidade dos dados.",
 	"mega.semMudanca": "A pedra não declara mudança neste campo.",
 
 	"inicio.cartao.megas.titulo": "Mega Evoluções",
@@ -326,8 +326,8 @@
 	"item.uso": "Uso",
 	"item.efeito": "Efeito",
 	"item.semEfeito": "O módulo não traz texto para este item.",
-	"item.textoIncompleto": "O módulo gravou só um pedaço desta regra — o texto abaixo começa ou termina no meio de uma frase. Confira no livro.",
-	"item.textoContaminado": "O módulo gravou, no texto deste item, conteúdo que pertence a outra linha da tabela do livro — a célula de preço, o rótulo \"Não vendido\" partido no meio da frase, ou a descrição de outro item. O compêndio não publica esse texto para não atribuir ao item uma regra que não é dele; o original fica no relatório de qualidade dos dados.",
+	"item.textoIncompleto": "O módulo gravou só um pedaço desta regra - o texto abaixo começa ou termina no meio de uma frase. Confira no livro.",
+	"item.textoContaminado": "O módulo gravou, no texto deste item, conteúdo que pertence a outra linha da tabela do livro - a célula de preço, o rótulo \"Não vendido\" partido no meio da frase, ou a descrição de outro item. O compêndio não publica esse texto para não atribuir ao item uma regra que não é dele; o original fica no relatório de qualidade dos dados.",
 	"item.evolucoes": "Evolui com este item",
 	"item.evolucoes.seta": "→",
 

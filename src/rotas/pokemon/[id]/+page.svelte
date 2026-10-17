@@ -60,7 +60,7 @@
 </script>
 
 <svelte:head>
-	<title>{especie.nome} — {t("site.nome")}</title>
+	<title>{especie.nome} - {t("site.nome")}</title>
 	<meta name="description" content={especie.descricao} />
 </svelte:head>
 
@@ -125,7 +125,7 @@
 
 				<!--
 					O módulo de origem trunca este campo em 66 espécies. Avisamos em vez de
-					adivinhar o modo que falta — e mostramos o texto original, para que quem
+					adivinhar o modo que falta - e mostramos o texto original, para que quem
 					tem o livro possa conferir.
 				-->
 				{#if especie.deslocamentoIncompleto}
@@ -302,7 +302,7 @@
 		gap: var(--espaco-8);
 		align-items: center;
 		padding: var(--espaco-8);
-		/* A cor do tipo primário tinge o cabeçalho de leve — identidade sem ruído.
+		/* A cor do tipo primário tinge o cabeçalho de leve - identidade sem ruído.
 		   `color-mix` mantém a mistura legível nos dois temas, porque parte sempre
 		   da superfície vigente. */
 		background: color-mix(in oklab, var(--tipo-cor) 10%, var(--superficie));

@@ -8,7 +8,7 @@
 </script>
 
 <svelte:head>
-	<title>{titulo} — {t("site.nome")}</title>
+	<title>{titulo} - {t("site.nome")}</title>
 </svelte:head>
 
 <div class="pagina erro">

@@ -19,7 +19,7 @@
 </script>
 
 <svelte:head>
-	<title>{habilidade.nome} — {t("site.nome")}</title>
+	<title>{habilidade.nome} - {t("site.nome")}</title>
 	<meta
 		name="description"
 		content={paragrafos(habilidade.descricao)[0] ?? t("habilidade.semRegra.etiqueta")}
@@ -88,8 +88,8 @@
 
 				<!--
 					A ausência é dita mesmo quando uma Mega concede a habilidade: "nenhuma
-					espécie do compêndio" continua verdade — Mega Rayquaza não está na
-					Pokédex —, e o painel de Megas logo abaixo completa a resposta. Calar
+					espécie do compêndio" continua verdade - Mega Rayquaza não está na
+					Pokédex -, e o painel de Megas logo abaixo completa a resposta. Calar
 					aqui deixaria o painel com título e nada dentro.
 				-->
 				{#if grupos.length === 0}

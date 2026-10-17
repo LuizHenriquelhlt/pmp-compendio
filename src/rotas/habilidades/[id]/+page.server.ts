@@ -2,7 +2,7 @@ import { acharHabilidade, especiesComHabilidade, idsDeHabilidade } from "$dados/
 import { error } from "@sveltejs/kit"
 import type { EntryGenerator, PageServerLoad } from "./$types"
 
-/** Diz ao prerender quais páginas de Habilidade existem — uma por `id` do compêndio. */
+/** Diz ao prerender quais páginas de Habilidade existem - uma por `id` do compêndio. */
 export const entries: EntryGenerator = () => idsDeHabilidade().map((id) => ({ id }))
 
 export const load: PageServerLoad = ({ params }) => {

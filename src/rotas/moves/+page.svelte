@@ -67,7 +67,7 @@
 </script>
 
 <svelte:head>
-	<title>{t("catalogoMoves.titulo")} — {t("site.nome")}</title>
+	<title>{t("catalogoMoves.titulo")} - {t("site.nome")}</title>
 	<meta name="description" content={t("catalogoMoves.subtitulo", { n: String(data.moves.length) })} />
 </svelte:head>
 

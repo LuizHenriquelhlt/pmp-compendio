@@ -8,7 +8,7 @@
 	 * os seletores de `base.css` observam.
 	 *
 	 * O valor inicial é lido do atributo que o script em `app.html` já aplicou, para
-	 * que o botão nasça coerente com a tela — sem piscar.
+	 * que o botão nasça coerente com a tela - sem piscar.
 	 */
 	let tema = $state<"claro" | "escuro" | undefined>(
 		browser ? (document.documentElement.dataset.tema as "claro" | "escuro" | undefined) : undefined,

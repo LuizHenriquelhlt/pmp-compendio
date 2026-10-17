@@ -86,14 +86,14 @@ describe("contaminação", () => {
 			.toBe("célula de preço no meio da frase")
 	})
 
-	// Com preço próprio, o N/A veio de outro item — a marca diz qual é o caso.
+	// Com preço próprio, o N/A veio de outro item - a marca diz qual é o caso.
 	it("distingue a célula que veio de outro item", () => {
 		expect(contaminacao("Altera o tipo de Silvally. N/A Memory Disc", { temPreco: true }))
 			.toBe("célula de preço de outro item")
 	})
 
 	// Mega Pedra: "Não" e "vendido" entraram em pontos diferentes. Lido como está, a regra
-	// vira o oposto — "durante a não batalha".
+	// vira o oposto - "durante a não batalha".
 	it("acha o rótulo de preço partido no meio da frase", () => {
 		expect(contaminacao("Permite que ele Mega Evolua durante a Não batalha em resposta à "
 			+ "Pedra-Chave de seu Treinador. vendido"))

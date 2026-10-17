@@ -11,7 +11,7 @@
 	/**
 	 * Os deltas de atributo em pílulas curtas: `FOR +3`, `DES −2`.
 	 *
-	 * Entram todos, inclusive os negativos — Mega Hawlucha perde 2 de FOR e ganha 9 de
+	 * Entram todos, inclusive os negativos - Mega Hawlucha perde 2 de FOR e ganha 9 de
 	 * SAB, e mostrar só os ganhos venderia a forma melhor do que o livro a descreve.
 	 */
 	const deltas = $derived(mega.atributos.map((a) => ({
@@ -24,7 +24,7 @@
 	Mesma decisão do CartaoMove: o cartão inteiro é um link, para que a área de toque seja
 	o cartão todo e o leitor de tela anuncie um alvo em vez de oito.
 
-	A faixa à esquerda usa a cor do PRIMEIRO tipo que a forma passa a ter — é a mudança
+	A faixa à esquerda usa a cor do PRIMEIRO tipo que a forma passa a ter - é a mudança
 	mais visível que a pedra faz. Nas 74 que não trocam de tipo não há cor de tipo para
 	mostrar, e a faixa cai na tinta da marca, como no CartaoHabilidade.
 -->

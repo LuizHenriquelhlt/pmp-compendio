@@ -51,14 +51,14 @@ const MODOS = {
  * `"9m de caminhada, 7,5m de natação"` → lista estruturada.
  *
  * Na v1.33.0 do módulo, 65 espécies têm esse campo truncado no meio
- * (`"9m de caminhada, 9m de escalada, 9m de"`) — aparentemente um corte de largura
+ * (`"9m de caminhada, 9m de escalada, 9m de"`) - aparentemente um corte de largura
  * na extração do PDF. Quando isso acontece devolvemos os modos legíveis e marcamos
  * `incompleto`, em vez de adivinhar o modo que falta.
  */
 export function interpretarDeslocamento(bruto = "") {
 	// Não dá para dividir por vírgula: em português ela é separador de lista E separador
 	// decimal ("1,5m de caminhada, 9m de natação"). Em vez disso casamos o padrão
-	// globalmente e julgamos o truncamento pelo que sobrou fora das correspondências —
+	// globalmente e julgamos o truncamento pelo que sobrou fora das correspondências -
 	// que é justamente a definição de "o que não foi entendido".
 	const padrao = () => /(\d+(?:,\d+)?)\s*m\s+de\s+([a-zà-ú]+)(\s*\(flutuação\))?/gi
 

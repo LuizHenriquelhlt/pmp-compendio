@@ -68,7 +68,7 @@
 		transition: box-shadow 150ms ease, transform 150ms ease, border-color 150ms ease;
 	}
 
-	/* Mesmo sinal do CartaoHabilidade: tracejado quando falta dado na fonte — texto
+	/* Mesmo sinal do CartaoHabilidade: tracejado quando falta dado na fonte - texto
 	   contaminado por outra entrada ou cortado no meio de uma frase. */
 	.sem-texto {
 		border-left-style: dashed;

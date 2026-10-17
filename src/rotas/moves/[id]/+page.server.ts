@@ -2,7 +2,7 @@ import { acharMove, especiesQueAprendem, idsDeMove } from "$dados/carregar.serve
 import { error } from "@sveltejs/kit"
 import type { EntryGenerator, PageServerLoad } from "./$types"
 
-/** Diz ao prerender quais páginas de Move existem — uma por `id` do compêndio. */
+/** Diz ao prerender quais páginas de Move existem - uma por `id` do compêndio. */
 export const entries: EntryGenerator = () => idsDeMove().map((id) => ({ id }))
 
 export const load: PageServerLoad = ({ params }) => {

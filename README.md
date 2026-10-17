@@ -6,7 +6,7 @@ Site estático de consulta para o PMP: statblocks de espécies, fichas de Move, 
 Passiva, Mega Evolução e item, com busca e filtros, pensado para ser aberto no meio de uma
 sessão.
 Construído em
-[SvelteKit](https://svelte.dev/docs/kit), sem servidor e sem banco — tudo é gerado no build.
+[SvelteKit](https://svelte.dev/docs/kit), sem servidor e sem banco - tudo é gerado no build.
 
 ## Conteúdo não acompanha o código
 
@@ -14,7 +14,7 @@ O sistema Pokémon Mundo Perfeito é obra da sua comunidade autora. Este reposit
 carrega **apenas o programa**: `dados/` e `dados-crus/` estão no `.gitignore`, e o
 conteúdo é gerado na máquina de quem executa, a partir do módulo Foundry do PMP.
 
-Sem essa etapa, o site não constrói — por desenho.
+Sem essa etapa, o site não constrói - por desenho.
 
 ## Rodando
 
@@ -42,7 +42,7 @@ Os dois passos de dados juntos: `npm run dados`.
 > **`dados-crus/sem-genero.json` não vem do módulo.** O módulo gravou todas as espécies
 > como 50/50, e a lista das que não têm gênero foi tirada do PDF à mão. Ela não é
 > regenerada pelo passo 1: se você desempacotar numa pasta limpa, copie o arquivo para lá
-> antes do passo 2, senão as espécies sem gênero voltam a sair 50/50 — e o aviso é só um
+> antes do passo 2, senão as espécies sem gênero voltam a sair 50/50 - e o aviso é só um
 > `console.warn` fácil de não ver.
 
 Se você já tem os packs desempacotados em outro lugar, aponte o segundo passo para lá:
@@ -72,12 +72,12 @@ As páginas são assadas no build da imagem, então conteúdo novo pede um `--bu
 
 **Por que existe um `nginx.conf` aqui.** O adapter-static grava uma rota por ARQUIVO, não
 por pasta: `/moves` sairia como `moves.html`. Quase nenhum servidor estático tenta a
-extensão sozinho — ele devolve 404 em `/sobre` e redireciona `/moves` para `/moves/`, uma
+extensão sozinho - ele devolve 404 em `/sobre` e redireciona `/moves` para `/moves/`, uma
 pasta sem `index.html`. O `npm run dev` e o `npm run preview` resolvem a extensão por conta
 própria, e por isso o problema só aparece fora do modo de desenvolvimento.
 
 Por isso o `npm run build` termina em [`ferramentas/portatil.mjs`](ferramentas/portatil.mjs),
-que renomeia cada `build/X.html` para `build/X/index.html` — a forma que **todo** servidor
+que renomeia cada `build/X.html` para `build/X/index.html` - a forma que **todo** servidor
 estático resolve sozinho, porque `index index.html` é o padrão do nginx, do Apache, do
 Caddy, do S3 e das Pages. As URLs do compêndio não mudam: quem muda é o arquivo no disco,
 não o link em `/moves/absorb`.
@@ -85,10 +85,10 @@ não o link em `/moves/absorb`.
 É renomear, não copiar: o SvelteKit já grava `build/X/__data.json` ao lado de
 `build/X.html`, então a pasta de destino quase sempre existe e o passo não custa um byte.
 Servir as duas formas custaria os 60 MB de HTML de novo, e a forma com extensão é a que
-depende de configuração especial — não a com índice.
+depende de configuração especial - não a com índice.
 
 A alternativa seria `trailingSlash: "always"` no SvelteKit, que resolve o mesmo problema
-pelo lado do framework — mas mudaria toda a forma das URLs (`/moves/` em vez de `/moves`),
+pelo lado do framework - mas mudaria toda a forma das URLs (`/moves/` em vez de `/moves`),
 inclusive as de espécie, que já estão decididas.
 
 ## Publicando
@@ -98,7 +98,7 @@ npm run build
 node ferramentas/publicar.mjs   # publicacao/compendio-pmp.zip (~22 MB)
 ```
 
-O pacote leva o conteúdo de `build/` na RAIZ do zip — `index.html` e `squarecloud.app` no
+O pacote leva o conteúdo de `build/` na RAIZ do zip - `index.html` e `squarecloud.app` no
 primeiro nível, não dentro de uma pasta. Um nível a mais é o erro mais comum, e o painel só
 diz que não achou `index.html`.
 
@@ -108,21 +108,21 @@ nginx, que ele configura sozinho, e `SUBDOMAIN` é o que define a URL: `pmp-comp
 atende em `https://pmp-compendio.squareweb.app`.
 
 **`SUBDOMAIN` tem de ir no PRIMEIRO upload.** Sem ele o deploy vira uma aplicação comum
-em vez de um site, e não há como converter depois — seria apagar e subir de novo. Trocar
+em vez de um site, e não há como converter depois - seria apagar e subir de novo. Trocar
 o subdomínio mais tarde funciona; removê-lo, não. O `publicar.mjs` confere isso antes de
 zipar, junto com as outras regras do arquivo: `DISPLAY_NAME` sem acento (o host recusa
 "Compêndio"), `VERSION` entre `recommended` e `latest`, limites de tamanho. Essas regras
 só são aplicadas pelo host DEPOIS do upload, e a do subdomínio não tem segunda chance.
 
 Domínio próprio existe, na aba *Domains* do painel, com os registros de DNS que ele
-mesmo mostra e certificado automático — mas só a partir do plano Standard. No Hobby o
+mesmo mostra e certificado automático - mas só a partir do plano Standard. No Hobby o
 site fica no `squareweb.app`. Não há plano gratuito.
 
 ### Publicando pelo GitHub
 
 A integração do Square Cloud com o GitHub **não constrói nada**: ela sincroniza os
 arquivos do repositório e reinicia o container. Por isso ela não serve para o
-`pmp-compendio`, que é código-fonte — não há `index.html` na raiz, e `dados/` está fora do
+`pmp-compendio`, que é código-fonte - não há `index.html` na raiz, e `dados/` está fora do
 Git, de modo que nem um build em CI funcionaria sem resolver isso antes.
 
 O que funciona é um **repositório de publicação separado**, só com o build:
@@ -134,7 +134,7 @@ node ferramentas/publicar-github.mjs
 
 Ele espelha `build/` mais o `squarecloud.app` em `LuizHenriquelhlt/pmp-compendio-site`
 (privado, ramo `main`) e empurra. No painel do Square Cloud, conecte **esse** repositório,
-não o do código. É o arranjo do gh-pages: fonte num lugar, artefato em outro — e quem
+não o do código. É o arranjo do gh-pages: fonte num lugar, artefato em outro - e quem
 clona o fonte não baixa 90 MB de HTML gerado junto.
 
 O repositório de publicação é um espelho, não um acúmulo: o script apaga tudo antes de
@@ -144,17 +144,17 @@ copiar, para que um arquivo que deixou de ser gerado desapareça de lá também.
 HTML, e o que é servido deixaria de ser byte a byte o que o build produziu.
 
 **Por que este caminho e não o .zip.** O upload do .zip falha na extração, no painel. O
-arquivo está correto — integridade conferida, nomes todos em ASCII, barras normais,
-deflate comum, sem zip64 — mas são 5.981 arquivos e 77,7 MB descomprimidos, e a extração
+arquivo está correto - integridade conferida, nomes todos em ASCII, barras normais,
+deflate comum, sem zip64 - mas são 5.981 arquivos e 77,7 MB descomprimidos, e a extração
 não aguenta. A integração do GitHub clona em vez de extrair, e para o Git esse número é
 banal. O `publicar.mjs` continua existindo para hosts que recebem .zip.
 
-Como o build é portátil, qualquer host estático serve igual — Cloudflare Pages e Netlify
+Como o build é portátil, qualquer host estático serve igual - Cloudflare Pages e Netlify
 aceitam a pasta `build/` direto, sem zip e sem arquivo de configuração.
 
 **Lembre que `dados/` é conteúdo do PMP.** O build assa esse conteúdo dentro das páginas:
 publicar o site é publicar o compêndio. Isso é decisão de quem tem os direitos, não do
-deploy — veja "Conteúdo não acompanha o código", no começo deste arquivo.
+deploy - veja "Conteúdo não acompanha o código", no começo deste arquivo.
 
 ## Como os dados chegam aqui
 
@@ -167,13 +167,13 @@ módulo Foundry          dados-crus/*.json          dados/*.json              bu
 O módulo guarda cada espécie em `flags["pokemon-mundo-perfeito"].species` e cada Move em
 `flags["pokemon-mundo-perfeito"].move`, já com os campos tipados (`dexNumber`,
 `armorClass`, `moveTable`, `moveType`, `pp`, `range`…). O pipeline lê desses campos e só
-interpreta texto onde o módulo guarda prosa — ou onde o campo não quer dizer o que o
+interpreta texto onde o módulo guarda prosa - ou onde o campo não quer dizer o que o
 nome promete:
 
 | Campo do módulo | Por que não dá para usar direto |
 |---|---|
 | `damage.baseFormula`, `damage.scaling` | São "os dados do Move", não "os dados de dano": Recover guarda 2d6 de **cura** ali, e 16 Moves escalonam cura |
-| `category` | String vazia nos 833 Moves — a categoria de resolução só existe no texto |
+| `category` | String vazia nos 833 Moves - a categoria de resolução só existe no texto |
 | `system.activities[].type` | É a modelagem do Foundry: 75 Moves marcados como `attack` são **disputas** no livro |
 | `activation.type` | Guarda só o primeiro modo: os 18 Moves de "1 ação / reação" ficam como `action` |
 | `priority` | Zerado em 3 Moves que declaram prioridade no próprio texto |
@@ -191,9 +191,9 @@ variam nas 313. Tudo o mais é constante, e alguns campos enganam pelo nome:
 
 | Campo do módulo | Por que não dá para usar direto |
 |---|---|
-| `flags[…].category` (habilidade) | `"habilidade-passiva"` nas 313 — promete um vocabulário de categorias e entrega uma constante. Não há taxonomia de habilidade no módulo |
+| `flags[…].category` (habilidade) | `"habilidade-passiva"` nas 313 - promete um vocabulário de categorias e entrega uma constante. Não há taxonomia de habilidade no módulo |
 | `species.passiveAbility.active` | É exatamente `options[0]` nas 1.149 espécies. No PMP o jogador **escolhe** entre as opções; publicar `active` inventa uma escolha que o livro não faz |
-| `mega.abilityChoices` | Não é escolha de Habilidade: o conteúdo é `{ options: ["str","dex"], delta: 5 }` — é o *ability score* do dnd5e, ou seja, **atributo** |
+| `mega.abilityChoices` | Não é escolha de Habilidade: o conteúdo é `{ options: ["str","dex"], delta: 5 }` - é o *ability score* do dnd5e, ou seja, **atributo** |
 | `system.description.value` (habilidade) | Era a nota de "regra não encontrada" em 74 das 313 até a v1.34.0; a v1.35.0 preencheu todas. O tratamento continua no pipeline: o defeito pode voltar numa versão futura |
 
 Em compensação, as referências de habilidade das fichas de espécie vêm **limpas**: as
@@ -204,7 +204,7 @@ sem nenhum dos defeitos de extração que obrigam a reparar `moveTable`, `tms` e
 Duas assimetrias que a modelagem precisa respeitar: **"oculta" é propriedade do par
 espécie–habilidade**, não da habilidade (139 das 302 com portador são padrão em uma
 espécie e ocultas em outra), e **três habilidades não pertencem a espécie nenhuma da
-Pokédex** — quem as tem é uma forma Mega, declarada em `mega-evolutions.json`.
+Pokédex** - quem as tem é uma forma Mega, declarada em `mega-evolutions.json`.
 
 O pack `mega-evolutions` é o oposto do `abilities`: treze campos de `flags[…].mega`
 carregam dado útil nas 93 pedras, e nada do documento Foundry em volta serve (`system.*` é
@@ -219,13 +219,13 @@ constante nas 93). Quase tudo sai de campo. Em compensação, é onde o texto es
 | `types.type2: null` com `type1` preenchido | Não é dado faltando: é **monotipo**. Mega Aggron vem de Aço/Pedra e fica Aço puro, e o módulo renderiza "Tipo muda para Aço" |
 | `size` | Usa 4 degraus onde as espécies usam 6 (`tiny` e `huge` só existem na base). E o texto de Mega Hawlucha pede "Imenso", palavra que a escala do PMP não tem |
 | `otherEffects` | 10 frases em 10 pedras, e nenhuma é redundante: elas **corrigem** os campos acima. Uma está truncada no meio ("Snow Warning (torna-se Snow") |
-| `passiveAbility` | Vazio em 4 pedras — mas **duas delas** declaram a habilidade em `otherEffects`, e a de Mega Floette (Fairy Aura) existe no pack |
+| `passiveAbility` | Vazio em 4 pedras - mas **duas delas** declaram a habilidade em `otherEffects`, e a de Mega Floette (Fairy Aura) existe no pack |
 | `description` | 4 das 93 carregam texto de outro documento: a de Mega Delphox traz um bloco de estatísticas de espécie inteiro, a de Mega Hawlucha traz o statblock do Move Nihil Light |
 | `img` | 42 são SVG de tipo, 48 são PNG de item e 3 são um ícone genérico. Usá-lo como sinal de tipo acerta em 42 e inventa em 51 |
 
 O `<ul>` de `system.description.value` fica de fora por inteiro: agrupando os 475 `<li>`
 do corpus em formas de frase, **todas** saem de um campo estruturado. Nenhum fato vive só
-ali — o que ele dá de graça é o vocabulário em português do próprio módulo, que a
+ali - o que ele dá de graça é o vocabulário em português do próprio módulo, que a
 interface copia.
 
 `category` merece nota por ser um dos raríssimos campos de categoria do módulo que de fato
@@ -236,7 +236,7 @@ nenhuma (Rayquaza). O que as três têm em comum é não seguir a regra comum da
 Três consequências para a modelagem: **nenhuma das 93 formas existe como espécie na
 Pokédex** (o link vai para a espécie-base, que casa em 90), **seis espécies têm duas
 pedras** (Charizard, Mewtwo e Raichu com X e Y; Garchomp, Absol e Lucario com a forma Z),
-e **a relação Mega↔habilidade é N:N** — Magic Bounce e Tough Claws são concedidas por
+e **a relação Mega↔habilidade é N:N** - Magic Bounce e Tough Claws são concedidas por
 quatro pedras cada.
 
 Os **itens** não estão no pack chamado `items`, que tem dois documentos: uma pasta e o
@@ -246,20 +246,20 @@ Terastal e Dynamax), do qual `category: "item-treinador"` é a maior fatia:
 
 | Campo do módulo | Por que não dá para usar direto |
 |---|---|
-| `system.price.value` | Está **1000x menor** em 2 itens: o módulo leu a vírgula de `"₽20,000"` como decimal e gravou 20. O pack mistura as duas convenções de milhar — 150 itens escrevem `₽1.500` e 2 escrevem `₽20,000` —, e nenhum dos 343 tem centavos |
+| `system.price.value` | Está **1000x menor** em 2 itens: o módulo leu a vírgula de `"₽20,000"` como decimal e gravou 20. O pack mistura as duas convenções de milhar - 150 itens escrevem `₽1.500` e 2 escrevem `₽20,000` -, e nenhum dos 343 tem centavos |
 | `system.price.value: 0` | Não é "de graça": 31 itens-chave (Mega Pedra, Pedra-Chave, Bracelete-Z, Cristal-Z…) o livro não vende. É `null`, como o `armorClassDelta` das Megas |
-| `system.description.value` | A tabela do PDF vazou para dentro em 10 itens, de quatro jeitos — ver abaixo |
+| `system.description.value` | A tabela do PDF vazou para dentro em 10 itens, de quatro jeitos - ver abaixo |
 | `folder` | É a taxonomia mais fraca do pack: 310 dos 420 caem num balde chamado "Itens"; Berries, Tera Shards, Hortelãs, Doces e Poções dividem 110 |
-| `img` | 190 dos 420 apontam para a biblioteca de ícones do próprio Foundry (`icons/equipment/…`), que não é publicada com o site. Destes, 66 são itens Pokémon que a PokéAPI tem e o módulo só não linkou — ver "A arte dos itens" |
+| `img` | 190 dos 420 apontam para a biblioteca de ícones do próprio Foundry (`icons/equipment/…`), que não é publicada com o site. Destes, 66 são itens Pokémon que a PokéAPI tem e o módulo só não linkou - ver "A arte dos itens" |
 
 As quatro formas de contaminação do texto, todas da extração do PDF:
 
 1. **A célula de preço no FIM** (7 itens): "Permite que Hoopa mude de forma. **N/A**". É o
-   único caso seguro de aparar, porque dois sinais independentes concordam — o token está
+   único caso seguro de aparar, porque dois sinais independentes concordam - o token está
    no fim *e* o item não tem preço.
 2. **A célula no MEIO da frase** (6): "o dano duas **N/A** vezes".
 3. **O rótulo "Não vendido" partido** (2): em Mega Pedra o "Não" caiu no meio e o
-   "vendido" no fim, e lido como está a regra vira o oposto — "durante a **não** batalha".
+   "vendido" no fim, e lido como está a regra vira o oposto - "durante a **não** batalha".
 4. **A descrição de outro item emendada** (5): Balm Mushroom traz Pearl, Big Pearl e Pearl
    String juntos; Soul Dew e Everstone trazem a tabela dos Genesect Drives.
 
@@ -269,18 +269,18 @@ caso 1 são aparados e publicados normalmente.
 
 A v1.35.0 trouxe um quinto padrão, e esse **carrega informação**: os 77 itens das
 expansões de Galar e Paldea têm o cabeçalho da seção do livro colado no fim da descrição
-("Itens Evolutivos — Expansão da Nona Geração (Paldea)"). Em vez de descartar, o pipeline
-o extrai para `secao` e `expansao` — vira a taxonomia que a pasta não dá, com 12 seções
+("Itens Evolutivos - Expansão da Nona Geração (Paldea)"). Em vez de descartar, o pipeline
+o extrai para `secao` e `expansao` - vira a taxonomia que a pasta não dá, com 12 seções
 ("Itens Evolutivos", "Fósseis", "Lista de Tera Shards", "Itens-Chave"…). O padrão exige o
 travessão e a forma "Expansão da … Geração (…)" na última linha, porque quatro itens
 antigos têm segundo parágrafo legítimo e não podem perder nada.
 
 Nove itens têm **só um pedaço da regra**, e esses continuam visíveis, ao contrário dos
-contaminados: o texto é o que o livro tem e não atribui ao item regra alheia — o que não
+contaminados: o texto é o que o livro tem e não atribui ao item regra alheia - o que não
 pode é o leitor achar que a frase pela metade é a regra inteira, então a ficha avisa
 acima dela. Oito estão cortados no fim: cinco Berries (Iapapa, Aguav, Wiki, Figy e Mago)
 param exatamente na palavra que as distingue, "causa confusão caso seja de Natureza", e
-três param em "Fornece +1 em". Um está cortado no **começo** — a descrição inteira do
+três param em "Fornece +1 em". Um está cortado no **começo** - a descrição inteira do
 Extender no módulo é "tenham sido ativados por ele, seja por Move ou por habilidade
 passiva", e sem o início não dá para saber o que é "ele".
 
@@ -294,33 +294,33 @@ pelo compêndio.
 
 O módulo preenche `img` com uma URL da PokéAPI em 230 dos 420 itens e deixa os outros 190
 apontando para a biblioteca de ícones interna do Foundry, que não é publicada com o site.
-Mas boa parte desses 190 são itens Pokémon de verdade que a PokéAPI tem — o módulo só não
+Mas boa parte desses 190 são itens Pokémon de verdade que a PokéAPI tem - o módulo só não
 linkou. `npm run dados:arte` acha, confere e **baixa** para `static/itens/`.
 
 Baixar, e não apontar, é o ponto. Antes o site linkava direto para
 `raw.githubusercontent.com`, e isso quebrava de forma **intermitente**: o endpoint `raw`
-não é uma CDN e estrangula quando a listagem pede algumas dezenas de imagens de uma vez —
+não é uma CDN e estrangula quando a listagem pede algumas dezenas de imagens de uma vez -
 o leitor via o ícone de imagem quebrada em alguns cartões, sempre em cartões diferentes.
 Servindo de `static/`, nada depende da rede na hora da visita, e o container fica servível
 offline, que é como ele é usado na mesa.
 
 A ferramenta roda **fora** do pipeline porque faz rede, e `construir.mjs` precisa ser
 offline e determinístico. Ela lê o `img` original do **pack cru**, não de
-`dados/itens.json` — depois da primeira execução esse arquivo já traz o caminho local que
+`dados/itens.json` - depois da primeira execução esse arquivo já traz o caminho local que
 ela mesma gerou, e ler de lá faria cada ciclo perder um pouco mais de arte.
 
 Duas defesas contra publicar imagem ruim:
 
-- **A assinatura PNG é conferida** antes de gravar. Um 200 com corpo errado — página de
-  erro, resposta de estrangulamento — passaria por um `HEAD`, e foi assim que imagens
+- **A assinatura PNG é conferida** antes de gravar. Um 200 com corpo errado - página de
+  erro, resposta de estrangulamento - passaria por um `HEAD`, e foi assim que imagens
   quebradas chegaram ao site da primeira vez.
 - **Seis sprites são recusados por estarem quebrados na origem**: os doces de atributo de
   Let's Go (`health-candy`, `quick-candy`, `tough-candy`…) têm, no repositório da PokéAPI,
-  um PNG que não é um desenho — quatro borrões de pixels, os seis com os mesmos 444–448
+  um PNG que não é um desenho - quatro borrões de pixels, os seis com os mesmos 444–448
   pixels opacos. A lista é curada e não um limiar automático: o sprite legítimo mais
   esparso do catálogo fica a três pontos percentuais dos quebrados.
 
-Os 130 sem sprite recebem um ícone desenhado em `IconeDeItem.svelte` — traçado simples em
+Os 130 sem sprite recebem um ícone desenhado em `IconeDeItem.svelte` - traçado simples em
 `currentColor`, escolhido por palavra no nome (mochila, tenda, lanterna, óculos, kit,
 corda, livro…). Sem dependência externa, sem questão de licença, e acompanha o tema. Os 19
 Tera Shards saem **tingidos com a cor do próprio tipo**, que o compêndio já tem: um glifo
@@ -328,19 +328,19 @@ vira 19 ícones distintos.
 
 Não são um problema a resolver com outra fonte:
 
-- **A maior parte é equipamento de aventura que o PMP inventou** — Chaleira, Cantil,
+- **A maior parte é equipamento de aventura que o PMP inventou** - Chaleira, Cantil,
   Bússola, Canivete de Bolso, Tenda, Saco de Dormir, Pacote de Explorador. Não são itens
   Pokémon; não existe arte oficial deles em fonte nenhuma, e o ícone genérico do Foundry
   que o módulo escolheu é a arte certa para uma chaleira.
 - **As 20 Hortelãs** têm sprite na PokéAPI, mas o PMP renomeou as Naturezas e as remapeou
   para atributos de D&D: "Teimoso" e "Astuto" não têm correspondente entre as 25 Naturezas
   oficiais. Casar por semelhança publicaria uma associação que o livro não faz. O sprite
-  existir não é prova de que o mapeamento está certo — `timid-mint` existe, e isso não
+  existir não é prova de que o mapeamento está certo - `timid-mint` existe, e isso não
   torna a Hortelã da Astúcia uma Timid Mint.
 - **Cristal-Z, Mega Pedra e os 19 Tera Shards** são genéricos no PMP; a PokéAPI só tem os
   específicos (um por tipo, um por espécie).
 
-A tabela de tradução de `arte.mjs` só aceita o que é **inequívoco** — as três máscaras de
+A tabela de tradução de `arte.mjs` só aceita o que é **inequívoco** - as três máscaras de
 Ogerpon, os quatro Nectares, Orbe Tera, Pedra-Chave, Bracelete-Z, Pulseira Dynamax.
 
 O Bulbapedia não resolveria nada disto: os itens inventados não existem lá, e para o resto
@@ -365,7 +365,7 @@ na fonte. O relatório cobre:
 | `efeitosDeMoveNaoInterpretados` | Frases que **declaram** um efeito mecânico que o parser não estruturou (24 na v1.35.0) |
 | `textosDeMoveContaminados` | Texto de regra com conteúdo vazado de outro lugar, como crédito de arte (1 na v1.35.0) |
 | `habilidadesSemRegra` | Habilidades cuja regra o módulo não achou no livro, com a nota original (**0** na v1.35.0; eram 74 na v1.34.0) |
-| `efeitosDeHabilidadeNaoInterpretados` | Frases que declaram um efeito de habilidade que o parser não estruturou (20 na v1.35.0 — subiu de 13 quando a v1.35.0 deu texto às 74 que não tinham) |
+| `efeitosDeHabilidadeNaoInterpretados` | Frases que declaram um efeito de habilidade que o parser não estruturou (20 na v1.35.0 - subiu de 13 quando a v1.35.0 deu texto às 74 que não tinham) |
 | `habilidadesSemPortador` | Habilidades que nenhuma espécie e nenhuma Mega têm (8 na v1.35.0) |
 | `habilidadesDeMegaNaoResolvidas` | Habilidades que uma pedra Mega nomeia e que não existem no pack (20 na v1.35.0: 8 nomes reais, 11 vezes a marca de pendência `"[ainda a ser lançada]"` e 1 truncada na fonte) |
 | `megasSemEspecieBase` | Megas cuja espécie-base não casa com a Pokédex, com os nomes candidatos (3 na v1.35.0) |
@@ -375,24 +375,24 @@ na fonte. O relatório cobre:
 | `precosDeItemDivergentes` | Itens em que o número do módulo discorda do preço impresso (2 na v1.35.0, os dois 1000x menores) |
 | `textosDeItemContaminados` | Itens cujo texto carrega conteúdo de outra linha da tabela, com a marca e o original (10 na v1.35.0) |
 | `celulasDePrecoEmItens` | Células de preço aparadas do fim do texto (7 na v1.35.0) |
-| `textosDeItemCortados` | Itens cujo texto foi cortado antes de dizer a regra, com `onde` (começo ou fim) — 9 na v1.35.0 |
+| `textosDeItemCortados` | Itens cujo texto foi cortado antes de dizer a regra, com `onde` (começo ou fim) - 9 na v1.35.0 |
 | `referenciasDePaginaEmItens` | Itens que mandam virar a página do livro (6 na v1.35.0) |
 | `itensDeEvolucaoNaoResolvidos` | Itens citados numa evolução que não têm ficha (0 na v1.35.0) |
 | `movesDeClimaAusentes`, `movesDeHabilidadeNaoResolvidos` | Moves nomeados por uma habilidade que não existem no compêndio (0 na v1.35.0) |
 
 Boa parte dessas categorias aponta lacunas no texto do próprio livro, não falhas do
-pipeline — são a lista de trabalho para melhorar o módulo.
+pipeline - são a lista de trabalho para melhorar o módulo.
 
 `efeitosDeMoveNaoInterpretados` merece nota: cada família de efeito tem um detector de
 **sinal** (largo) e um extrator (estreito), e só vai para o relatório a frase que declara
 o efeito sem que nada tenha sido extraído. É o que separa "o livro não declara isso" de
-"o livro declara e eu não entendi" — sem os dois limiares, a segunda some em silêncio.
+"o livro declara e eu não entendi" - sem os dois limiares, a segunda some em silêncio.
 
 ## Estrutura
 
 ```
 Dockerfile          build do site + nginx que serve as rotas (ver "No Docker")
-nginx.conf          try_files $uri $uri.html — sem isso as rotas dão 404
+nginx.conf          try_files $uri $uri.html - sem isso as rotas dão 404
 ferramentas/        pipeline de dados (Node puro, fora do app)
   desempacotar.mjs    packs LevelDB → JSON cru
   construir.mjs       JSON cru → formato do site
@@ -424,17 +424,17 @@ imunidade, Prankster concede a imunidade ao **oponente**, e Shields Down retira 
 marcador o que concedeu na primeira frase. Por isso a família de imunidade ancora no
 sujeito (`Este Pokémon é imune a…`) e traz a lista de citações junto.
 
-Em `megas.mjs` o risco é outro: o corpus da família é **minúsculo** — dez frases em dez
-das 93 pedras —, e com dez exemplos é fácil escrever um padrão que casa os dez por
+Em `megas.mjs` o risco é outro: o corpus da família é **minúsculo** - dez frases em dez
+das 93 pedras -, e com dez exemplos é fácil escrever um padrão que casa os dez por
 acidente. Por isso os testes trazem as dez na íntegra, e não uma amostra, e cada uma
 está anotada com o campo estruturado que ela contradiz. A detecção de contaminação da
 descrição é conferida nos dois sentidos: pega as 4 sujas e não acusa a maior das 89
 limpas.
 
-Em `itens.mjs` a armadilha é a vírgula — a mesma que estas ferramentas repetem desde o
+Em `itens.mjs` a armadilha é a vírgula - a mesma que estas ferramentas repetem desde o
 pack de Moves, desta vez cometida pela própria fonte. E um caso que só apareceu rodando:
 o detector de texto cortado usava `` antes da palavra, e `/a\s*$/` **casa dentro de
-"Força"** — sem a flag `u`, o `\w` do JavaScript é só ASCII, "ç" não é caractere de
+"Força"** - sem a flag `u`, o `\w` do JavaScript é só ASCII, "ç" não é caractere de
 palavra e abre uma fronteira ali. As 20 Hortelãs, que terminam em "-2 Força" e estão
 completas, iam todas para o relatório. A âncora passou a ser um espaço.
 
@@ -449,8 +449,8 @@ deliberados: a fonte **Rubik**, o **cromo escuro** de cabeçalho e rodapé, a **
 diagonal** no topo de cada página e os **cabeçalhos de painel** em faixa escura com a
 ponta cortada na diagonal. Os emblemas de tipo também são inclinados.
 
-Cada seção veste uma cor — Pokémon vermelho, Moves azul, Habilidades roxo, Megas verde,
-Itens âmbar —, aplicada por uma classe no `<main>` que vem do primeiro segmento da URL.
+Cada seção veste uma cor - Pokémon vermelho, Moves azul, Habilidades roxo, Megas verde,
+Itens âmbar -, aplicada por uma classe no `<main>` que vem do primeiro segmento da URL.
 Assim uma rota nova já nasce temática, inclusive as fichas, que são a maior parte das
 páginas. Tudo abaixo herda por `--secao`.
 
@@ -465,19 +465,19 @@ Duas diferenças de propósito:
 
 A **tela principal** segue o desenho do poke5e: uma pílula larga por seção, com o nome à
 esquerda e um ícone grande à direita, cortado pela curva do cartão (`overflow: hidden` é o
-que dá o efeito). Em telas estreitas a pílula vira um retângulo de cantos grandes — pílula
+que dá o efeito). Em telas estreitas a pílula vira um retângulo de cantos grandes - pílula
 inteira em 375px viraria um comprimido, e o texto bateria na curva.
 
 Os ícones de seção e o de voltar são desenhados em `currentColor`, como os dos itens: sem
 dependência, sem licença de terceiros, e acompanham o tema. O **voltar** das fichas virou
 um botão de ícone com dica em texto; o nome continua existindo em `aria-label`, que é o
 que o leitor de tela anuncia, e a dica visível é `aria-hidden` para não ser lida duas
-vezes. Ela aparece no `:hover` **e** no `:focus-visible` — dica que só responde ao mouse
+vezes. Ela aparece no `:hover` **e** no `:focus-visible` - dica que só responde ao mouse
 deixa quem navega por teclado sem saber para onde o botão vai.
 
 A faixa do cabeçalho de painel é recortada com `clip-path`, e não inclinada com
 `transform: skewX`. Inclinar a caixa inclinaria o texto junto, obrigando a desincliná-lo
-num elemento interno — e isso exigiria mexer na marcação de todos os painéis de todas as
+num elemento interno - e isso exigiria mexer na marcação de todos os painéis de todas as
 fichas. O recorte dá a mesma diagonal sem tocar no HTML.
 
 A Rubik é hospedada em `static/fontes/`, não no Google Fonts, pela mesma razão que a arte
@@ -493,9 +493,9 @@ para somar um idioma.
 
 ## Créditos
 
-- **Sistema Pokémon Mundo Perfeito** — comunidade autora do PMP.
+- **Sistema Pokémon Mundo Perfeito** - comunidade autora do PMP.
 - **Módulo Foundry** [`pokemon-mundo-perfeito`](https://github.com/LuizHenriquelhlt/Foundry-Modulos-Pokemon-Mundo-Perfeito), origem dos dados.
-- **Artes** — [PokéAPI](https://pokeapi.co).
+- **Artes** - [PokéAPI](https://pokeapi.co).
 
 Projeto de fã, sem fim lucrativo. Pokémon é marca registrada de Nintendo, Game Freak e
 The Pokémon Company; não há vínculo nem endosso de nenhuma delas, nem da Wizards of the
@@ -503,7 +503,7 @@ Coast.
 
 ## Licença
 
-O **código** deste repositório está sob a licença MIT — veja [LICENSE](LICENSE).
+O **código** deste repositório está sob a licença MIT - veja [LICENSE](LICENSE).
 
 A licença cobre o código, e só ele. Três coisas dentro ou ao redor do projeto têm dono
 diferente e **não** são MIT:
@@ -512,6 +512,6 @@ diferente e **não** são MIT:
   isso que o conteúdo gerado (`dados/`) fica fora do Git. As frases de regra que
   aparecem em `testes/` são citações curtas, usadas como fixture para fixar o
   comportamento dos parsers contra o texto real.
-- **A fonte Rubik**, em `static/fontes/`, sob SIL OFL — a licença acompanha os arquivos.
+- **A fonte Rubik**, em `static/fontes/`, sob SIL OFL - a licença acompanha os arquivos.
 - **A arte dos itens**, baixada da PokéAPI para `static/itens/` por quem roda o
   pipeline, e também fora do Git.

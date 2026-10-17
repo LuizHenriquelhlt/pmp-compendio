@@ -234,7 +234,7 @@ describe("dreno", () => {
 			.toEqual([ { tipo: "dreno", fracao: { numerador: 3, denominador: 4 } } ])
 	})
 
-	// "Drenar" no livro também significa ficar sem ação e perder PP — nada disso cura.
+	// "Drenar" no livro também significa ficar sem ação e perder PP - nada disso cura.
 	it.each([
 		"Este Move drena sua energia, e você não pode realizar outra ação padrão ou reação até o final do seu próximo turno.",
 		"Quando for atingido por um Move, você pode gastar sua reação para tentar drenar os PP do atacante.",

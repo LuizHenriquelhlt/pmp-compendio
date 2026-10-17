@@ -10,7 +10,7 @@
 	 * o leitor de tela anuncia. A dica visível é `aria-hidden`, senão o nome seria lido
 	 * duas vezes.
 	 *
-	 * A dica aparece no `:hover` E no `:focus-visible` — tooltip que só responde ao mouse
+	 * A dica aparece no `:hover` E no `:focus-visible` - tooltip que só responde ao mouse
 	 * deixa quem navega por teclado sem saber para onde o botão vai.
 	 */
 	type Props = { href: string, texto: string }

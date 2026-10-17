@@ -20,7 +20,7 @@ export type Buscavel = {
 /**
  * Texto comparável: sem acento, sem caixa, sem pontuação.
  *
- * Buscar "pokemon" tem de achar "Pokémon", e "nidoran f" tem de achar "Nidoran♀" —
+ * Buscar "pokemon" tem de achar "Pokémon", e "nidoran f" tem de achar "Nidoran♀" -
  * então a pontuação vira espaço em vez de desaparecer, para não colar palavras.
  */
 export function normalizarParaBusca(texto: string): string {
@@ -59,7 +59,7 @@ export type MoveBuscavel = {
  * Chave de busca de um Move: o nome e o nome do tipo em português.
  *
  * Os nomes de Move são em inglês (convenção do PMP), mas quem consulta pensa o tipo em
- * português — "fogo" tem de achar Flamethrower. É a única tradução que a busca faz, e
+ * português - "fogo" tem de achar Flamethrower. É a única tradução que a busca faz, e
  * por isso o tipo entra na chave pelo nome, não pelo `id`.
  */
 export function chaveDeBuscaDeMove(move: MoveBuscavel): string {
@@ -80,7 +80,7 @@ export type HabilidadeBuscavel = {
  * Chave de busca de uma Habilidade: o nome e os nomes, em português, do que ela atinge.
  *
  * Mesma decisão de `chaveDeBuscaDeMove`: os nomes de habilidade são em inglês (convenção
- * do PMP), mas quem consulta pensa a mecânica em português — "paralisado" tem de achar
+ * do PMP), mas quem consulta pensa a mecânica em português - "paralisado" tem de achar
  * Limber e "granizo" tem de achar Ice Body. O que entra na chave são os VOCABULÁRIOS DO
  * SISTEMA (condições, tipos e climas), não a descrição: o texto do livro fica fora do
  * índice, e é por isso que ele continua enxuto.
@@ -97,13 +97,13 @@ export function chaveDeBuscaDeHabilidade(habilidade: HabilidadeBuscavel): string
 /**
  * Chave de busca de Mega: a forma, a pedra, a espécie-base, os tipos e as habilidades.
  *
- * A pedra entra porque é por ela que a mesa chega na forma — quem tem uma Charizardite X
+ * A pedra entra porque é por ela que a mesa chega na forma - quem tem uma Charizardite X
  * na mão procura por ela, não por "Mega Charizard X". E a espécie-base entra porque
  * procurar "charizard" tem de achar as duas formas, já que nenhuma das 93 `megaForm`
  * existe como espécie na Pokédex.
  *
  * Os tipos entram pelo NOME em português, como em `chaveDeBuscaDeMove`: os nomes de forma
- * são em inglês, mas quem consulta pensa o tipo em português — "dragão" tem de achar Mega
+ * são em inglês, mas quem consulta pensa o tipo em português - "dragão" tem de achar Mega
  * Charizard X, que passa a ser Fogo/Dragão.
  */
 export function chaveDeBuscaDeMega(mega: MegaBuscavel): string {

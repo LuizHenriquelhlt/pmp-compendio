@@ -6,7 +6,7 @@ import { nomeDoTipo } from "./tipos"
  * Uma condição de evolução pronta para a tela.
  *
  * `itemId` vem preenchido só na condição que nomeia um item com ficha, e é o que permite
- * a pílula virar link — a ligação para `/itens`, no mesmo espírito do `moveId` que
+ * a pílula virar link - a ligação para `/itens`, no mesmo espírito do `moveId` que
  * `descreverEfeitoDeHabilidade` devolve.
  */
 export type CondicaoDeEvolucao = { texto: string, itemId: string | null }
@@ -28,7 +28,7 @@ export function descreverCondicoes(evolucao: Evolucao): CondicaoDeEvolucao[] {
 	]
 
 	// O item é a única condição que vira link: ele tem ficha própria desde o catálogo de
-	// Itens. `itemId` é `null` quando o nome não casou com o catálogo — aí a pílula fica
+	// Itens. `itemId` é `null` quando o nome não casou com o catálogo - aí a pílula fica
 	// como texto, e o relatório registra o nome.
 	if (evolucao.item != null) {
 		condicoes.push({

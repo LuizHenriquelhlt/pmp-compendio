@@ -24,7 +24,7 @@ const CONDICAO_ESPECIAL = /(após|somente após|troc|chuva|névoa|neblina|girar|
 /**
  * A espécie-alvo de uma cláusula.
  *
- * O alvo é o nome que vem depois de "para" — a preposição que o livro usa para
+ * O alvo é o nome que vem depois de "para" - a preposição que o livro usa para
  * indicar destino. Aceitar qualquer nome em qualquer posição produzia três erros:
  *
  *   - "Corsola de Galar pode evoluir para Cursola" achava "Corsola", pedaço do
@@ -34,7 +34,7 @@ const CONDICAO_ESPECIAL = /(após|somente após|troc|chuva|névoa|neblina|girar|
  *   - "…, apenas na presença de um Shelmet" criava uma segunda evolução, quando
  *     a frase é condição da primeira.
  *
- * Sem "para", a cláusula só introduz alvo se COMEÇAR com um nome — o caso das
+ * Sem "para", a cláusula só introduz alvo se COMEÇAR com um nome - o caso das
  * ramificações encadeadas do Applin ("… e Appletun com uma Sweet Apple").
  */
 function acharAlvo(clausula, propriaEspecie, nomesDeEspecie) {
@@ -59,7 +59,7 @@ function acharAlvo(clausula, propriaEspecie, nomesDeEspecie) {
  *
  * @param {object} vocabulario
  * @param {string[]} vocabulario.nomesDeEspecie Nomes conhecidos, do mais longo ao mais
- *   curto — a ordem importa: "Raichu de Alola" tem de ser testado antes de "Raichu".
+ *   curto - a ordem importa: "Raichu de Alola" tem de ser testado antes de "Raichu".
  * @param {{ nome: string }[]} vocabulario.itensEvolutivos Pedras e afins, idem.
  * @param {Record<string, string>} vocabulario.tipoPorChave Chave Foundry → id do tipo.
  */

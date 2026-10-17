@@ -33,7 +33,7 @@ describe("alcance em metros", () => {
 	})
 
 	it("estrutura a área pessoal, separando o alcance da forma", () => {
-		// Sem `forma`, "12m" e "cone de 12m" ficariam iguais na tela — a diferença entre
+		// Sem `forma`, "12m" e "cone de 12m" ficariam iguais na tela - a diferença entre
 		// atingir um alvo e atingir todo mundo na frente.
 		expect(interpretarAlcance("Pessoal (cone de 40 pés / 12 metros)", 12, false)).toMatchObject({
 			texto: "Pessoal (cone de 12m)", metros: 12, pessoal: true, forma: "cone",

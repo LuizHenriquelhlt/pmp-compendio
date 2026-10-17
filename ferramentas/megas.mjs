@@ -1,31 +1,31 @@
-// Interpretação do texto de uma pedra Mega — `otherEffects` e `description`.
+// Interpretação do texto de uma pedra Mega - `otherEffects` e `description`.
 //
 // Separado de `construir.mjs` pela mesma razão que `habilidades.mjs` e `efeitos.mjs`: é
-// prosa do livro, e um erro aqui não deixa um campo vazio — ele inventa uma regra.
+// prosa do livro, e um erro aqui não deixa um campo vazio - ele inventa uma regra.
 //
 // O pack `mega-evolutions` é o MAIS estruturado dos quatro (treze campos de
 // `flags[…].mega` carregam dado útil, contra três no `abilities`), então quase tudo vem
 // de campo e não de texto. Só sobram dois pedaços de prosa, e os dois são armadilha:
 //
-//   1. `otherEffects` — 10 frases em 10 das 93 pedras, e NENHUMA é redundante com os
+//   1. `otherEffects` - 10 frases em 10 das 93 pedras, e NENHUMA é redundante com os
 //      campos. Várias os CORRIGEM: Mega Eelektross tem `movementBonusFeet: 0` e diz
 //      "+ 10 pés em todos os seus deslocamentos" no texto; Mega Delphox tem
 //      `movementGrants: []` e ganha voo de 40 pés só na prosa; Mega Floette tem
 //      `passiveAbility: ""` e ganha Fairy Aura só aqui. Zero e lista vazia querem dizer
 //      "o campo não foi preenchido", não "não há".
 //
-//   2. `description` — a prosa de sabor, e o texto mais contaminado que o módulo tem.
+//   2. `description` - a prosa de sabor, e o texto mais contaminado que o módulo tem.
 //      Quatro das 93 carregam conteúdo de outra entrada: a de Mega Delphox traz um bloco
 //      de estatísticas de espécie INTEIRO (o de Eternal Flower Floette, com CA, PV,
 //      atributos, duas habilidades com regra completa e lista de Moves), e a de Mega
 //      Hawlucha traz a lore de Mega Zygarde mais o statblock do Move Nihil Light.
 //
 // O `<ul>` de `system.description.value` fica deliberadamente de fora: agrupando os 475
-// `<li>` do corpus em formas de frase, todas saem de um campo estruturado — nenhum fato
+// `<li>` do corpus em formas de frase, todas saem de um campo estruturado - nenhum fato
 // vive só ali. O que ele dá de graça é o vocabulário em português do próprio módulo
 // ("à escolha do jogador", "em todos os deslocamentos"), que a interface copia.
 //
-// Cada família segue o desenho de `habilidades.mjs` — `sinal` largo, `ler` estreito —, só
+// Cada família segue o desenho de `habilidades.mjs` - `sinal` largo, `ler` estreito -, só
 // que a unidade aqui é a ENTRADA de `otherEffects`, não a frase: o módulo já separou as
 // afirmações em itens de lista. Uma entrada com sinal da família da qual nada foi extraído
 // é a única que vai para `dados/relatorio.json`. É o que separa "o livro não declara isso"
@@ -53,11 +53,11 @@ export function habilidadePendente(nome = "") {
  *
  * Existe para UMA frase ("Aumenta de tamanho para Imenso", em Mega Hawlucha) e serve
  * principalmente para provar que ela não casa: a escala do PMP é Minúsculo, Pequeno,
- * Médio, Grande, **Enorme** e Gigantesco — `huge` é "Enorme", e "Imenso" é uma sétima
+ * Médio, Grande, **Enorme** e Gigantesco - `huge` é "Enorme", e "Imenso" é uma sétima
  * palavra que o vocabulário do sistema não tem. Mapear "Imenso" para `huge` por
  * parecença seria adivinhar um degrau da escala, então a frase vai para o relatório.
  *
- * A tabela fica aqui, e não só em `tamanhos.ts`, porque o pipeline não importa do app —
+ * A tabela fica aqui, e não só em `tamanhos.ts`, porque o pipeline não importa do app -
  * e porque o que ela aceita são os nomes como o LIVRO os escreve, não os `id` das rotas.
  */
 const TAMANHO_POR_NOME = {
@@ -74,12 +74,12 @@ const TAMANHO_POR_NOME = {
  *
  * `flutuação` merece nota. A Pokédex **nunca** usa a palavra como modo sozinho (0 das
  * 1.149): ela escreve `"6m de voo (flutuação)"` em 98 espécies, sempre como qualificador
- * do voo — é o voo que ignora terreno difícil. O pack de Megas, por outro lado, grava
+ * do voo - é o voo que ignora terreno difícil. O pack de Megas, por outro lado, grava
  * `{ type: "flutuação" }` em `movementGrants` e "deslocamento de flutuação" no texto.
  *
  * Como "flutuação" só tem um significado neste sistema, ela entra como o par
  * `voo` + `flutuacao: true`, que é exatamente a forma que `interpretarDeslocamento`
- * produz para as espécies — e assim a Mega e a espécie-base se formatam com a mesma
+ * produz para as espécies - e assim a Mega e a espécie-base se formatam com a mesma
  * função. Um modo fora desta tabela não vira dado: vai para o relatório.
  */
 const MODO_DE_DESLOCAMENTO = {
@@ -101,8 +101,8 @@ const MODO_DE_DESLOCAMENTO = {
  * ocorrência de "pés". Publicar o número cru mostraria "+20 de deslocamento" na ficha da
  * Mega ao lado de "9m de caminhada" na da espécie.
  *
- * O fator não é escolha nossa: o corpus declara os dois lados três vezes — "40 pés (12
- * metros)" duas e "+ 10 pés (3 metros)" uma —, sempre 0,3 m/pé, que é a convenção do
+ * O fator não é escolha nossa: o corpus declara os dois lados três vezes - "40 pés (12
+ * metros)" duas e "+ 10 pés (3 metros)" uma -, sempre 0,3 m/pé, que é a convenção do
  * dnd5e em português (1,5 m por 5 pés). Todos os valores do campo são múltiplos de 5.
  */
 export function pesEmMetros(pes) {
@@ -123,7 +123,7 @@ export function interpretarDeslocamentoConcedido({ type, equalTo } = {}) {
 /**
  * "Ganha a habilidade Fairy Aura", "Mantém a habilidade Snow Warning".
  *
- * Duas das quatro pedras com `passiveAbility` vazia declaram a habilidade AQUI — e uma
+ * Duas das quatro pedras com `passiveAbility` vazia declaram a habilidade AQUI - e uma
  * delas (Mega Floette → Fairy Aura) nomeia uma habilidade que existe no pack. Quem lê só
  * `passiveAbility` publica "sem habilidade" para Mega Floette, e a ficha de Fairy Aura
  * nunca descobre que uma Mega a concede.
@@ -138,7 +138,7 @@ const HABILIDADE_CONCEDIDA = /\b(?:Ganha|Mantém|Mantem)\s+a\s+habilidade\s+(.+?
 /**
  * O texto da fonte foi cortado no meio.
  *
- * Mega Abomasnow grava "Mantém a habilidade Snow Warning (torna-se Snow" — parêntese
+ * Mega Abomasnow grava "Mantém a habilidade Snow Warning (torna-se Snow" - parêntese
  * aberto e palavra pela metade. A habilidade "Snow Warning" existe no pack, mas o nome
  * capturado inclui o fragmento, então não casa. Aparar no "(" devolveria o nome certo
  * **por sorte**: nada garante que o próximo corte caia depois de um nome completo, e
@@ -167,7 +167,7 @@ function lerHabilidadeConcedida(entrada) {
 // ------------------------------------------------------------------ Tamanho
 
 /**
- * "Aumenta de tamanho para Imenso" — a única frase da família, e ela não casa.
+ * "Aumenta de tamanho para Imenso" - a única frase da família, e ela não casa.
  *
  * Mega Hawlucha tem `size: null` no campo estruturado e declara a mudança só no texto, com
  * uma palavra que a escala do PMP não usa. A família existe para que isso apareça no
@@ -189,13 +189,13 @@ function lerTamanho(entrada) {
 /**
  * Quatro formas, e cada uma contradiz um campo estruturado:
  *
- *   - "Ganha deslocamento de voo de 40 pés (12 metros)" — `movementGrants: []`, e o valor
+ *   - "Ganha deslocamento de voo de 40 pés (12 metros)" - `movementGrants: []`, e o valor
  *     é ABSOLUTO, ao contrário do `equalTo: "caminhada"` do campo (Delphox, Tatsugiri);
- *   - "+ 10 pés (3 metros) em todos os seus deslocamentos" — `movementBonusFeet: 0`
+ *   - "+ 10 pés (3 metros) em todos os seus deslocamentos" - `movementBonusFeet: 0`
  *     (Eelektross). Repare no ESPAÇO depois do `+`: um `/^\+\d+/` não casa;
- *   - "Seu deslocamento é reduzido pela metade" — metade não é delta fixo, e nenhum campo
+ *   - "Seu deslocamento é reduzido pela metade" - metade não é delta fixo, e nenhum campo
  *     do módulo expressa proporção (Abomasnow);
- *   - "Perde seu deslocamento de nado" — nenhum campo expressa remoção (Golisopod).
+ *   - "Perde seu deslocamento de nado" - nenhum campo expressa remoção (Golisopod).
  *
  * As quatro saem em metros, pela razão de `pesEmMetros`.
  */
@@ -246,8 +246,8 @@ const FAMILIAS = [
  * @returns {{ efeitos: object[], textos: string[], naoInterpretado: { familia: string, frase: string }[] }}
  *
  * `textos` é o que sobra: entrada sem sinal de família nenhuma, que a ficha mostra como
- * prosa. São as regras de ativação das três pedras especiais — a Reversão Primal de
- * Groudon e Kyogre e o "não precisa de pedra" de Rayquaza —, que declaram nível mínimo,
+ * prosa. São as regras de ativação das três pedras especiais - a Reversão Primal de
+ * Groudon e Kyogre e o "não precisa de pedra" de Rayquaza -, que declaram nível mínimo,
  * usos por descanso e condição de obediência. Estruturá-las seria modelar um vocabulário
  * a partir de três frases; exibidas, continuam sendo a regra inteira.
  *
@@ -296,10 +296,10 @@ export function interpretarOutrosEfeitos(entradas = []) {
  * outras 27: 11 começam **direto** em "recebe os seguintes benefícios:", sem sujeito
  * nenhum (Mega Glalie, Absol, Latias…); 3 começam com "Evoluir, Mega X recebe…"; 7 trazem
  * a forma Mega no lugar da base ("Mewtwo X recebe…"); e as 3 especiais têm abertura
- * própria ("Groudon não Mega Evolui — passa pela Reversão Primal…"), que NÃO é lead-in e
+ * própria ("Groudon não Mega Evolui - passa pela Reversão Primal…"), que NÃO é lead-in e
  * precisa sobreviver.
  *
- * Como a frase é só uma deixa — a página já diz de quem é a ficha —, removê-la resolve os
+ * Como a frase é só uma deixa - a página já diz de quem é a ficha -, removê-la resolve os
  * quatro casos com uma regra e sem inventar sujeito nenhum: os 11 sujeitos perdidos deixam
  * de ter consequência visível. O `?` no grupo do sujeito é o que faz as 11 sem sujeito
  * casarem junto.
@@ -342,13 +342,13 @@ const CONTAMINACAO = [
  *
  * Decisão deliberada: a descrição contaminada **não é publicada**, ao contrário do
  * `textosDeMoveContaminados`, que mantém visível o crédito de arte vazado em Swallow. A
- * diferença não é de princípio, é de grau e de lugar — lá era uma linha a mais num campo
+ * diferença não é de princípio, é de grau e de lugar - lá era uma linha a mais num campo
  * separado (`observacoes`), e dá para ver onde a regra acaba; aqui são até 2.600
  * caracteres DENTRO do único campo de prosa, e a ficha de Mega Delphox mostraria "CA: 17"
  * e a regra de Flower Veil como se fossem dela.
  *
  * Aparar o trecho vazado não é opção: as marcas provam a PRESENÇA da contaminação, não
- * onde ela começa — em Delphox o vazamento começa no meio de um parágrafo de sabor, muitas
+ * onde ela começa - em Delphox o vazamento começa no meio de um parágrafo de sabor, muitas
  * linhas antes da primeira marca, e cortar na marca deixaria a lore da Floette dentro.
  * Então a página faz o que faz com as 74 habilidades sem regra: diz, em texto de
  * interface, que o módulo gravou texto de outra entrada ali, e o original inteiro vai para

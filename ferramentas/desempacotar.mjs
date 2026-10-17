@@ -2,7 +2,7 @@
 //
 // Uso: npm run dados:desempacotar -- "<pasta-do-módulo>" [saída=dados-crus]
 //
-// Só lê os arquivos do banco — nada do módulo é executado. Os packs são copiados para
+// Só lê os arquivos do banco - nada do módulo é executado. Os packs são copiados para
 // uma pasta temporária antes de abrir, porque abrir um LevelDB escreve LOCK/LOG no
 // diretório e isso sujaria o módulo original.
 import { ClassicLevel } from "classic-level"

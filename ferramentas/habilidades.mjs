@@ -1,18 +1,18 @@
 // Interpretação do texto de uma Habilidade Passiva.
 //
 // Separado de `construir.mjs` pela mesma razão que `efeitos.mjs`: é prosa livre do livro,
-// e aqui um erro não deixa um campo vazio — ele inventa uma regra. "Esta habilidade não
+// e aqui um erro não deixa um campo vazio - ele inventa uma regra. "Esta habilidade não
 // fornece imunidade" lido como imunidade (Justified) publica o oposto do livro, e quem
 // consulta no meio de uma sessão não tem como saber.
 //
 // O pack `abilities` não ajuda: de todos os campos do documento, só `name`,
 // `system.description.value` e o flag `placeholder` variam nas 313 habilidades. O resto é
-// constante — inclusive `flags["pokemon-mundo-perfeito"].category`, que é
+// constante - inclusive `flags["pokemon-mundo-perfeito"].category`, que é
 // `"habilidade-passiva"` em todas. O nome promete um vocabulário de categorias e entrega
 // uma constante: não existe taxonomia de habilidade no módulo, nem derivável dele. Tudo
 // o que este arquivo estrutura sai do texto.
 //
-// Cada família segue o desenho de `efeitos.mjs` — `sinal` largo, `falsoSinal` para as
+// Cada família segue o desenho de `efeitos.mjs` - `sinal` largo, `falsoSinal` para as
 // frases que usam as mesmas palavras para outra coisa, `naoDeclara` para as que CITAM o
 // assunto sem afirmá-lo. Uma frase com sinal verdadeiro, que não é citação, e da qual
 // nada foi extraído é a única que vai para `dados/relatorio.json`. É o que separa "o
@@ -21,7 +21,7 @@
 // O recorte da família de imunidade é deliberadamente estreito: só o que cai nos
 // vocabulários que o PMP já tem (as condições de status e os 18 tipos). Imunidade a
 // acerto crítico, a dano indireto, a Moves de som ou de gênero é regra do livro, mas
-// modelá-la exigiria inventar um vocabulário de categorias que o sistema não publica —
+// modelá-la exigiria inventar um vocabulário de categorias que o sistema não publica -
 // então essas vão para o relatório com a frase original. A descrição completa aparece
 // sempre na página, então o que se perde é a pílula de resumo, não a regra.
 
@@ -36,7 +36,7 @@
 const NOTA_DE_REGRA_AUSENTE = /Regra completa não encontrada no glossário de Habilidades Passivas/i
 
 /**
- * A habilidade não tem regra no módulo — a descrição é uma nota de extração, não texto do
+ * A habilidade não tem regra no módulo - a descrição é uma nota de extração, não texto do
  * livro.
  *
  * Publicar essa nota como descrição mostraria um erro de pipeline onde se espera uma
@@ -113,8 +113,8 @@ const CLIMAS = [
  * O clima de cada Move que gera clima.
  *
  * Quem gera clima no corpus não nomeia o clima: diz "gera imediatamente os efeitos do
- * Move Rain Dance". O fato extraído é então o NOME DO MOVE — que já existe no dicionário
- * e tem ficha própria —, e esta tabela só traduz o Move no clima que a descrição dele
+ * Move Rain Dance". O fato extraído é então o NOME DO MOVE - que já existe no dicionário
+ * e tem ficha própria -, e esta tabela só traduz o Move no clima que a descrição dele
  * declara ("Você provoca uma tempestade de granizo maciça", em Hail).
  *
  * `construir.mjs` confere cada chave contra o dicionário de Moves e relata a que não
@@ -150,7 +150,7 @@ function climasNaFrase(frase) {
  *
  * "Este Pokémon é imune a…" cobre 25 das 31 habilidades da família, e "o torna imune"
  * cobre Ice Body. Ancorar no sujeito é o que separa a imunidade de quem tem a habilidade
- * da imunidade de terceiros CONTRA ela — Prankster diz "Pokémon do tipo Sombrio são
+ * da imunidade de terceiros CONTRA ela - Prankster diz "Pokémon do tipo Sombrio são
  * imunes a Moves de inimigos sob efeito de Prankster", e lido sem sujeito o portador
  * ganharia uma imunidade que o livro dá ao oponente.
  */
@@ -188,8 +188,8 @@ const IMUNIDADE_NAO_DECLARA = [
  * Duas, e só duas, saem estruturadas: condição de status e tipo de Move. São os
  * vocabulários que o PMP publica, e por isso o filtro da listagem é construído com o
  * vocabulário do sistema em vez de uma lista de categorias inventada aqui. Quando a
- * frase declara imunidade a outra coisa — acerto crítico, dano indireto, Moves de som ou
- * de gênero —, nada é extraído e a frase vai para o relatório.
+ * frase declara imunidade a outra coisa - acerto crítico, dano indireto, Moves de som ou
+ * de gênero -, nada é extraído e a frase vai para o relatório.
  *
  * A janela é o trecho DEPOIS da âncora: "é imune ao dano e efeitos de Moves do tipo
  * Elétrico (incluindo Moves de Status)" tem a palavra "Status" sem nomear condição
@@ -222,14 +222,14 @@ function lerImunidades(frase) {
  * Como a habilidade se relaciona com o clima, da relação mais específica para a mais
  * ampla. A primeira que casar vence.
  *
- *   - `gera` — "gera imediatamente os efeitos do Move Rain Dance"; e Delta Stream, que é
+ *   - `gera` - "gera imediatamente os efeitos do Move Rain Dance"; e Delta Stream, que é
  *     o único a criar clima sem nomear um Move ("cria ventos fortes");
- *   - `suprime` — Air Lock e Cloud Nine, e suprimem TODOS os climas, não um;
- *   - `protege` — a imunidade ao dano do clima, que quatro habilidades declaram SEM a
+ *   - `suprime` - Air Lock e Cloud Nine, e suprimem TODOS os climas, não um;
+ *   - `protege` - a imunidade ao dano do clima, que quatro habilidades declaram SEM a
  *     palavra "imune" ("não sofre dano das condições climáticas", "não receberá dano da
  *     Tempestade de Areia"). Quem procurar só "imune" perde Overcoat, Slush Rush,
  *     Sand Rush e Sand Force;
- *   - `interage` — o resto. É a relação de quem nomeia um clima sem gerá-lo, suprimi-lo
+ *   - `interage` - o resto. É a relação de quem nomeia um clima sem gerá-lo, suprimi-lo
  *     nem se proteger dele: "Durante a chuva, todos os deslocamentos são dobrados". O
  *     rótulo é deliberadamente fraco porque a frase é a única evidência.
  */
@@ -239,7 +239,7 @@ const SUPRIME = /suprime\s+todos\s+os\s+efeitos\s+causados\s+pelo\s+clima/i
 const PROTEGE = /(?:é\s+imune|torna\s+(?:[oa]\s+)?imune|não\s+(?:sofre|sofrerá|recebe|receberá)\s+dano)/i
 
 /**
- * O sinal da família é um clima NOMEADO — não a palavra "clima".
+ * O sinal da família é um clima NOMEADO - não a palavra "clima".
  *
  * Essa é a diferença que dispensa a lista de citações que as outras famílias precisam
  * ter: toda frase que fala de clima genericamente para NEGAR algo ("Disguise não protege
@@ -291,7 +291,7 @@ function lerClima(frase) {
  * O desempate é `conhece … como`, não `conhece` sozinho: Forewarn fala de "revelar o
  * Move que conhece com maior potência de dano", que é leitura do Move do ALVO.
  *
- * O `id` da rota não é resolvido aqui — `construir.mjs` o resolve contra o dicionário de
+ * O `id` da rota não é resolvido aqui - `construir.mjs` o resolve contra o dicionário de
  * Moves depois, como faz com os alvos de evolução, e relata o nome que não casar.
  */
 const SINAL_MOVE_CONCEDIDO = /\bconhece\b/i
@@ -318,7 +318,7 @@ const FAMILIAS = [
 	},
 	// Sem `naoDeclara`: o sinal já é estreito (um clima nomeado), e o único jeito de uma
 	// frase da família não render nada é nomear um Move de clima que `CLIMA_POR_MOVE` não
-	// conhece — que é exatamente o que o relatório deve pegar.
+	// conhece - que é exatamente o que o relatório deve pegar.
 	{ nome: "clima", sinal: SINAL_CLIMA, ler: lerClima },
 	{
 		nome: "moveConcedido",
@@ -328,7 +328,7 @@ const FAMILIAS = [
 	},
 ]
 
-/** Da relação mais específica para a mais ampla — a ordem em que a ficha as mostra. */
+/** Da relação mais específica para a mais ampla - a ordem em que a ficha as mostra. */
 const PRECEDENCIA = { gera: 0, suprime: 1, protege: 2, interage: 3 }
 
 /**
@@ -341,7 +341,7 @@ const PRECEDENCIA = { gera: 0, suprime: 1, protege: 2, interage: 3 }
  * `protege` e `interage` convivem de propósito: Slush Rush dobra o deslocamento DURANTE o
  * granizo e também não sofre o dano dele. São dois fatos, não um repetido.
  *
- * A ordenação é aqui, e não na página, porque a ordem natural é a das FRASES — Sand Veil
+ * A ordenação é aqui, e não na página, porque a ordem natural é a das FRASES - Sand Veil
  * declara a proteção antes do bônus e Slush Rush depois. Sem isto, duas habilidades com
  * os mesmos dois fatos sairiam em ordens diferentes na tela.
  */
@@ -378,7 +378,7 @@ function semRedundancia(efeitos) {
  * @returns {{ efeitos: object[], naoInterpretado: { familia: string, frase: string }[] }}
  *
  * `naoInterpretado` lista, por família, a primeira frase que declara o assunto numa
- * habilidade de que nada foi extraído — por habilidade e não por frase, como em
+ * habilidade de que nada foi extraído - por habilidade e não por frase, como em
  * `efeitos.mjs`, para que o relatório seja trabalho a fazer e não ruído.
  */
 export function interpretarHabilidade(descricao = "") {

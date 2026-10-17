@@ -8,7 +8,7 @@
 
 	/**
 	 * Os 124 itens sem sprite não são uma falha a consertar com outra fonte: a maioria é
-	 * equipamento de aventura que o PMP inventou — Chaleira, Cantil, Bússola, Tenda —, e
+	 * equipamento de aventura que o PMP inventou - Chaleira, Cantil, Bússola, Tenda -, e
 	 * não existe arte oficial deles em fonte nenhuma. O que dá para fazer é desenhar um
 	 * ícone que diga ao menos QUE COISA é, em vez de um retângulo cinza.
 	 *
@@ -17,7 +17,7 @@
 	 * terceiros, e acompanha o tema claro/escuro sozinho.
 	 *
 	 * A escolha é por PALAVRA no nome, e não por pasta, porque a pasta não distingue: 310
-	 * dos 420 itens caem num balde chamado "Itens". A ordem importa — "Kit de Mergulho"
+	 * dos 420 itens caem num balde chamado "Itens". A ordem importa - "Kit de Mergulho"
 	 * casaria tanto em `kit` quanto em nada, e o primeiro padrão que casar vence.
 	 */
 	const FAMILIAS: { glifo: Glifo, padrao: RegExp }[] = [
@@ -49,7 +49,7 @@
 		if (achado != null) return achado.glifo
 
 		// Sem palavra conhecida: o frasco para consumível, a caixa para o resto. É o
-		// mínimo honesto — diz se gasta no uso, que é a distinção que o jogador usa.
+		// mínimo honesto - diz se gasta no uso, que é a distinção que o jogador usa.
 		return item.consumivel ? "frasco" : "caixa"
 	})
 

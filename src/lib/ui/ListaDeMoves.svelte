@@ -10,7 +10,7 @@
 	Separador por vírgula em vez de lista com marcadores: é como o livro imprime estas
 	listas, e para as fichas com 200 TMs uma lista vertical seria impraticável.
 
-	Entrada sem `id` sai como texto, não como link — é o que o pipeline não conseguiu casar
+	Entrada sem `id` sai como texto, não como link - é o que o pipeline não conseguiu casar
 	com o compêndio e preservou como estava (tabela de defesas vazada para dentro da lista
 	de TMs, na v1.33.0). Mostrar o texto mantém a lista do livro completa; o conserto é na
 	fonte, e `relatorio.json` tem a lista.

@@ -1,7 +1,7 @@
 # Localização
 
 O Compêndio PMP nasce em **português do Brasil**. O PMP é um sistema brasileiro, e o
-projeto adota os nomes em português como identidade do conteúdo — inclusive nos `id`
+projeto adota os nomes em português como identidade do conteúdo - inclusive nos `id`
 e nas URLs (`/pokemon/weezing-de-galar`, e não `/pokemon/galarian-weezing`).
 
 Isso é uma escolha, com uma consequência: um idioma novo não herda os identificadores
@@ -64,7 +64,7 @@ novo com chave faltando cai no pt-BR em vez de quebrar.
 
 ### 2. Vocabulário do jogo
 
-Acrescente o rótulo traduzido às tabelas de domínio. O `id` **não muda** — ele é a
+Acrescente o rótulo traduzido às tabelas de domínio. O `id` **não muda** - ele é a
 identidade, não o texto:
 
 ```ts
@@ -95,7 +95,7 @@ para `moves.json` e `habilidades.json` do mesmo jeito.
 ]
 ```
 
-O que a sobreposição não declarar permanece em pt-BR — então um idioma pode começar
+O que a sobreposição não declarar permanece em pt-BR - então um idioma pode começar
 só com os nomes e ganhar descrições depois, sem etapa intermediária quebrada.
 
 Vale guardar o nome original como apelido de busca ao mesclar, para que a listagem
@@ -105,7 +105,7 @@ continue encontrável nos dois idiomas.
 
 Como os `id` são em português, as URLs continuam as mesmas em qualquer idioma. Um
 idioma novo é um prefixo de rota (`/en/pokemon/weezing-de-galar`), não um conjunto
-novo de endereços — o que também evita quebrar links já compartilhados.
+novo de endereços - o que também evita quebrar links já compartilhados.
 
 ## Por que não Paraglide ou i18next
 
@@ -113,6 +113,6 @@ Com um idioma só, um gerador de código de i18n custaria mais do que entrega: m
 etapa de build, mais um formato de arquivo, mais uma dependência a atualizar.
 
 A assinatura de `t(chave, valores)` é deliberadamente a mesma que essas bibliotecas
-expõem. No dia em que houver dois ou três idiomas de verdade — com roteamento por
-locale e necessidade de *tree-shaking* por idioma — a troca é mecânica: os catálogos
+expõem. No dia em que houver dois ou três idiomas de verdade - com roteamento por
+locale e necessidade de *tree-shaking* por idioma - a troca é mecânica: os catálogos
 já estão no formato certo e as chamadas não mudam.

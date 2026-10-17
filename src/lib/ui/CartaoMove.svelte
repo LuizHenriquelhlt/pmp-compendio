@@ -67,7 +67,7 @@
 		padding: var(--espaco-5);
 		background: var(--superficie);
 		border: 1px solid var(--borda);
-		/* A cor do tipo entra como faixa à esquerda, não como fundo — identifica o tipo
+		/* A cor do tipo entra como faixa à esquerda, não como fundo - identifica o tipo
 		   sem comprometer o contraste do texto. */
 		border-left: 4px solid var(--tipo-cor);
 		border-radius: var(--raio);

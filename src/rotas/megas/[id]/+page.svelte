@@ -21,8 +21,8 @@
 	 * A CA entra no painel só quando MUDA.
 	 *
 	 * Onze pedras gravam `armorClassDelta: 0`, e "17 → 17 (+0)" sob o título "o que muda"
-	 * é ruído. A distinção entre 0 e ausente continua valendo nos dados — 0 é "o módulo
-	 * disse que não muda" e `null` é "o módulo não gravou" —, mas na tela as duas dão no
+	 * é ruído. A distinção entre 0 e ausente continua valendo nos dados - 0 é "o módulo
+	 * disse que não muda" e `null` é "o módulo não gravou" -, mas na tela as duas dão no
 	 * mesmo: nada a mostrar.
 	 */
 	const mudaCA = $derived(mega.deltaCA != null && mega.deltaCA !== 0)
@@ -38,7 +38,7 @@
 </script>
 
 <svelte:head>
-	<title>{mega.nome} — {t("site.nome")}</title>
+	<title>{mega.nome} - {t("site.nome")}</title>
 	<meta
 		name="description"
 		content={paragrafos(mega.descricao)[0]
@@ -67,7 +67,7 @@
 					<!--
 						As três que não seguem a regra comum da Mega Pedra: duas Reversões Primal
 						e Mega Rayquaza, que não precisa de pedra. O rótulo é neutro de propósito
-						— chamar as três de "Primal" erraria em uma, e a regra de cada uma está
+						- chamar as três de "Primal" erraria em uma, e a regra de cada uma está
 						no painel de outras regras.
 					-->
 					<span class="etiqueta aviso">{t("mega.especial")}</span>
@@ -184,7 +184,7 @@
 					{#if mega.escolhasDeAtributo.length > 0}
 						<!--
 							`mega.abilityChoices` no módulo NÃO é escolha de Habilidade: o conteúdo é
-							`{ options: ["str","dex"], delta: 5 }`, o ability score do dnd5e — ou seja,
+							`{ options: ["str","dex"], delta: 5 }`, o ability score do dnd5e - ou seja,
 							atributo. O próprio módulo escreve "à escolha do jogador".
 						-->
 						<div class="escolhas">
@@ -223,7 +223,7 @@
 				<h2>{t("mega.descricao")}</h2>
 
 				<!--
-					Quatro das 93 descrições carregam texto de outro documento do livro — a de
+					Quatro das 93 descrições carregam texto de outro documento do livro - a de
 					Mega Delphox traz um bloco de estatísticas de espécie inteiro. Publicá-las
 					atribuiria a esta forma regras que não são dela, e o leitor não teria como
 					saber onde a descrição acaba. A página diz o que aconteceu, com texto de
@@ -259,7 +259,7 @@
 					<!--
 						Três pedras nomeiam a espécie-base de um jeito que a Pokédex não publica:
 						"Eternal Flower Floette", "Meowstic" (a Pokédex tem Macho e Fêmea) e
-						"Tatsugiri" (tem as três formas). O nome continua visível, sem link —
+						"Tatsugiri" (tem as três formas). O nome continua visível, sem link -
 						escolher uma das formas por semelhança seria adivinhar.
 					-->
 					<p class="sem-ficha">{mega.especie}</p>
@@ -472,7 +472,7 @@
 		font-weight: 600;
 	}
 
-	/* Os dois grupos de emblemas — o antes e o depois — e a própria linha. Sem o `span`
+	/* Os dois grupos de emblemas - o antes e o depois - e a própria linha. Sem o `span`
 	   genérico aqui, os emblemas do DEPOIS saem colados ("TerrestreFogo"). */
 	.linha-tipos, .linha-tipos span {
 		display: inline-flex;

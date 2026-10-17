@@ -2,7 +2,7 @@
 //
 // Extraído do pipeline pela mesma razão que `evolucao.mjs`: é prosa livre do livro, e
 // cada padrão novo é uma chance de ler errado. Aqui o risco é maior, porque um erro não
-// deixa um campo vazio — ele inventa uma regra. "Reduz o Ataque em 1 estágio" lido com o
+// deixa um campo vazio - ele inventa uma regra. "Reduz o Ataque em 1 estágio" lido com o
 // sinal trocado vira um buff na tela, e quem consulta não tem como saber.
 //
 // Por isso cada família de efeito tem TRÊS padrões, não um:
@@ -11,13 +11,13 @@
 //   - `falsoSinal`: as frases que usam as mesmas palavras para outra coisa.
 //     "Este Move drena sua energia" (9 Moves) significa que você fica sem ação, não que
 //     alguém é curado; "drenar os PP do atacante" também não cura.
-//   - `naoImpoe`: as frases que CITAM o efeito sem causá-lo — condicionais ("se você
+//   - `naoImpoe`: as frases que CITAM o efeito sem causá-lo - condicionais ("se você
 //     estiver congelado, ainda pode usar este Move"), imunidades, e as curas da condição
 //     ("a paralisia dele é curada").
 //
 // Uma frase com sinal verdadeiro, que não é citação, e da qual nada foi extraído é a
 // única coisa que vai para `dados/relatorio.json`. É a diferença entre "o livro não
-// declara esse efeito" e "o livro declara e eu não entendi" — a segunda é trabalho a
+// declara esse efeito" e "o livro declara e eu não entendi" - a segunda é trabalho a
 // fazer, e sem os três padrões ela desaparece no meio do ruído ou some em silêncio.
 //
 // O recorte de cada família é o VOCABULÁRIO DO PRÓPRIO LIVRO, não a mecânica: um Move
@@ -29,7 +29,7 @@
  * As condições de status do PMP, com as flexões que aparecem no corpus.
  *
  * `gravemente envenenad` vem antes de `envenenad` porque o livro trata as duas como
- * condições distintas e a segunda é sufixo da primeira — invertido, todo envenenamento
+ * condições distintas e a segunda é sufixo da primeira - invertido, todo envenenamento
  * grave seria lido como envenenamento comum.
  */
 const STATUS = [
@@ -114,7 +114,7 @@ const ESTAGIO_NAO_MUDA = [
 	/acumulad[oa]\s+até\s+um\s+máximo/i,
 ]
 
-/** Frações escritas por extenso e em algarismos — o livro usa as duas formas. */
+/** Frações escritas por extenso e em algarismos - o livro usa as duas formas. */
 const FRACOES = {
 	"metade": [ 1, 2 ],
 	"um terço": [ 1, 3 ],
@@ -145,11 +145,11 @@ function lerFracao(texto) {
  * de quem resiste a ele, e o livro é consistente nisso: "natural de 19 ou 20 **no
  * acerto**" é piso (o atacante quer rolar alto), "natural de 1 ou 2 **no teste**" é teto
  * (quem resiste rolou baixo). Ler os dois como piso transforma um efeito que acontece em
- * 10% das vezes num que acontece sempre — daí a distinção explícita.
+ * 10% das vezes num que acontece sempre - daí a distinção explícita.
  *
  * Entre vários gatilhos na mesma frase a escolha é POSICIONAL: vale o primeiro. Não é o
  * mais específico de propósito. "Em um acerto, … ficando paralisado em caso de falha"
- * (Nuzzle) é uma cadeia — acerto E falha —, e dizer só "em um acerto" é verdade
+ * (Nuzzle) é uma cadeia - acerto E falha -, e dizer só "em um acerto" é verdade
  * incompleta. "Quem falhar no teste por 5 ou mais, OU rolar natural de 1 ou 2, se torna
  * queimada" (Heat Wave) é uma alternativa, e escolher o gatilho mais estreito faria o
  * efeito parecer mais raro do que é. Incompleto erra menos que estreito, e o texto
@@ -184,7 +184,7 @@ function lerGatilho(frase) {
  * De quem é o efeito.
  *
  * O português não ajuda: "o alvo tem sua Precisão reduzida" usa o mesmo possessivo que
- * "sua Velocidade é reduzida" (o usuário). O desempate é por menção explícita — alvo e
+ * "sua Velocidade é reduzida" (o usuário). O desempate é por menção explícita - alvo e
  * aliado vencem o possessivo, porque o livro só os nomeia quando o efeito é deles.
  */
 function lerAlvo(janela) {
@@ -229,15 +229,15 @@ function lerStatus(frase) {
  * Mudanças de estágio da frase.
  *
  * A âncora é a quantidade de estágios, e o que interessa está na JANELA à esquerda dela
- * — o trecho desde a âncora anterior (ou o começo da frase). Ler a frase inteira é o que
+ * - o trecho desde a âncora anterior (ou o começo da frase). Ler a frase inteira é o que
  * quebra em Fillet Away ("você **perde** 50% dos seus pontos de vida máximos, mas seu
  * Ataque… **aumentam** em 2 estágios"): com dois verbos de sinal oposto na mesma frase,
  * só a proximidade da âncora decide, e vale o último verbo da janela.
  *
  * Duas âncoras, porque o livro usa as duas construções:
  *
- *   - "reduzida **em 1** estágio" — a dominante;
- *   - "sua Velocidade **aumenta 1** estágio" — sem a preposição (Scale Shot).
+ *   - "reduzida **em 1** estágio" - a dominante;
+ *   - "sua Velocidade **aumenta 1** estágio" - sem a preposição (Scale Shot).
  *
  * A segunda exige o verbo imediatamente antes do número justamente para não casar com as
  * cláusulas de limite e de referência, que também terminam em "N estágios": "até um
@@ -255,7 +255,7 @@ function lerEstagios(frase) {
 	// extração do PDF: Secret Power lista quatro ambientes com um efeito cada ("Areia,
 	// terra e pedra Reduz Precisão em um estágio Água Reduz Ataque em um estágio…") e
 	// Order Up lista três formas de Tatsugiri. Extrair as mudanças sem as condições que
-	// as separam diria que o Move faz todas de uma vez, o que nunca acontece — então a
+	// as separam diria que o Move faz todas de uma vez, o que nunca acontece - então a
 	// frase vai inteira para o relatório. Nenhuma regra legítima do corpus passa de duas.
 	if ([ ...frase.matchAll(ancora) ].length >= 3) return []
 
@@ -377,9 +377,9 @@ function lerLimite(depois) {
 /**
  * Dreno: a fração do dano causado que volta como cura.
  *
- * O livro escreve de quatro jeitos — "retorna como cura ao usuário", "é convertido em
+ * O livro escreve de quatro jeitos - "retorna como cura ao usuário", "é convertido em
  * cura para o usuário", "ganhando … em pontos de vida" e "recuperando … como pontos de
- * vida" —, e usa "drenar" também para coisas que não curam ninguém. Daí o `falsoSinal`.
+ * vida" -, e usa "drenar" também para coisas que não curam ninguém. Daí o `falsoSinal`.
  */
 const SINAL_DRENO = /\bdren(?:a|ar|am|ando|o)\b|convertid[oa]\s+em\s+cura|retorna\s+como\s+cura|do\s+dano\s+causado[^.]{0,60}(?:em|como)\s+pontos\s+de\s+vida/i
 const DRENO_FALSO = /dren\w*\s+sua\s+energia|drena\s+suas\s+forças|drenar?\s+os\s+PP|drenando\s+também/i
@@ -401,7 +401,7 @@ function lerDreno(frase) {
  * Recuo: o dano que o usuário sofre de volta.
  *
  * A implementação de referência só reconhece as frações por extenso ("um quarto do dano
- * causado"), mas o corpus usa sobretudo algarismos ("sofre 1/3 do dano causado") — por
+ * causado"), mas o corpus usa sobretudo algarismos ("sofre 1/3 do dano causado") - por
  * isso ela encontra 2 dos 13 Moves de recuo.
  *
  * Duas bases: fração do dano causado (o caso comum) e fração da vida máxima do próprio
@@ -431,7 +431,7 @@ function lerRecuo(frase) {
 /**
  * Cura.
  *
- * Os dados de cura já vêm estruturados do módulo — ver a classificação de
+ * Os dados de cura já vêm estruturados do módulo - ver a classificação de
  * `damage.baseFormula` em `moves.mjs`, que o módulo usa tanto para dano quanto para cura.
  * O que só o texto diz é QUEM é curado (Floral Healing e Heal Pulse curam o alvo, não o
  * usuário) e as curas que não são em dados: fração da vida e restauração total.
@@ -493,7 +493,7 @@ const FAMILIAS = [
 /**
  * Um efeito não pode aparecer duas vezes.
  *
- * O livro costuma anunciar o efeito na frase de narração e declará-lo na de regra —
+ * O livro costuma anunciar o efeito na frase de narração e declará-lo na de regra -
  * Lovely Kiss "tenta deixá-la sonolenta" e depois a deixa sonolenta numa disputa. As
  * duas leituras são a mesma regra, e vale a que tem gatilho, que é a da mecânica.
  */

@@ -61,7 +61,7 @@ describe("interpretarDeslocamento", () => {
 	})
 
 	// 65 espécies da v1.33.0 do módulo têm esse campo cortado. Devolvemos o que é
-	// legível e sinalizamos — nunca adivinhamos o modo que falta.
+	// legível e sinalizamos - nunca adivinhamos o modo que falta.
 	it("marca truncamento sem inventar o modo perdido", () => {
 		expect(interpretarDeslocamento("9m de caminhada, 9m de escalada, 9m de")).toEqual({
 			deslocamentos: [

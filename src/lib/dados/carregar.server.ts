@@ -1,7 +1,7 @@
 /**
  * Acesso aos dados gerados pelo pipeline.
  *
- * Os JSONs vivem em `dados/` — fora de `static/` de propósito. Eles são lidos do disco
+ * Os JSONs vivem em `dados/` - fora de `static/` de propósito. Eles são lidos do disco
  * durante o prerender e o resultado fica assado em cada página, então o site publicado
  * contém as páginas renderizadas, não um dump do conteúdo do PMP.
  *
@@ -50,7 +50,7 @@ const FALTANDO = [
  * Lê um JSON de `dados/`.
  *
  * O cache só vale durante o build: o prerender gera 1149 páginas de espécie, e sem ele
- * cada uma releria o `especies.json` inteiro. Em desenvolvimento é o contrário — com
+ * cada uma releria o `especies.json` inteiro. Em desenvolvimento é o contrário - com
  * cache, rodar `npm run dados` não teria efeito até reiniciar o servidor, e a tela
  * mostraria dados velhos sem avisar.
  */
@@ -108,7 +108,7 @@ export function idsDeMega(): string[] {
 }
 
 /**
- * As Megas de uma espécie — uma LISTA, não um campo.
+ * As Megas de uma espécie - uma LISTA, não um campo.
  *
  * Seis espécies têm duas pedras na v1.33.0: Charizard, Mewtwo e Raichu com as formas X e
  * Y, e Garchomp, Absol e Lucario com a forma Z que o PMP acrescentou. Um campo único
@@ -116,7 +116,7 @@ export function idsDeMega(): string[] {
  *
  * É relação inversa, como `evoluiDe` e `especiesComHabilidade`: a pedra declara a
  * espécie-base, e não o contrário, então o pipeline não grava a volta na ficha de espécie.
- * Varrer 93 registros por página de espécie é barato — ao contrário do índice inverso de
+ * Varrer 93 registros por página de espécie é barato - ao contrário do índice inverso de
  * Moves, que precisou de memoização por ter 77 mil referências.
  */
 export function megasDaEspecie(especieId: string): MegaNoIndice[] {
@@ -155,14 +155,14 @@ export type EvolucaoPorItem = {
 }
 
 /**
- * Quem evolui com este item — a relação inversa de `evolucoes.itemId`.
+ * Quem evolui com este item - a relação inversa de `evolucoes.itemId`.
  *
  * Calculada na leitura e não gravada no pipeline, pela mesma razão que `evoluiDe` e
  * `especiesComHabilidade`: é o avesso do caminho natural do dado. O livro declara o item
  * dentro da condição de evolução da espécie, e duplicar a volta na ficha do item criaria
  * duas cópias da mesma ligação para divergirem.
  *
- * São 80 evoluções por item nas 1.149 espécies — varrer é barato, e não precisa da
+ * São 80 evoluções por item nas 1.149 espécies - varrer é barato, e não precisa da
  * memoização que o índice inverso de Moves exigiu.
  */
 export function especiesQueEvoluemCom(itemId: string): EvolucaoPorItem[] {
@@ -207,7 +207,7 @@ export function idsDeEspecie(): string[] {
  */
 export type HabilidadeDaEspecie = {
 	nome: string
-	/** `null` se o nome não casar com o pack — não acontece na v1.33.0, mas o link precisa decidir. */
+	/** `null` se o nome não casar com o pack - não acontece na v1.33.0, mas o link precisa decidir. */
 	id: string | null
 	texto: string
 	oculta: boolean
@@ -228,7 +228,7 @@ function mapaDeHabilidades(): Map<string, Habilidade> {
 /**
  * As habilidades de uma espécie, já resolvidas contra o pack.
  *
- * As 2.662 referências das fichas casam com o pack nas 2.662 na v1.33.0 — nada do reparo
+ * As 2.662 referências das fichas casam com o pack nas 2.662 na v1.33.0 - nada do reparo
  * que `moveTable`, `tms` e `eggMoves` exigem. Ainda assim o `id` pode ser `null`, porque
  * é a página que decide entre link e texto, e não dá para supor que a fonte continue
  * limpa na próxima versão.
@@ -255,7 +255,7 @@ export function habilidadesDaEspecie(especie: Especie): HabilidadeDaEspecie[] {
 }
 
 /**
- * Espécies que evoluem para esta — a relação inversa de `evolucoes`, que o pipeline
+ * Espécies que evoluem para esta - a relação inversa de `evolucoes`, que o pipeline
  * não grava para não duplicar a informação na fonte.
  */
 export function evoluiDe(id: string): { id: string, nome: string }[] {
@@ -283,7 +283,7 @@ export type MoveNoIndice = {
 	resolucoes: IdResolucao[]
 	/** Dados base de dano, quando o Move causa dano. */
 	dano: string | null
-	/** Dados base de cura — campo separado porque o módulo guarda os dois no mesmo lugar. */
+	/** Dados base de cura - campo separado porque o módulo guarda os dois no mesmo lugar. */
 	cura: string | null
 	poder: string
 }
@@ -323,7 +323,7 @@ function mapaDeMoves(): Map<string, string> {
 /**
  * Um nome de Move de ficha de espécie, com o `id` da rota quando ele existe.
  *
- * `tm` vem preenchido só na lista de TMs, e é o número que o livro dá ao disco — está no
+ * `tm` vem preenchido só na lista de TMs, e é o número que o livro dá ao disco - está no
  * nome do documento no módulo ("TM114: Grass Knot"), não num campo.
  */
 export type MoveReferenciado = { nome: string, id: string | null, tm?: number }
@@ -343,7 +343,7 @@ function tmPorMove(): Record<string, number> {
  * Separada de `referenciarMoves` porque só os TMs têm número: a tabela por nível e os
  * Moves de Ovo são os mesmos Moves sem disco nenhum.
  *
- * `tm` fica ausente nas 21 entradas que não casam — e essas são justamente as linhas
+ * `tm` fica ausente nas 21 entradas que não casam - e essas são justamente as linhas
  * contaminadas que `movesNaoResolvidos` já acusa, não TMs que faltam no pack.
  */
 export function referenciarTms(nomes: string[]): MoveReferenciado[] {
@@ -361,7 +361,7 @@ export function referenciarTms(nomes: string[]): MoveReferenciado[] {
  * Resolve nomes de Move em links.
  *
  * `id: null` não é falha de busca: é uma entrada que o pipeline não conseguiu casar com
- * o compêndio e preservou como estava — tabela de defesas vazada para dentro da lista de
+ * o compêndio e preservou como estava - tabela de defesas vazada para dentro da lista de
  * TMs, na v1.33.0 (ver `movesNaoResolvidos` em `relatorio.json`). A ficha mostra o texto
  * sem link, para que a lista do livro não encurte por causa de um defeito da fonte.
  */
@@ -391,7 +391,7 @@ export type QuemAprende = {
  * Índice inverso: de nome de Move para as espécies que o aprendem.
  *
  * Construído de uma vez e memoizado no build porque é o oposto do caminho natural dos
- * dados — a ficha de espécie lista os Moves dela, e a ficha de Move precisa da relação
+ * dados - a ficha de espécie lista os Moves dela, e a ficha de Move precisa da relação
  * virada. São 77 mil referências; refazer a varredura em cada uma das 833 páginas de
  * Move custaria 64 milhões de comparações no prerender.
  */
@@ -432,7 +432,7 @@ export function especiesQueAprendem(nomeDoMove: string): QuemAprende {
  * fora o texto da descrição, os efeitos detalhados e a lista de Megas.
  *
  * Os efeitos entram achatados em facetas, como `resolucoes` e `modos` no índice de
- * Moves — é o que os filtros consultam.
+ * Moves - é o que os filtros consultam.
  */
 export type HabilidadeNoIndice = {
 	id: string
@@ -492,7 +492,7 @@ export type QuemTem = {
 /**
  * Índice inverso: de nome de Habilidade para as espécies que a têm.
  *
- * Construído de uma vez e memoizado no build pela mesma razão que o de Moves — é o
+ * Construído de uma vez e memoizado no build pela mesma razão que o de Moves - é o
  * oposto do caminho natural dos dados, e refazer a varredura em cada uma das 313 páginas
  * de habilidade repetiria 1.149 leituras de ficha por página.
  */
@@ -530,7 +530,7 @@ export function especiesComHabilidade(nomeDaHabilidade: string): QuemTem {
  * Quantos portadores cada habilidade tem, para a listagem.
  *
  * Vem daqui e não do pipeline de propósito: é relação inversa, e o projeto não a grava
- * nos dados para não duplicar na fonte o que já está nas fichas de espécie — a mesma
+ * nos dados para não duplicar na fonte o que já está nas fichas de espécie - a mesma
  * razão de `evoluiDe` não existir como campo.
  */
 export function totalDePortadores(): Map<string, number> {

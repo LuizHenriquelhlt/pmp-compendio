@@ -109,7 +109,7 @@
 </script>
 
 <svelte:head>
-	<title>{t("catalogoMegas.titulo")} — {t("site.nome")}</title>
+	<title>{t("catalogoMegas.titulo")} - {t("site.nome")}</title>
 	<meta
 		name="description"
 		content={t("catalogoMegas.subtitulo", { n: String(data.megas.length) })}

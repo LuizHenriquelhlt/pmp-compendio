@@ -102,7 +102,7 @@
 </script>
 
 <svelte:head>
-	<title>{t("catalogoHabilidades.titulo")} — {t("site.nome")}</title>
+	<title>{t("catalogoHabilidades.titulo")} - {t("site.nome")}</title>
 	<meta
 		name="description"
 		content={t("catalogoHabilidades.subtitulo", { n: String(data.habilidades.length) })}
@@ -116,7 +116,7 @@
 		<!--
 			A contagem de habilidades sem regra fica no subtítulo, não escondida num filtro:
 			quando existe, quem consulta merece saber antes de procurar uma regra que o
-			módulo não tem. Some quando não há nenhuma — a v1.35.0 do módulo zerou as 74, e
+			módulo não tem. Some quando não há nenhuma - a v1.35.0 do módulo zerou as 74, e
 			"0 não têm a regra" é uma frase que só confunde.
 		-->
 		{#if semRegra > 0}

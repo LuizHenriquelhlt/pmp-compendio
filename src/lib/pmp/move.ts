@@ -13,7 +13,7 @@ import type { IdTipo } from "./tipos"
 export type Move = {
 	id: string
 	nome: string
-	/** `null` nos Moves de tipo variável — ver `tipoVariavel`. */
+	/** `null` nos Moves de tipo variável - ver `tipoVariavel`. */
 	tipo: IdTipo | null
 	/** Natural Gift e Judgment mudam de tipo em jogo; o módulo os marca como `variable`. */
 	tipoVariavel: boolean
@@ -26,7 +26,7 @@ export type Move = {
 	prioridade: number
 	/**
 	 * A prioridade que o texto do Move declara, quando o campo do módulo discorda.
-	 * Três Moves estão nessa situação na v1.33.0 — ver `relatorio.json`.
+	 * Três Moves estão nessa situação na v1.33.0 - ver `relatorio.json`.
 	 */
 	prioridadeNoTexto: number | null
 	resolucoes: IdResolucao[]
@@ -90,7 +90,7 @@ export type Efeito =
 	| { tipo: "status", status: IdStatus, alvo: AlvoDeEfeito, gatilho?: Gatilho }
 	| { tipo: "estagio", atributo: IdAtributoDeEstagio, delta: number, alvo?: AlvoDeEfeito, limite?: number, gatilho?: Gatilho }
 	| { tipo: "dreno", fracao: Fracao }
-	// O recuo tem exatamente uma das duas bases — fração do dano causado (o caso comum) ou
+	// O recuo tem exatamente uma das duas bases - fração do dano causado (o caso comum) ou
 	// fração da vida máxima do usuário (Chloroblast). São mecânicas diferentes, e a união
 	// as mantém exclusivas em vez de deixar as duas opcionais e as duas ausentes possíveis.
 	| { tipo: "recuo", fracao: Fracao }
@@ -139,7 +139,7 @@ export const ATRIBUTOS_DE_ESTAGIO = [
 export type IdAtributoDeEstagio = (typeof ATRIBUTOS_DE_ESTAGIO)[number]["id"]
 
 /**
- * Como o Move é resolvido na mesa — a categoria que o filtro da listagem usa.
+ * Como o Move é resolvido na mesa - a categoria que o filtro da listagem usa.
  *
  * Não existe como campo no módulo (`category` é vazio nos 833 Moves) e `activities.type`
  * do Foundry não serve: 75 Moves marcados lá como ataque são disputas no livro. O
@@ -183,12 +183,12 @@ export function formatarFracao({ numerador, denominador }: Fracao): string {
 	return GLIFOS[`${numerador}/${denominador}`] ?? `${numerador}/${denominador}`
 }
 
-/** `null` em Struggle — o único Move sem limite de PP. */
+/** `null` em Struggle - o único Move sem limite de PP. */
 export function formatarPP(pp: number | null): string {
 	return pp == null ? t("move.pp.ilimitado") : String(pp)
 }
 
-/** `"+1"`, `"−2"`, `"0"` — com o sinal de menos tipográfico, como no resto do compêndio. */
+/** `"+1"`, `"−2"`, `"0"` - com o sinal de menos tipográfico, como no resto do compêndio. */
 export function formatarDelta(delta: number): string {
 	if (delta < 0) return `−${Math.abs(delta)}`
 	return delta > 0 ? `+${delta}` : "0"
@@ -208,7 +208,7 @@ export function formatarEscalonamento(dados: Dados): string {
 /**
  * Um efeito mecânico em duas partes, para a pílula da ficha: o que acontece e quando.
  *
- * `quando` é `null` quando o livro não declara condição, e isso é informação — marcar
+ * `quando` é `null` quando o livro não declara condição, e isso é informação - marcar
  * "em um acerto" por padrão inventaria a condição mais comum. Ver `ferramentas/efeitos.mjs`.
  */
 export function descreverEfeito(efeito: Efeito): { oque: string, dequem: string | null, quando: string | null } {

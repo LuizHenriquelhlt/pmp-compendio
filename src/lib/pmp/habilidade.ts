@@ -18,7 +18,7 @@ export type Habilidade = {
 	id: string
 	nome: string
 	/**
-	 * Vazia nas 74 habilidades em que o módulo não achou a regra no livro — ver
+	 * Vazia nas 74 habilidades em que o módulo não achou a regra no livro - ver
 	 * `semRegra`. O que o módulo grava nesse campo é uma nota de extração, não texto do
 	 * PMP, e publicá-la como descrição mostraria um erro de pipeline no lugar da regra.
 	 */
@@ -26,7 +26,7 @@ export type Habilidade = {
 	/** O módulo não tem a regra desta habilidade. 74 das 313 na v1.33.0. */
 	semRegra: boolean
 	efeitos: EfeitoDeHabilidade[]
-	/** Megas que concedem esta habilidade — o portador que não está na Pokédex. */
+	/** Megas que concedem esta habilidade - o portador que não está na Pokédex. */
 	megas: MegaQueConcede[]
 }
 
@@ -109,7 +109,7 @@ export const nomeDoClima = (id: IdClima): string => NOME_DE_CLIMA.get(id) ?? id
  * ela atinge.
  *
  * `moveId` vem preenchido só quando o fato nomeia um Move que tem ficha, e é o que
- * permite a pílula virar link — a ligação de volta para `/moves`, no mesmo espírito do
+ * permite a pílula virar link - a ligação de volta para `/moves`, no mesmo espírito do
  * que a ficha de Move faz com as espécies.
  */
 export function descreverEfeitoDeHabilidade(

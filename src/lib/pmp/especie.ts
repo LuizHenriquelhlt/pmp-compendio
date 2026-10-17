@@ -27,7 +27,7 @@ export type Evolucao = {
 	nivel: number
 	item?: string
 	/**
-	 * `id` do item, quando o nome casa com o catálogo — o que faz a condição virar link.
+	 * `id` do item, quando o nome casa com o catálogo - o que faz a condição virar link.
 	 *
 	 * Casa nas 80 evoluções por item da v1.33.0. `null` continua previsto: o nome vem do
 	 * texto do livro, e nada garante que a próxima versão do módulo o escreva igual.
@@ -37,7 +37,7 @@ export type Evolucao = {
 	periodo?: "dia" | "noite" | "crepusculo"
 	tipoDeMove?: IdTipo
 	genero?: "M" | "F"
-	/** Condição narrativa que o pipeline não soube estruturar — fica como texto. */
+	/** Condição narrativa que o pipeline não soube estruturar - fica como texto. */
 	especial?: string
 }
 
@@ -89,7 +89,7 @@ export type Especie = {
 	deslocamentoBruto: string
 	/**
 	 * `true` quando o texto do módulo está truncado e um dos modos se perdeu.
-	 * 65 espécies estão nessa situação na v1.33.0 — ver `relatorio.json`.
+	 * 65 espécies estão nessa situação na v1.33.0 - ver `relatorio.json`.
 	 */
 	deslocamentoIncompleto: boolean
 	sentidos: Sentido[]
@@ -109,7 +109,7 @@ export function formatarGenero(genero: Genero | null): string {
 	return `${genero.machoPct}% M / ${genero.femeaPct}% F`
 }
 
-/** `9m de caminhada, 7,5m de natação` — números no formato brasileiro. */
+/** `9m de caminhada, 7,5m de natação` - números no formato brasileiro. */
 export function formatarDeslocamentos(deslocamentos: Deslocamento[]): string {
 	return deslocamentos.map(formatarDeslocamento).join(", ")
 }

@@ -18,7 +18,7 @@
 		<div class="atributo">
 			<dt title={atributo.nome}>
 				{atributo.abrev}
-				<span class="apenas-leitor-de-tela">— {atributo.nome}</span>
+				<span class="apenas-leitor-de-tela">- {atributo.nome}</span>
 			</dt>
 			<dd>
 				<span class="valor numero">{atributos[atributo.id]}</span>

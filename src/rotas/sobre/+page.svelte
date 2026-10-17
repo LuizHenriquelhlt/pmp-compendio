@@ -3,7 +3,7 @@
 </script>
 
 <svelte:head>
-	<title>{t("nav.sobre")} — {t("site.nome")}</title>
+	<title>{t("nav.sobre")} - {t("site.nome")}</title>
 </svelte:head>
 
 <div class="pagina leitura">
@@ -48,7 +48,7 @@
 		<p>
 			O pipeline <strong>não inventa dado</strong>. Quando o material de origem está ambíguo ou
 			truncado, o registro é marcado e listado em um relatório de qualidade, para ser corrigido
-			na fonte — e a página exibe a ressalva em vez de um valor adivinhado.
+			na fonte - e a página exibe a ressalva em vez de um valor adivinhado.
 		</p>
 	</section>
 

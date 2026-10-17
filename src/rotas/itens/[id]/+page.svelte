@@ -20,7 +20,7 @@
 </script>
 
 <svelte:head>
-	<title>{item.nome} — {t("site.nome")}</title>
+	<title>{item.nome} - {t("site.nome")}</title>
 	<meta name="description" content={paragrafos(item.descricao)[0] ?? item.nome} />
 </svelte:head>
 
@@ -62,7 +62,7 @@
 
 				<!--
 					Dez itens têm o texto costurado com conteúdo de outra linha da tabela do
-					livro. Publicar atribuiria a eles regra alheia — e em Mega Pedra inverteria
+					livro. Publicar atribuiria a eles regra alheia - e em Mega Pedra inverteria
 					a regra, porque o "Não" de "Não vendido" caiu no meio da frase ("durante a
 					Não batalha"). A página diz o que houve; o original fica no relatório.
 				-->

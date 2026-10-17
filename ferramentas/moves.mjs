@@ -1,7 +1,7 @@
 // Interpretação dos campos de um Move do módulo Foundry.
 //
-// O pack de Moves vem muito mais estruturado que a Pokédex — `moveType`, `pp`, `priority`
-// e `damage.scaling` são campos de verdade —, mas quatro deles não querem dizer o que o
+// O pack de Moves vem muito mais estruturado que a Pokédex - `moveType`, `pp`, `priority`
+// e `damage.scaling` são campos de verdade -, mas quatro deles não querem dizer o que o
 // nome promete, e é por isso que este módulo existe (e tem testes):
 //
 //   1. `damage.baseFormula` e `damage.scaling` são "os dados do Move", não "os dados de
@@ -14,7 +14,7 @@
 //      resultado com 10 + CON do alvo"), porque o Foundry não tem disputa como primitiva.
 //   4. `priority` está zerado em 3 Moves que declaram prioridade no próprio texto.
 //
-// `range.meters` e `range.melee`, por outro lado, conferem com o texto nos 833 Moves —
+// `range.meters` e `range.melee`, por outro lado, conferem com o texto nos 833 Moves -
 // esses dão para usar direto.
 
 /**
@@ -59,7 +59,7 @@ export function emMetros(bruto = "") {
 /**
  * Sobrou "pé" depois da conversão: o campo está truncado na fonte (Tera Starstorm).
  *
- * O lookahead no lugar de `\b` final porque, sem a flag `u`, `\w` é só ASCII — depois de
+ * O lookahead no lugar de `\b` final porque, sem a flag `u`, `\w` é só ASCII - depois de
  * "é" não existe fronteira de palavra, e `/p[ée]s?\b/` nunca casaria o singular.
  */
 export function sobrouEmPes(convertido) {
@@ -77,7 +77,7 @@ const FORMAS_DE_AREA = [
  * O alcance como o compêndio o usa.
  *
  * `metros` e `corpoACorpo` vêm do módulo (conferidos contra o texto nos 833 Moves); o
- * resto é lido do texto, porque só ele distingue "12m de alcance" de "cone de 12m" — a
+ * resto é lido do texto, porque só ele distingue "12m de alcance" de "cone de 12m" - a
  * diferença entre atingir um alvo e atingir todo mundo na frente.
  */
 export function interpretarAlcance(bruto = "", metros = 0, corpoACorpo = false) {
@@ -101,7 +101,7 @@ export function interpretarAlcance(bruto = "", metros = 0, corpoACorpo = false) 
  * `"1 ação / reação"` → `{ texto: "1 ação / reação", modos: [ "acao", "reacao" ] }`.
  *
  * `activation.type` do módulo guarda só o primeiro modo: os 18 Moves de "1 ação /
- * reação" ficam como `action`, e filtrar por reação os perderia — justamente os Moves
+ * reação" ficam como `action`, e filtrar por reação os perderia - justamente os Moves
  * que alguém procura quando quer saber o que dá para fazer fora do seu turno.
  *
  * "recarga" e "carga" não são modos, são restrições de uso (o Move gasta a rodada
@@ -144,12 +144,12 @@ export function interpretarDuracao(bruto = "") {
  * Como o Move é resolvido na mesa.
  *
  * Lido do TEXTO, não de `system.activities[].type`, porque o tipo de atividade é a
- * modelagem do Foundry e não a do PMP — 75 Moves marcados como `attack` são disputas, e
+ * modelagem do Foundry e não a do PMP - 75 Moves marcados como `attack` são disputas, e
  * 24 são Moves de acerto garantido ou de cura pura, sem rolagem de ataque nenhuma.
  *
  * Um Move pode ter mais de uma: 41 deles pedem ataque E salvaguarda. `nenhuma` é o
- * resultado quando o texto não declara rolagem alguma — os buffs pessoais e os Moves de
- * campo —, e não um "não sei".
+ * resultado quando o texto não declara rolagem alguma - os buffs pessoais e os Moves de
+ * campo -, e não um "não sei".
  */
 const RESOLUCOES = [
 	[ "ataque", /Faça\s+(?:um|uma|dois|duas|três|quatro|novamente|\d+)[^.]{0,40}ataques?|ataques?\s+(?:corpo\s+a\s+corpo|à\s+distância)|rolage(?:m|ns)\s+de\s+ataque|realiz(?:a|e|ar)\s+um\s+ataque|fazendo\s+(?:dois|duas|três)\s+ataques?/i ],
@@ -197,7 +197,7 @@ function assuntoDaDescricao(base, descricao) {
 	if (new RegExp(`${base}(?:\\s*\\+\\s*MOVE)?\\s+de\\s+dano`, "i").test(descricao)) return "dano"
 	if (new RegExp(`${base}(?:\\s*\\+\\s*MOVE)?\\s+(?:pontos\\s+de\\s+vida|PV)`, "i").test(descricao)) return "cura"
 	if (new RegExp(`(?:recupera|restaura|cura)\\w*[^.]{0,80}${base}`, "i").test(descricao)) return "cura"
-	// Sete Moves escrevem "de dado do tipo fogo" onde queriam "de dano" — erro de digitação
+	// Sete Moves escrevem "de dado do tipo fogo" onde queriam "de dano" - erro de digitação
 	// no livro, que o bloco de Níveis Superiores desfaz.
 	if (new RegExp(`${base}[^.]{0,60}de\\s+dan[oe]`, "i").test(descricao)) return "dano"
 	return "?"
@@ -211,10 +211,10 @@ const ESCALONAMENTO_NO_TEXTO = /(?:muda|mudam)\s+para\s+(.+)$/is
  * O módulo guarda os dois no mesmo lugar (`damage.baseFormula` e `damage.scaling`) sem
  * dizer qual é qual. O assunto do bloco de Níveis Superiores decide, e a descrição é a
  * reserva; quando nenhum dos dois resolve, nada é atribuído e o Move vai para o
- * relatório — é melhor a ficha não mostrar dado nenhum do que mostrar cura como dano.
+ * relatório - é melhor a ficha não mostrar dado nenhum do que mostrar cura como dano.
  *
  * `escalonamentoPlano` existe porque dois Moves (Sonic Boom, Dragon Rage) escalonam um
- * número fixo e não dados, e `damage.scaling` do módulo só aceita `NdM` — para esses, o
+ * número fixo e não dados, e `damage.scaling` do módulo só aceita `NdM` - para esses, o
  * escalonamento está no texto e em nenhum campo.
  */
 export function interpretarDados({ base = "", escalonamento = [], niveisSuperiores = "", descricao = "" }) {
@@ -347,7 +347,7 @@ export function criarReparadorDeMoves(nomesDeMove) {
 	 *
 	 * Além dos defeitos da lista achatada, a tabela tem um que é só dela: nomes partidos
 	 * ENTRE LINHAS (`"Take"` no nível 4, `"Down Flamethrower"` no nível 8). Daí o
-	 * fragmento pendente, que só se resolve quando a linha seguinte o completa — e o
+	 * fragmento pendente, que só se resolve quando a linha seguinte o completa - e o
 	 * primeiro Move do resultado pertence à linha anterior.
 	 */
 	function repararTabela(linhas = []) {
