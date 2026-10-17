@@ -14,6 +14,8 @@ import type { Especie } from "$pmp/especie"
 import type { Habilidade, IdClima } from "$pmp/habilidade"
 import type { Item, ItemNoIndice } from "$pmp/item"
 import type { Mega, MegaNoIndice } from "$pmp/mega"
+import type { Regra, RegraNoIndice } from "$pmp/regra"
+import type { Tm } from "$pmp/tm"
 import type { IdModo, IdResolucao, IdStatus, Move } from "$pmp/move"
 import type { IdTamanho } from "$pmp/tamanhos"
 import type { IdTipo } from "$pmp/tipos"
@@ -121,6 +123,59 @@ export function idsDeMega(): string[] {
  */
 export function megasDaEspecie(especieId: string): MegaNoIndice[] {
 	return lerIndiceDeMegas().filter((m) => m.especieId === especieId)
+}
+
+// ------------------------------------------------------------------ Regras
+
+export function lerRegras(): Regra[] {
+	return ler<Regra[]>("regras")
+}
+
+export function lerIndiceDeRegras(): RegraNoIndice[] {
+	return ler<RegraNoIndice[]>("indice-regras")
+}
+
+let regraPorId: Map<string, Regra> | undefined
+
+export function acharRegra(id: string): Regra | undefined {
+	if (!building) return new Map(lerRegras().map((r) => [ r.id, r ])).get(id)
+
+	regraPorId ??= new Map(lerRegras().map((r) => [ r.id, r ]))
+	return regraPorId.get(id)
+}
+
+/** Todos os `id` de regra, para o gerador de rotas do prerender. */
+export function idsDeRegra(): string[] {
+	return lerIndiceDeRegras().map((r) => r.id)
+}
+
+// ------------------------------------------------------------------ TMs
+
+/**
+ * O catálogo de discos, montado aqui juntando dois índices que o pipeline já emite:
+ * `tms.json` (nome do Move -> número do disco) e `indice-moves.json` (o resto). Não há
+ * arquivo próprio porque não há dado próprio - um TM é um número apontando para um Move.
+ *
+ * Ordenado por NÚMERO, que é a ordem do disco. A ficha de espécie lista os TMs por nome,
+ * porque lá a pergunta é "este Pokémon aprende tal Move?"; aqui é "o que é o TM 114?".
+ */
+export function lerCatalogoDeTms(): Tm[] {
+	const numeroPorNome = ler<Record<string, number>>("tms")
+	const movePorNome = new Map(lerIndiceDeMoves().map((m) => [ m.nome, m ]))
+
+	return Object.entries(numeroPorNome)
+		.map(([ nome, numero ]) => {
+			const move = movePorNome.get(nome)
+			return {
+				numero,
+				id: move?.id ?? null,
+				nome,
+				tipo: move?.tipo ?? null,
+				pp: move?.pp ?? null,
+				alcance: move?.alcance ?? null,
+			}
+		})
+		.sort((a, b) => a.numero - b.numero)
 }
 
 // ------------------------------------------------------------------ Itens

@@ -10,6 +10,7 @@ import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs"
 import { join } from "node:path"
 import { interpretarEfeitos } from "./efeitos.mjs"
 import { interpretarDefesas } from "./defesas.mjs"
+import { interpretarRegras } from "./regras.mjs"
 import { criarInterpretadorDeEvolucao } from "./evolucao.mjs"
 import { CLIMA_POR_MOVE, interpretarHabilidade, regraAusente } from "./habilidades.mjs"
 import {
@@ -57,6 +58,7 @@ const relatorio = {
 	geradoEm: new Date().toISOString(),
 	deslocamentoIncompleto: [],
 	defesasNaoReconhecidas: [],
+	tagsDeRegraDescartadas: [],
 	movesNaoResolvidos: [],
 	evolucoesNaoResolvidas: [],
 	evolucoesSuspeitas: [],
@@ -1076,6 +1078,23 @@ function escrever(nome, dados) {
 
 relatorio.movesNaoResolvidos = [ ...movesNaoResolvidos ]
 
+/*
+ * As páginas de regras. Diferente das outras fatias, esta não é um catálogo de fichas
+ * com campos: é texto do livro, e o que o pipeline faz é sanitizar e agrupar, não
+ * interpretar. Ver `regras.mjs` para o que a sanitização permite e por quê.
+ */
+const { entradas: regras, descartadas: tagsDeRegraDescartadas } = interpretarRegras(carregarOpcional("regras") ?? [])
+relatorio.tagsDeRegraDescartadas = tagsDeRegraDescartadas
+
+const indiceDeRegras = regras.map((entrada) => ({
+	id: entrada.id,
+	nome: entrada.nome,
+	grupo: entrada.grupo,
+	paginas: entrada.paginas.length,
+	// Primeiras linhas em texto puro, para o cartão da listagem não ficar só com o título.
+	resumo: textoSimples(entrada.paginas[0]?.html ?? "").replace(/\s+/g, " ").trim().slice(0, 190),
+}))
+
 console.log(`\nGerado em ${saida}/:`)
 escrever("especies", especies)
 escrever("indice", indice)
@@ -1088,6 +1107,8 @@ escrever("indice-megas", indiceDeMegas)
 escrever("tms", TM_POR_MOVE)
 escrever("itens", itens)
 escrever("indice-itens", indiceDeItens)
+escrever("regras", regras)
+escrever("indice-regras", indiceDeRegras)
 // Sem a normalização de travessão: o relatório existe para mostrar o que o módulo
 // escreveu de verdade, e trocar a pontuação esconderia parte do que ele deve revelar.
 writeFileSync(join(saida, "relatorio.json"), JSON.stringify(relatorio, null, 1))
@@ -1097,6 +1118,7 @@ console.log(`  tabelas de Moves reparadas: ${movesReparados}`)
 console.log(`  nomes de Move não resolvidos nas fichas: ${movesNaoResolvidos.size}`)
 console.log(`  deslocamento truncado no módulo: ${relatorio.deslocamentoIncompleto.length} espécies`)
 console.log(`  defesas por tipo não reconhecidas: ${relatorio.defesasNaoReconhecidas.length}`)
+console.log(`  tags descartadas das páginas de regra: ${relatorio.tagsDeRegraDescartadas.length}`)
 console.log(`  evoluções com alvo não resolvido: ${relatorio.evolucoesNaoResolvidas.length}`)
 console.log(`  evoluções a conferir no livro: ${relatorio.evolucoesSuspeitas.length}`)
 console.log(`  formas sem antecessor declarado: ${relatorio.formasOrfas.length}`)

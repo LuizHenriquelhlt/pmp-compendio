@@ -166,6 +166,16 @@
 	--secao-itens: oklch(0.58 0.13 75);
 	--secao-itens-forte: oklch(0.50 0.13 75);
 
+	/* TMs em ciano e Regras em ardósia. O ciano é a cor que sobrava longe das cinco
+	   já usadas; a ardósia é de propósito a menos saturada do conjunto - as Regras são
+	   texto do livro para ler, não um catálogo para percorrer, e uma cor que não puxa
+	   o olho é o certo ali. */
+	--secao-tms: oklch(0.54 0.13 200);
+	--secao-tms-forte: oklch(0.46 0.13 200);
+
+	--secao-regras: oklch(0.48 0.05 265);
+	--secao-regras-forte: oklch(0.40 0.05 265);
+
 	/*
 	 * A cor da seção em vigor, que cada rota redefine no `<main>`. O padrão é a marca, para
 	 * qualquer página que não declare a sua (a home, o Sobre, o erro).
@@ -217,6 +227,12 @@
 		--secao-itens: oklch(0.75 0.13 75);
 		--secao-itens-forte: oklch(0.83 0.12 75);
 
+		--secao-tms: oklch(0.72 0.12 200);
+		--secao-tms-forte: oklch(0.80 0.11 200);
+
+		--secao-regras: oklch(0.72 0.04 265);
+		--secao-regras-forte: oklch(0.80 0.04 265);
+
 		--sombra-1: 0 1px 2px oklch(0 0 0 / 0.4);
 		--sombra-2: 0 2px 4px oklch(0 0 0 / 0.35), 0 6px 16px oklch(0 0 0 / 0.3);
 	}
@@ -258,6 +274,12 @@
 
 	--secao-itens: oklch(0.75 0.13 75);
 	--secao-itens-forte: oklch(0.83 0.12 75);
+
+	--secao-tms: oklch(0.72 0.12 200);
+	--secao-tms-forte: oklch(0.80 0.11 200);
+
+	--secao-regras: oklch(0.72 0.04 265);
+	--secao-regras-forte: oklch(0.80 0.04 265);
 
 	--sombra-1: 0 1px 2px oklch(0 0 0 / 0.4);
 	--sombra-2: 0 2px 4px oklch(0 0 0 / 0.35), 0 6px 16px oklch(0 0 0 / 0.3);
@@ -396,6 +418,16 @@ button, input, select {
 .secao-itens {
 	--secao: var(--secao-itens);
 	--secao-forte: var(--secao-itens-forte);
+}
+
+.secao-tms {
+	--secao: var(--secao-tms);
+	--secao-forte: var(--secao-tms-forte);
+}
+
+.secao-regras {
+	--secao: var(--secao-regras);
+	--secao-forte: var(--secao-regras-forte);
 }
 
 /* ------------------------------------------------------------------ Painel

@@ -11,7 +11,7 @@
 	 */
 	type Props = { secao: Secao, tamanho?: number }
 
-	export type Secao = "pokemon" | "moves" | "habilidades" | "megas" | "itens" | "dados"
+	export type Secao = "pokemon" | "moves" | "habilidades" | "megas" | "itens" | "tms" | "regras" | "dados"
 
 	let { secao, tamanho = 112 }: Props = $props()
 </script>
@@ -52,6 +52,19 @@
 		<path d="M14 18h20a4 4 0 0 1 4 4v18a2 2 0 0 1-2 2H12a2 2 0 0 1-2-2V22a4 4 0 0 1 4-4Z" />
 		<path d="M18 18v-3a6 6 0 0 1 12 0v3" />
 		<rect x="18" y="28" width="12" height="9" rx="2" />
+	{:else if secao === "tms"}
+		<!--
+			O disco. Dois círculos concentricos e um brilho: é a forma que o jogo usa para
+			TM desde sempre, e a que o poke5e também escolheu para a seção.
+		-->
+		<circle cx="24" cy="24" r="19" />
+		<circle cx="24" cy="24" r="6" />
+		<path d="M13 15a16 16 0 0 1 8-5" />
+	{:else if secao === "regras"}
+		<!-- Livro aberto: a lombada no meio e as duas páginas caindo para fora. -->
+		<path d="M24 14v26" />
+		<path d="M24 14C19 10 13 9 7 9v26c6 0 12 1 17 5" />
+		<path d="M24 14c5-4 11-5 17-5v26c-6 0-12 1-17 5" />
 	{:else}
 		<!-- Dados da sua mesa: um d20 visto de frente. -->
 		<path d="M24 4 42 14v20L24 44 6 34V14L24 4Z" />

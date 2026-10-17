@@ -14,6 +14,8 @@
 		{ href: "/habilidades", rotulo: t("nav.habilidades") },
 		{ href: "/megas", rotulo: t("nav.megas") },
 		{ href: "/itens", rotulo: t("nav.itens") },
+		{ href: "/tms", rotulo: t("nav.tms") },
+		{ href: "/regras", rotulo: t("nav.regras") },
 		{ href: "/sobre", rotulo: t("nav.sobre") },
 	]
 
@@ -30,7 +32,7 @@
 	 * nova já nasça temática - inclusive as fichas, que são a maior parte das páginas.
 	 * A home, o Sobre e o erro ficam sem classe e herdam a cor da marca.
 	 */
-	const SECOES_COM_COR = [ "pokemon", "moves", "habilidades", "megas", "itens" ]
+	const SECOES_COM_COR = [ "pokemon", "moves", "habilidades", "megas", "itens", "tms", "regras" ]
 
 	const classeDaSecao = $derived.by(() => {
 		const primeiro = page.url.pathname.split("/")[1] ?? ""

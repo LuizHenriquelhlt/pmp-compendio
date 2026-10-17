@@ -45,6 +45,18 @@
 			texto: t("inicio.cartao.itens.texto", { n: data.totalDeItens.toLocaleString("pt-BR") }),
 		},
 		{
+			id: "tms",
+			href: "/tms",
+			titulo: t("inicio.cartao.tms.titulo"),
+			texto: t("inicio.cartao.tms.texto", { n: data.totalDeTms.toLocaleString("pt-BR") }),
+		},
+		{
+			id: "regras",
+			href: "/regras",
+			titulo: t("inicio.cartao.regras.titulo"),
+			texto: t("inicio.cartao.regras.texto", { n: data.totalDeRegras.toLocaleString("pt-BR") }),
+		},
+		{
 			id: "dados",
 			href: "/sobre",
 			titulo: t("inicio.cartao.dados.titulo"),

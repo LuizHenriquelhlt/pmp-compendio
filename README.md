@@ -3,8 +3,8 @@
 *Referência do sistema **Pokémon Mundo Perfeito**, em português do Brasil.*
 
 Site estático de consulta para o PMP: statblocks de espécies, fichas de Move, Habilidade
-Passiva, Mega Evolução e item, com busca e filtros, pensado para ser aberto no meio de uma
-sessão.
+Passiva, Mega Evolução e item, a tabela dos TMs e as páginas de regra do livro, com busca
+e filtros, pensado para ser aberto no meio de uma sessão.
 Construído em
 [SvelteKit](https://svelte.dev/docs/kit), sem servidor e sem banco - tudo é gerado no build.
 
@@ -402,6 +402,8 @@ ferramentas/        pipeline de dados (Node puro, fora do app)
   habilidades.mjs     imunidade, clima e Move concedido no texto da Habilidade
   megas.mjs           habilidade, tamanho e deslocamento no texto da pedra Mega; contaminação
   itens.mjs           preço do item e as quatro contaminações da tabela do PDF
+  defesas.mjs         vulnerabilidades, resistências e imunidades no `traits` do dnd5e
+  regras.mjs          sanitiza o HTML das páginas de regra contra uma lista fechada
   texto.mjs           HTML→texto, slug, deslocamento, sentidos
 mensagens/          catálogos de interface, um por idioma
 src/
@@ -413,8 +415,8 @@ src/
 testes/             testes do pipeline
 ```
 
-Os seis módulos de interpretação (`evolucao`, `moves`, `efeitos`, `habilidades`, `megas`,
-`itens`) são separados de `construir.mjs` pela mesma razão: leem prosa do livro, cada
+Os oito módulos de interpretação (`evolucao`, `moves`, `efeitos`, `habilidades`, `megas`,
+`itens`, `defesas`, `regras`) são separados de `construir.mjs` pela mesma razão: leem prosa do livro, cada
 padrão novo é uma chance de ler errado, e isolados cada padrão vira um teste. As
 entradas dos testes são frases do corpus real, não inventadas.
 
