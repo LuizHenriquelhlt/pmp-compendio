@@ -81,7 +81,7 @@ const STATUS = [
  * escreve "Terrestre". Uma tabela que só aceite os nomes canônicos perde exatamente a
  * habilidade mais conhecida da família.
  */
-const TIPO_POR_NOME = {
+export const TIPO_POR_NOME = {
 	normal: "normal", fogo: "fogo", água: "agua", agua: "agua", elétrico: "eletrico",
 	eletrico: "eletrico", grama: "grama", gelo: "gelo", lutador: "lutador",
 	venenoso: "venenoso", terrestre: "terrestre", terra: "terrestre", voador: "voador",

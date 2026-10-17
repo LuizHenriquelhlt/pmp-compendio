@@ -9,6 +9,7 @@
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs"
 import { join } from "node:path"
 import { interpretarEfeitos } from "./efeitos.mjs"
+import { interpretarDefesas } from "./defesas.mjs"
 import { criarInterpretadorDeEvolucao } from "./evolucao.mjs"
 import { CLIMA_POR_MOVE, interpretarHabilidade, regraAusente } from "./habilidades.mjs"
 import {
@@ -55,6 +56,7 @@ const TAMANHO_POR_CHAVE = {
 const relatorio = {
 	geradoEm: new Date().toISOString(),
 	deslocamentoIncompleto: [],
+	defesasNaoReconhecidas: [],
 	movesNaoResolvidos: [],
 	evolucoesNaoResolvidas: [],
 	evolucoesSuspeitas: [],
@@ -193,6 +195,14 @@ for (const documento of documentosDeEspecie) {
 	const todasAsPericias = periciasBrutas.some((p) => /^todas$/i.test(p.trim()))
 	const semGenero = s.gender?.genderless === true || SEM_GENERO.has(documento.name)
 
+	// As três linhas de defesa moram no `traits` do dnd5e, como texto livre - ver
+	// `defesas.mjs` para o formato e para o que o corpus garante.
+	const defesasLidas = interpretarDefesas(documento.system?.traits)
+	const defesas = defesasLidas.defesas
+	for (const problema of defesasLidas.naoReconhecidas) {
+		relatorio.defesasNaoReconhecidas.push({ especie: documento.name, ...problema })
+	}
+
 	especies.push({
 		id,
 		nome: documento.name,
@@ -234,6 +244,7 @@ for (const documento of documentosDeEspecie) {
 		movesPorNivel: tabelaDeMoves(s.moveTable ?? [], documento.name),
 		tms: listaDeMoves(s.tms ?? [], documento.name),
 		movesDeOvo: listaDeMoves(s.eggMoves ?? [], documento.name),
+		defesas,
 		defesasAlteradas: Object.keys(s.typeDefenseOverrides ?? {}).length > 0 ? s.typeDefenseOverrides : null,
 		imagem: typeof documento.img === "string" && documento.img.startsWith("http") ? documento.img : null,
 	})

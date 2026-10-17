@@ -2,11 +2,31 @@ import type { IdAtributo } from "./atributos"
 import type { IdTamanho } from "./tamanhos"
 import type { IdTipo } from "./tipos"
 
+/**
+ * Uma entrada de defesa: o tipo, e o grau quando o livro o marca.
+ *
+ * `grau` sai verbatim do módulo. `x4` numa vulnerabilidade é fraqueza dobrada; `x1/4`
+ * numa resistência, resistência dobrada. O compêndio mostra o marcador e não o traduz em
+ * regra: o módulo não diz o que ele significa, e inventar isso seria pôr na ficha uma
+ * regra que o livro não escreveu.
+ */
+export type Defesa = { tipo: IdTipo, grau: "x4" | "x1/4" | null }
+
+/**
+ * As três linhas de defesa por tipo. `null` na espécie inteira quer dizer que o módulo
+ * não declarou nenhuma - diferente de três listas vazias, que diriam "não tem defesa".
+ */
+export type Defesas = {
+	vulnerabilidades: Defesa[]
+	resistencias: Defesa[]
+	imunidades: Defesa[]
+}
+
 /** Um modo de deslocamento já interpretado: `{ modo: "caminhada", metros: 9 }`. */
 export type Deslocamento = {
 	modo: "caminhada" | "natação" | "voo" | "escalada" | "escavação"
 	metros: number
-	/** Voo por flutuação — o livro distingue, porque ignora terreno difícil. */
+	/** Voo por flutuação - o livro distingue, porque ignora terreno difícil. */
 	flutuacao?: boolean
 }
 
@@ -98,6 +118,8 @@ export type Especie = {
 	movesPorNivel: { nivel: number, moves: string[] }[]
 	tms: string[]
 	movesDeOvo: string[]
+	/** As três linhas por tipo, lidas do `traits` do módulo. */
+	defesas: Defesas | null
 	/** Resistências/fraquezas que fogem da tabela de tipos padrão. */
 	defesasAlteradas: Record<string, string> | null
 	imagem: string | null

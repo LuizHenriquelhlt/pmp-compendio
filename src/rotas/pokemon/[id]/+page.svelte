@@ -50,6 +50,21 @@
 		return linhas
 	})
 
+	/**
+	 * As três linhas de defesa, na ordem em que o livro as imprime. Montadas aqui, e não
+	 * no modelo, porque a ordem e os rótulos são decisão de apresentação - e os rótulos
+	 * passam por `t()`, como todo texto de interface.
+	 */
+	const linhasDeDefesa = $derived(
+		especie.defesas == null
+			? []
+			: ([ "vulnerabilidades", "resistencias", "imunidades" ] as const).map((chave) => ({
+				chave,
+				rotulo: t(`especie.defesas.${chave}`),
+				entradas: especie.defesas![chave],
+			})),
+	)
+
 	const pericias = $derived(
 		especie.todasAsPericias
 			? t("especie.pericias.todas")
@@ -185,6 +200,31 @@
 							<li><a href="/megas/{mega.id}">{mega.nome}</a> <span class="tenue">({mega.pedra})</span></li>
 						{/each}
 					</ul>
+				</section>
+			{/if}
+
+			{#if especie.defesas != null}
+				<section class="painel">
+					<h2>{t("especie.defesasPorTipo")}</h2>
+					<dl class="ficha">
+						{#each linhasDeDefesa as linha (linha.chave)}
+							<dt>{linha.rotulo}</dt>
+							<dd>
+								{#if linha.entradas.length === 0}
+									<span class="tenue">{t("especie.defesas.nenhuma")}</span>
+								{:else}
+									<span class="defesas">
+										{#each linha.entradas as defesa (defesa.tipo)}
+											<span class="defesa">
+												<EmblemaTipo tipo={defesa.tipo} tamanho="pequeno" />
+												{#if defesa.grau != null}<span class="grau">{defesa.grau}</span>{/if}
+											</span>
+										{/each}
+									</span>
+								{/if}
+							</dd>
+						{/each}
+					</dl>
 				</section>
 			{/if}
 
@@ -467,6 +507,28 @@
 		text-transform: uppercase;
 		letter-spacing: 0.04em;
 		vertical-align: 0.1em;
+	}
+
+	/* Quebra em várias linhas: Charizard tem seis resistências, e em 375px elas não
+	   cabem numa linha só. `align-items: center` alinha o grau com o emblema. */
+	.defesas {
+		display: flex;
+		flex-wrap: wrap;
+		gap: 0.3rem;
+	}
+
+	.defesa {
+		display: inline-flex;
+		align-items: center;
+		gap: 0.2rem;
+	}
+
+	/* O grau fica fora do emblema, e não dentro: dentro, ele herdaria a cor do tipo e
+	   mudaria de contraste a cada tipo - ilegível em alguns. */
+	.grau {
+		color: var(--texto-tenue);
+		font-size: var(--txt-miudo);
+		font-weight: 700;
 	}
 
 	.ficha {
