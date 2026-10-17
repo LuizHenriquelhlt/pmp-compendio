@@ -217,3 +217,35 @@ export function textoCortado(descricao = "") {
 export function textoComecaNoMeio(descricao = "") {
 	return /^[a-zà-ÿ]/.test(descricao.trim())
 }
+
+/**
+ * Os ids de item que alguma evolução de espécie aponta.
+ *
+ * É a ligação inversa de `evolucao.itemId`, e é o que de fato classifica um item como
+ * evolutivo. O cabeçalho "Itens Evolutivos" do livro NÃO serve sozinho: ele cobre 13
+ * itens, e nenhuma das pedras clássicas está entre eles. O livro só agrupou sob esse
+ * título os itens novos de Galar e Paldea; Fire Stone, Thunder Stone, Water Stone e as
+ * outras foram impressas em outro lugar e saem sem seção nenhuma.
+ *
+ * Medido na v1.35.0: 35 itens são apontados por evolução, 13 trazem o cabeçalho, e os
+ * dois conjuntos só se sobrepõem em 7. Filtrar pelo cabeçalho esconderia 28.
+ *
+ * A direção inversa também não é completa: 6 itens trazem o cabeçalho sem que nenhuma
+ * espécie os aponte (Cracked Pot, as três Galarica, as duas xícaras). Nos jogos eles
+ * evoluem Sinistea, Galarian Slowpoke e Poltchageist - é lacuna do dado, não erro de
+ * classificação, e por isso os dois sinais somam em vez de um descartar o outro.
+ */
+export function itensApontadosPorEvolucao(especies = []) {
+	const ids = new Set()
+
+	for (const especie of especies ?? []) {
+		for (const evolucao of especie?.evolucoes ?? []) {
+			const id = evolucao?.itemId
+			// Só string não vazia: o campo é `null` em toda evolução por nível ou lealdade,
+			// que é a maioria delas.
+			if (typeof id === "string" && id !== "") ids.add(id)
+		}
+	}
+
+	return ids
+}

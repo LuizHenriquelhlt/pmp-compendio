@@ -9,11 +9,13 @@
 	type Ordem = "nome" | "precoCrescente" | "precoDecrescente"
 	type Uso = "" | "consumivel" | "equipamento" | "recipiente"
 	type Preco = "" | "com" | "sem"
+	type Evolucao = "" | "com" | "sem"
 
 	let consulta = $state("")
 	let grupo = $state("")
 	let uso = $state<Uso>("")
 	let preco = $state<Preco>("")
+	let evolucao = $state<Evolucao>("")
 	let ordem = $state<Ordem>("nome")
 
 	/** Quantos cartões já estão na tela. Cresce sob demanda. */
@@ -37,6 +39,10 @@
 			if (uso === "equipamento" && (item.consumivel || item.recipiente)) return false
 			if (preco === "com" && item.preco == null) return false
 			if (preco === "sem" && item.preco != null) return false
+			// `evolutivo` soma a ligação inversa da evolução ao cabeçalho do livro - ver
+			// `item.ts`. Filtrar pelo cabeçalho sozinho esconderia as pedras clássicas.
+			if (evolucao === "com" && !item.evolutivo) return false
+			if (evolucao === "sem" && item.evolutivo) return false
 
 			return corresponde(chaves.get(item.id) ?? "", consulta)
 		})
@@ -57,7 +63,9 @@
 	})
 
 	const semPreco = $derived(data.itens.filter((i) => i.preco == null).length)
-	const temFiltro = $derived(consulta !== "" || grupo !== "" || uso !== "" || preco !== "")
+	const evolutivos = $derived(data.itens.filter((i) => i.evolutivo).length)
+	const temFiltro = $derived(
+		consulta !== "" || grupo !== "" || uso !== "" || preco !== "" || evolucao !== "")
 
 	// Qualquer mudança de filtro recomeça a contagem de cartões visíveis.
 	$effect(() => {
@@ -65,6 +73,7 @@
 		void grupo
 		void uso
 		void preco
+		void evolucao
 		void ordem
 		visiveis = LOTE
 	})
@@ -74,6 +83,7 @@
 		grupo = ""
 		uso = ""
 		preco = ""
+		evolucao = ""
 	}
 </script>
 
@@ -131,6 +141,15 @@
 		</div>
 
 		<div class="campo">
+			<label for="evolucao">{t("filtro.evolucaoDeItem")}</label>
+			<select id="evolucao" bind:value={evolucao}>
+				<option value="">{t("filtro.evolucaoDeItem.todos")}</option>
+				<option value="com">{t("filtro.evolucaoDeItem.com")}</option>
+				<option value="sem">{t("filtro.evolucaoDeItem.sem")}</option>
+			</select>
+		</div>
+
+		<div class="campo">
 			<label for="ordem">{t("filtro.ordem")}</label>
 			<select id="ordem" bind:value={ordem}>
 				<option value="nome">{t("filtro.ordem.nome")}</option>
@@ -147,12 +166,15 @@
 	<p class="contagem" aria-live="polite">
 		{tPlural(filtrados.length, "catalogoItens.resultado", "catalogoItens.resultados")}
 		<span class="tenue">· {semPreco} {t("item.semPreco").toLowerCase()}</span>
+		<span class="tenue">· {t("catalogoItens.evolutivos", { n: String(evolutivos) })}</span>
 	</p>
 
 	{#if filtrados.length === 0}
 		<div class="vazio">
 			<p class="vazio-titulo">{t("catalogoItens.vazio")}</p>
-			<p>{t("catalogoItens.vazio.dica")}</p>
+			<!-- O número vem do dado: estava escrito "343" na mensagem, de quando o catálogo
+			     tinha esse tamanho, e continuou lá depois que ele passou a 420. -->
+			<p>{t("catalogoItens.vazio.dica", { n: data.itens.length.toLocaleString("pt-BR") })}</p>
 		</div>
 	{:else}
 		<ul class="grade">

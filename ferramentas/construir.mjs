@@ -14,8 +14,8 @@ import { interpretarRegras } from "./regras.mjs"
 import { criarInterpretadorDeEvolucao } from "./evolucao.mjs"
 import { CLIMA_POR_MOVE, interpretarHabilidade, regraAusente } from "./habilidades.mjs"
 import {
-	aparicaoDaCelulaDePreco, contaminacao, interpretarPreco, precoDivergente, referenciaDePagina,
-	textoComecaNoMeio, textoCortado, tituloDeSecao,
+	aparicaoDaCelulaDePreco, contaminacao, interpretarPreco, itensApontadosPorEvolucao,
+	precoDivergente, referenciaDePagina, textoComecaNoMeio, textoCortado, tituloDeSecao,
 } from "./itens.mjs"
 import {
 	contaminacaoNaDescricao, habilidadePendente, interpretarDeslocamentoConcedido,
@@ -970,6 +970,37 @@ for (const especie of especies) {
 	}
 }
 
+/*
+ * Quais itens evoluem alguma espécie.
+ *
+ * TEM de vir depois do laço acima: é ele que preenche `evolucao.itemId`, e antes dele o
+ * campo não existe em espécie nenhuma. Classificar antes dava 13 itens em vez de 41, e
+ * calado - o filtro funcionaria, só que errado.
+ *
+ * Dois sinais, que SOMAM em vez de um descartar o outro, porque nenhum é completo:
+ *
+ *   - a ligação inversa de `evolucao.itemId`, que é o sinal forte (35 itens);
+ *   - o cabeçalho "Itens Evolutivos" que o livro anexa aos itens de Galar e Paldea (13).
+ *
+ * Os dois só se sobrepõem em 7. O cabeçalho sozinho esconderia as pedras clássicas, que o
+ * livro imprimiu fora dessa seção e que saem sem seção nenhuma; a ligação sozinha perderia
+ * os que o livro declara evolutivos sem que nenhuma espécie os aponte.
+ *
+ * Esses últimos vão para o relatório: é lacuna de dado, do mesmo tipo das outras que o
+ * pipeline mede em vez de preencher.
+ */
+const SECAO_EVOLUTIVA = "Itens Evolutivos"
+const APONTADOS_POR_EVOLUCAO = itensApontadosPorEvolucao(especies)
+
+for (const item of itens) {
+	item.evolutivo = APONTADOS_POR_EVOLUCAO.has(item.id) || item.secao === SECAO_EVOLUTIVA
+}
+
+relatorio.itensEvolutivos = itens.filter((i) => i.evolutivo).length
+relatorio.itensEvolutivosSemEspecie = itens
+	.filter((i) => i.secao === SECAO_EVOLUTIVA && !APONTADOS_POR_EVOLUCAO.has(i.id))
+	.map((i) => i.nome)
+
 // A fatia de Mega que a listagem e a busca carregam. Fica de fora o que só a ficha usa -
 // a descrição, a prosa de `outrosTextos` e os fatos de deslocamento, que são de 5 a 10
 // casos cada e não sustentam filtro.
@@ -1020,6 +1051,8 @@ const indiceDeItens = itens.map((i) => ({
 	consumivel: i.consumivel,
 	recipiente: i.recipiente,
 	especie: i.especie,
+	// A listagem filtra por isto sem abrir a ficha de nenhum item.
+	evolutivo: i.evolutivo,
 	// O cartão precisa saber que a ficha não tem texto inteiro para mostrar, sem carregar
 	// o texto.
 	textoContaminado: i.textoContaminado,
@@ -1139,6 +1172,8 @@ console.log(`  textos de item contaminados na fonte: ${relatorio.textosDeItemCon
 console.log(`  textos de item cortados na fonte: ${relatorio.textosDeItemCortados.length}`)
 console.log(`  células de preço aparadas de itens: ${relatorio.celulasDePrecoEmItens.length}`)
 console.log(`  itens de evolução não resolvidos: ${relatorio.itensDeEvolucaoNaoResolvidos.length}`)
+console.log(`  itens que evoluem alguma espécie: ${relatorio.itensEvolutivos}`)
+console.log(`  itens evolutivos só pelo cabeçalho do livro: ${relatorio.itensEvolutivosSemEspecie.length}`)
 console.log(`  TMs sem número no nome: ${relatorio.tmsSemNumero.length}`)
 console.log(`  Moves de clima ausentes do compêndio: ${relatorio.movesDeClimaAusentes.length}`)
 console.log(`  Moves concedidos por habilidade não resolvidos: ${relatorio.movesDeHabilidadeNaoResolvidos.length}`)

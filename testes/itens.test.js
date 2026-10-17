@@ -1,7 +1,8 @@
 import { describe, expect, it } from "vitest"
 import {
 	aparicaoDaCelulaDePreco, contaminacao, interpretarPreco, precoDivergente,
-	referenciaDePagina, textoComecaNoMeio, textoCortado, tituloDeSecao,
+	itensApontadosPorEvolucao, referenciaDePagina, textoComecaNoMeio, textoCortado,
+	tituloDeSecao,
 } from "../ferramentas/itens.mjs"
 
 // As entradas destes testes são do corpus da v1.33.0, não inventadas. O pack de itens é o
@@ -254,5 +255,45 @@ describe("texto que começa no meio", () => {
 
 	it("não acusa texto vazio", () => {
 		expect(textoComecaNoMeio("")).toBe(false)
+	})
+})
+
+describe("itensApontadosPorEvolucao", () => {
+	// A forma das espécies é a que `construir.mjs` grava: cada evolução traz `itemId`, que
+	// é `null` em toda evolução por nível ou lealdade - a maioria delas.
+	const ESPECIES = [
+		{ nome: "Pikachu", evolucoes: [ { para: "Raichu", itemId: "thunder-stone" } ] },
+		{ nome: "Eevee", evolucoes: [
+			{ para: "Vaporeon", itemId: "water-stone" },
+			{ para: "Jolteon", itemId: "thunder-stone" },
+			{ para: "Espeon", itemId: null },
+		] },
+		{ nome: "Charmander", evolucoes: [ { para: "Charmeleon", itemId: null } ] },
+		{ nome: "Magikarp", evolucoes: [] },
+	]
+
+	it("acha os itens apontados, sem repetir", () => {
+		expect(itensApontadosPorEvolucao(ESPECIES)).toEqual(
+			new Set([ "thunder-stone", "water-stone" ]))
+	})
+
+	it("ignora evolução sem item - nível e lealdade são a maioria", () => {
+		expect(itensApontadosPorEvolucao([
+			{ nome: "Charmander", evolucoes: [ { para: "Charmeleon", itemId: null } ] },
+		])).toEqual(new Set())
+	})
+
+	it.each([ undefined, null, [] ])("devolve conjunto vazio para %j", (entrada) => {
+		expect(itensApontadosPorEvolucao(entrada)).toEqual(new Set())
+	})
+
+	it("aguenta espécie sem o campo de evoluções", () => {
+		expect(itensApontadosPorEvolucao([ { nome: "Ditto" }, null ])).toEqual(new Set())
+	})
+
+	it("descarta itemId vazio, que não é um id", () => {
+		expect(itensApontadosPorEvolucao([
+			{ nome: "X", evolucoes: [ { itemId: "" }, { itemId: "fire-stone" } ] },
+		])).toEqual(new Set([ "fire-stone" ]))
 	})
 })

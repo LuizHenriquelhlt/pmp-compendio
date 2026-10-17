@@ -85,6 +85,18 @@ export type Item = {
 	 * Junto com `consumivel`, é o que separa os 343 onde a pasta não separa.
 	 */
 	especie: string | null
+	/**
+	 * Alguma espécie evolui com este item.
+	 *
+	 * Vem de dois sinais somados, porque nenhum é completo sozinho: a ligação inversa de
+	 * `evolucao.itemId` (35 itens na v1.35.0) e o cabeçalho "Itens Evolutivos" que o livro
+	 * anexa aos itens de Galar e Paldea (13). Os dois só se sobrepõem em 7 - o cabeçalho
+	 * esconderia as pedras clássicas, que o livro imprimiu fora daquela seção, e a ligação
+	 * perderia os 6 que o livro declara evolutivos sem que nenhuma espécie os aponte.
+	 *
+	 * Esses 6 estão em `relatorio.json` como `itensEvolutivosSemEspecie`.
+	 */
+	evolutivo: boolean
 	imagem: string | null
 }
 

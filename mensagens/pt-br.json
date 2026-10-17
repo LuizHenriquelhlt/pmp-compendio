@@ -330,8 +330,9 @@
 	"catalogoItens.nota": "O preço vem do texto do livro: em dois itens o número que o módulo extraiu está mil vezes menor.",
 	"catalogoItens.resultado": "{n} item encontrado",
 	"catalogoItens.resultados": "{n} itens encontrados",
+	"catalogoItens.evolutivos": "{n} evoluem alguma espécie",
 	"catalogoItens.vazio": "Nenhum item corresponde aos filtros.",
-	"catalogoItens.vazio.dica": "Tente outro termo, ou limpe os filtros para ver os 343.",
+	"catalogoItens.vazio.dica": "Tente outro termo, ou limpe os filtros para ver os {n}.",
 	"buscaItens.rotulo": "Buscar item",
 	"buscaItens.exemplo": "Nome do item ou do grupo…",
 
@@ -346,6 +347,10 @@
 	"filtro.precoDeItem.todos": "Com e sem preço",
 	"filtro.precoDeItem.com": "Só os vendidos",
 	"filtro.precoDeItem.sem": "Só os não vendidos",
+	"filtro.evolucaoDeItem": "Evolução",
+	"filtro.evolucaoDeItem.todos": "Com e sem evolução",
+	"filtro.evolucaoDeItem.com": "Só os evolutivos",
+	"filtro.evolucaoDeItem.sem": "Só os não evolutivos",
 	"filtro.ordem.preco": "Preço",
 
 	"item.voltar": "Todos os itens",
