@@ -44,10 +44,32 @@ npm run dados:construir -- ../pmp-rpg/data/raw dados
 
 | Comando | O que faz |
 |---|---|
-| `npm run build` | Gera o site estático em `build/` (uma página por espécie) |
+| `npm run build` | Gera o site estático em `build/` (uma página por espécie e por Move) |
 | `npm run preview` | Serve o build de produção |
 | `npm run teste` | Roda a suíte de testes |
 | `npm run verificar` | Checagem de tipos (`svelte-check`) |
+
+## No Docker
+
+```bash
+npm run dados            # uma vez: o conteúdo não está no git
+docker compose up --build   # abre em http://localhost:8081
+```
+
+As páginas são assadas no build da imagem, então conteúdo novo pede um `--build` novo.
+
+**Por que existe um `nginx.conf` aqui.** O adapter-static grava uma rota por ARQUIVO, não
+por pasta: `/moves` é `moves.html`, `/sobre` é `sobre.html`, `/moves/absorb` é
+`moves/absorb.html`. O `npm run dev` e o `npm run preview` tentam a extensão sozinhos, mas
+um servidor estático comum não — ele devolve 404 em `/sobre` e redireciona `/moves` para
+`/moves/`, uma pasta sem `index.html`. Fora do modo de desenvolvimento, isso quebra todas
+as abas. O `try_files $uri $uri.html` do [nginx.conf](nginx.conf) é o que resolve.
+
+A alternativa seria `trailingSlash: "always"` no SvelteKit, que faz o build emitir
+`pasta/index.html` — mas mudaria toda a forma das URLs (`/moves/` em vez de `/moves`),
+inclusive as de espécie, que já estão decididas. Preferimos adaptar o servidor ao desenho
+das URLs. Quem for publicar isso em outro lugar precisa da mesma regra: tentar `.html`
+antes de desistir.
 
 ## Como os dados chegam aqui
 
@@ -100,6 +122,8 @@ o efeito sem que nada tenha sido extraído. É o que separa "o livro não declar
 ## Estrutura
 
 ```
+Dockerfile          build do site + nginx que serve as rotas (ver "No Docker")
+nginx.conf          try_files $uri $uri.html — sem isso as rotas dão 404
 ferramentas/        pipeline de dados (Node puro, fora do app)
   desempacotar.mjs    packs LevelDB → JSON cru
   construir.mjs       JSON cru → formato do site

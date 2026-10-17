@@ -1,0 +1,9 @@
+node_modules
+build
+.svelte-kit
+.git
+*.log
+
+# dados/ e dados-crus/ NÃO entram aqui: o conteúdo do PMP é lido durante o prerender e
+# precisa estar no contexto do build, mesmo estando fora do git.
+dados-crus

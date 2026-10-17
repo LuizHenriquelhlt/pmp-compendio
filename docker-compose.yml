@@ -1,0 +1,12 @@
+# docker compose up --build        → abre em http://localhost:8081
+#
+# Gere o conteúdo antes, uma vez: `npm run dados` (ele não está no git).
+# Como as páginas são assadas no build da imagem, todo conteúdo novo pede um --build.
+services:
+  compendio:
+    build: .
+    image: pmp-compendio:latest
+    ports:
+      # 8081 porque 8080 é d'O Narrador; só no seu PC, como lá.
+      - "127.0.0.1:8081:80"
+    restart: unless-stopped
