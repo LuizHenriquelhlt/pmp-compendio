@@ -307,13 +307,6 @@
 				</section>
 			{/if}
 
-			{#if data.tms.length > 0}
-				<section class="painel">
-					<h2>{t("especie.tms")} <span class="quantidade">({data.tms.length})</span></h2>
-					<p class="lista-larga"><ListaDeMoves moves={data.tms} /></p>
-				</section>
-			{/if}
-
 			{#if data.movesDeOvo.length > 0}
 				<section class="painel">
 					<h2>{t("especie.movesDeOvo")} <span class="quantidade">({data.movesDeOvo.length})</span></h2>
@@ -322,6 +315,21 @@
 			{/if}
 		</div>
 	</div>
+
+	<!--
+		Os TMs ficam FORA das duas colunas, ocupando a página inteira.
+
+		É de longe o painel mais alto da ficha - mediana de 56 discos, máximo de 309 - e
+		numa coluna de 552px a grade só cabe em duas colunas, deixando uma tira de 1.100px
+		de altura ao lado de uma coluna que terminou há muito. Na largura inteira cabem
+		cinco, e a página volta a ter as duas metades parecidas.
+	-->
+	{#if data.tms.length > 0}
+		<section class="painel tms">
+			<h2>{t("especie.tms")} <span class="quantidade">({data.tms.length})</span></h2>
+			<div class="lista-larga"><ListaDeMoves moves={data.tms} disposicao="grade" /></div>
+		</section>
+	{/if}
 
 	<section class="painel ficha-identidade">
 		<dl class="ficha">
@@ -465,6 +473,10 @@
 	.tenue {
 		color: var(--texto-tenue) !important;
 		font-size: var(--txt-pequeno);
+	}
+
+	.tms {
+		margin-top: var(--espaco-6);
 	}
 
 	.lista-larga {
