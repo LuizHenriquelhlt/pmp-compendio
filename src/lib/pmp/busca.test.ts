@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest"
-import { chaveDeBusca, corresponde, normalizarParaBusca } from "./busca"
+import { chaveDeBusca, chaveDeBuscaDeHabilidade, corresponde, normalizarParaBusca } from "./busca"
 
 describe("normalizarParaBusca", () => {
 	it("ignora acento e caixa", () => {
@@ -28,6 +28,52 @@ describe("chaveDeBusca", () => {
 
 	it("aceita espécie sem região", () => {
 		expect(chaveDeBusca({ nome: "Mew", numero: 151, regiao: null })).toBe("mew 151 151")
+	})
+})
+
+describe("chaveDeBuscaDeHabilidade", () => {
+	// Os nomes de habilidade são em inglês, mas a mecânica se procura em português.
+	it("acha pela condição de status, em português", () => {
+		const limber = chaveDeBuscaDeHabilidade({
+			nome: "Limber",
+			imunidadesDeStatus: [ "paralisado" ],
+			imunidadesDeTipo: [],
+			climas: [],
+		})
+
+		expect(corresponde(limber, "paralisado")).toBe(true)
+		expect(corresponde(limber, "limber")).toBe(true)
+	})
+
+	it("acha pelo tipo e pelo clima, ignorando acento", () => {
+		const voltAbsorb = chaveDeBuscaDeHabilidade({
+			nome: "Volt Absorb",
+			imunidadesDeStatus: [],
+			imunidadesDeTipo: [ "eletrico" ],
+			climas: [],
+		})
+		const swiftSwim = chaveDeBuscaDeHabilidade({
+			nome: "Swift Swim",
+			imunidadesDeStatus: [],
+			imunidadesDeTipo: [],
+			climas: [ "chuva" ],
+		})
+
+		expect(corresponde(voltAbsorb, "elétrico")).toBe(true)
+		expect(corresponde(voltAbsorb, "eletrico")).toBe(true)
+		expect(corresponde(swiftSwim, "chuva")).toBe(true)
+	})
+
+	it("não inventa correspondência para quem não tem a faceta", () => {
+		const adaptability = chaveDeBuscaDeHabilidade({
+			nome: "Adaptability",
+			imunidadesDeStatus: [],
+			imunidadesDeTipo: [],
+			climas: [],
+		})
+
+		expect(corresponde(adaptability, "chuva")).toBe(false)
+		expect(corresponde(adaptability, "adapt")).toBe(true)
 	})
 })
 

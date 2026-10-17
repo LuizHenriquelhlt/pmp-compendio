@@ -11,6 +11,7 @@
 		{ href: "/", rotulo: t("nav.inicio") },
 		{ href: "/pokemon", rotulo: t("nav.pokemon") },
 		{ href: "/moves", rotulo: t("nav.moves") },
+		{ href: "/habilidades", rotulo: t("nav.habilidades") },
 		{ href: "/sobre", rotulo: t("nav.sobre") },
 	]
 
@@ -120,12 +121,25 @@
 
 	nav {
 		margin-left: auto;
+		/* A navegação rola sozinha quando as seções não cabem, em vez de esticar a barra e
+		   fazer a PÁGINA rolar na horizontal. Com quatro seções cabia exatamente em 375px;
+		   a quinta estourava, e ainda vêm Itens e Regras. */
+		min-width: 0;
+		overflow-x: auto;
+		overscroll-behavior-x: contain;
+		scrollbar-width: none;
+	}
+
+	nav::-webkit-scrollbar {
+		display: none;
 	}
 
 	nav ul {
 		display: flex;
 		gap: 0.25rem;
 		list-style: none;
+		/* Sem isto os itens encolhem até quebrar o texto em vez de rolar. */
+		width: max-content;
 	}
 
 	nav a {

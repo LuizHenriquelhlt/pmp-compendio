@@ -32,6 +32,12 @@
 		</article>
 
 		<article>
+			<h2>{t("inicio.cartao.habilidades.titulo")}</h2>
+			<p>{t("inicio.cartao.habilidades.texto", { n: data.totalDeHabilidades.toLocaleString("pt-BR") })}</p>
+			<a href="/habilidades">{t("nav.habilidades")} →</a>
+		</article>
+
+		<article>
 			<h2>{t("inicio.cartao.dados.titulo")}</h2>
 			<p>{t("inicio.cartao.dados.texto")}</p>
 			<a href="/sobre">{t("nav.sobre")} →</a>

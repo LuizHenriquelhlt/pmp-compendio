@@ -2,8 +2,9 @@
 
 *Referência do sistema **Pokémon Mundo Perfeito**, em português do Brasil.*
 
-Site estático de consulta para o PMP: statblocks de espécies e fichas de Move, com busca
-e filtros, pensado para ser aberto no meio de uma sessão. Construído em
+Site estático de consulta para o PMP: statblocks de espécies, fichas de Move e de
+Habilidade Passiva, com busca e filtros, pensado para ser aberto no meio de uma sessão.
+Construído em
 [SvelteKit](https://svelte.dev/docs/kit), sem servidor e sem banco — tudo é gerado no build.
 
 ## Conteúdo não acompanha o código
@@ -44,7 +45,7 @@ npm run dados:construir -- ../pmp-rpg/data/raw dados
 
 | Comando | O que faz |
 |---|---|
-| `npm run build` | Gera o site estático em `build/` (uma página por espécie e por Move) |
+| `npm run build` | Gera o site estático em `build/` (uma página por espécie, Move e Habilidade) |
 | `npm run preview` | Serve o build de produção |
 | `npm run teste` | Roda a suíte de testes |
 | `npm run verificar` | Checagem de tipos (`svelte-check`) |
@@ -93,6 +94,27 @@ nome promete:
 | `activation.type` | Guarda só o primeiro modo: os 18 Moves de "1 ação / reação" ficam como `action` |
 | `priority` | Zerado em 3 Moves que declaram prioridade no próprio texto |
 
+As Habilidades Passivas vêm do pack `abilities`, e ele é o mais pobre dos três: de todos
+os campos do documento, só `name`, `system.description.value` e o flag `placeholder`
+variam nas 313. Tudo o mais é constante, e alguns campos enganam pelo nome:
+
+| Campo do módulo | Por que não dá para usar direto |
+|---|---|
+| `flags[…].category` (habilidade) | `"habilidade-passiva"` nas 313 — promete um vocabulário de categorias e entrega uma constante. Não há taxonomia de habilidade no módulo |
+| `species.passiveAbility.active` | É exatamente `options[0]` nas 1.149 espécies. No PMP o jogador **escolhe** entre as opções; publicar `active` inventa uma escolha que o livro não faz |
+| `mega.abilityChoices` | Não é escolha de Habilidade: o conteúdo é `{ options: ["str","dex"], delta: 5 }` — é o *ability score* do dnd5e, ou seja, **atributo** |
+| `system.description.value` (habilidade) | Em 74 das 313 não é regra, e sim a nota de que o módulo não achou a regra no livro |
+
+Em compensação, as referências de habilidade das fichas de espécie vêm **limpas**: as
+2.662 entradas de `passiveAbility.options` e `hiddenAbility` casam com o pack nas 2.662,
+sem nenhum dos defeitos de extração que obrigam a reparar `moveTable`, `tms` e
+`eggMoves`. Por isso ali não há reparador.
+
+Duas assimetrias que a modelagem precisa respeitar: **"oculta" é propriedade do par
+espécie–habilidade**, não da habilidade (139 das 302 com portador são padrão em uma
+espécie e ocultas em outra), e **três habilidades não pertencem a espécie nenhuma da
+Pokédex** — quem as tem é uma forma Mega, declarada em `mega-evolutions.json`.
+
 **O pipeline não inventa dado.** O que não for possível interpretar com segurança vai
 para `dados/relatorio.json`, com o texto original, para conferência no livro e correção
 na fonte. O relatório cobre:
@@ -110,6 +132,12 @@ na fonte. O relatório cobre:
 | `dadosDeMoveNaoClassificados` | Moves cujos dados não deu para dizer se são de dano ou de cura (1 na v1.33.0) |
 | `efeitosDeMoveNaoInterpretados` | Frases que **declaram** um efeito mecânico que o parser não estruturou (24 na v1.33.0) |
 | `textosDeMoveContaminados` | Texto de regra com conteúdo vazado de outro lugar, como crédito de arte (1 na v1.33.0) |
+| `habilidadesSemRegra` | Habilidades cuja regra o módulo não achou no livro, com a nota original (74 na v1.33.0) |
+| `efeitosDeHabilidadeNaoInterpretados` | Frases que declaram um efeito de habilidade que o parser não estruturou (13 na v1.33.0) |
+| `habilidadesSemPortador` | Habilidades que nenhuma espécie e nenhuma Mega têm (8 na v1.33.0) |
+| `habilidadesDeMegaNaoResolvidas` | Habilidades que uma pedra Mega nomeia e que não existem no pack (18 na v1.33.0, 10 delas literalmente `"[ainda a ser lançada]"`) |
+| `megasSemEspecieBase` | Megas cuja espécie-base não casa com a Pokédex (1 na v1.33.0) |
+| `movesDeClimaAusentes`, `movesDeHabilidadeNaoResolvidos` | Moves nomeados por uma habilidade que não existem no compêndio (0 na v1.33.0) |
 
 Boa parte dessas categorias aponta lacunas no texto do próprio livro, não falhas do
 pipeline — são a lista de trabalho para melhorar o módulo.
@@ -130,10 +158,11 @@ ferramentas/        pipeline de dados (Node puro, fora do app)
   evolucao.mjs        interpretação do texto de evolução (isolada por ser frágil)
   moves.mjs           alcance, ativação, resolução, dados e reparo de nomes de Move
   efeitos.mjs         efeitos mecânicos do texto do Move (a parte mais frágil de todas)
+  habilidades.mjs     imunidade, clima e Move concedido no texto da Habilidade
   texto.mjs           HTML→texto, slug, deslocamento, sentidos
 mensagens/          catálogos de interface, um por idioma
 src/
-  lib/pmp/            domínio: tipos, atributos, tamanhos, busca, espécie, move
+  lib/pmp/            domínio: tipos, atributos, tamanhos, busca, espécie, move, habilidade
   lib/dados/          leitura dos JSONs durante o prerender (só servidor)
   lib/i18n/           acesso às mensagens
   lib/ui/             design system e componentes
@@ -141,10 +170,16 @@ src/
 testes/             testes do pipeline
 ```
 
-Os três módulos de interpretação (`evolucao`, `moves`, `efeitos`) são separados de
-`construir.mjs` pela mesma razão: leem prosa do livro, cada padrão novo é uma chance de
-ler errado, e isolados cada padrão vira um teste. As entradas dos testes são frases do
-corpus real, não inventadas.
+Os quatro módulos de interpretação (`evolucao`, `moves`, `efeitos`, `habilidades`) são
+separados de `construir.mjs` pela mesma razão: leem prosa do livro, cada padrão novo é
+uma chance de ler errado, e isolados cada padrão vira um teste. As entradas dos testes
+são frases do corpus real, não inventadas.
+
+Em `habilidades.mjs` o risco tem nome: a palavra "imune" aparece 37 vezes no corpus e em
+11 delas **não** é imunidade de quem tem a habilidade. Justified diz que *não* fornece
+imunidade, Prankster concede a imunidade ao **oponente**, e Shields Down retira num
+marcador o que concedeu na primeira frase. Por isso a família de imunidade ancora no
+sujeito (`Este Pokémon é imune a…`) e traz a lista de citações junto.
 
 Os dados são lidos de `dados/` **durante o prerender** e ficam assados em cada página.
 Eles não vão para `static/`: o site publicado contém as páginas renderizadas, não um

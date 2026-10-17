@@ -146,15 +146,32 @@
 
 			<section class="painel">
 				<h2>{t("especie.habilidades")}</h2>
+				<!--
+					O nome vira link para a ficha da habilidade, no mesmo padrão da
+					ListaDeMoves: entrada sem `id` sai como texto, para que a lista do livro
+					não encurte por causa de um defeito da fonte. Na v1.33.0 as 2.662
+					referências casam, mas a página não supõe isso.
+				-->
 				<dl class="habilidades">
 					{#each data.habilidades as habilidade (habilidade.nome)}
 						<dt>
-							{habilidade.nome}
+							{#if habilidade.id != null}
+								<a href="/habilidades/{habilidade.id}">{habilidade.nome}</a>
+							{:else}
+								<span class="sem-ficha">{habilidade.nome}</span>
+							{/if}
 							{#if habilidade.oculta}
 								<span class="etiqueta">{t("especie.habilidade.oculta")}</span>
 							{/if}
 						</dt>
-						<dd>{habilidade.texto}</dd>
+						<!--
+							74 habilidades não têm regra no módulo, e todas têm portador: aqui o
+							aviso é texto de interface, não a nota de extração que o módulo
+							gravou no campo de descrição.
+						-->
+						<dd class:tenue={habilidade.semRegra}>
+							{habilidade.semRegra ? t("especie.habilidade.semRegra") : habilidade.texto}
+						</dd>
 					{/each}
 				</dl>
 			</section>
@@ -434,6 +451,13 @@
 		margin: 0.15rem 0 0;
 		color: var(--texto-suave);
 		font-size: var(--txt-pequeno);
+	}
+
+	/* Mesmo sinal da ListaDeMoves: nome que veio da fonte sem corresponder a uma ficha. */
+	.habilidades .sem-ficha {
+		color: var(--texto-tenue);
+		text-decoration: underline dotted;
+		text-decoration-color: var(--borda-forte);
 	}
 
 	.etiqueta {

@@ -5,6 +5,8 @@
  * número com zeros à esquerda e nome de forma são três jeitos legítimos de procurar
  * o mesmo Pokémon.
  */
+import { nomeDoClima, type IdClima } from "./habilidade"
+import { nomeDoStatus, type IdStatus } from "./move"
 import { nomeDoTipo, type IdTipo } from "./tipos"
 
 /** O mínimo que a busca precisa conhecer de uma espécie. */
@@ -63,6 +65,32 @@ export function chaveDeBuscaDeMove(move: MoveBuscavel): string {
 	const partes = [ normalizarParaBusca(move.nome) ]
 	if (move.tipo != null) partes.push(normalizarParaBusca(nomeDoTipo(move.tipo)))
 	return partes.join(" ")
+}
+
+/** O mínimo que a busca precisa conhecer de uma Habilidade. */
+export type HabilidadeBuscavel = {
+	nome: string
+	imunidadesDeStatus: IdStatus[]
+	imunidadesDeTipo: IdTipo[]
+	climas: IdClima[]
+}
+
+/**
+ * Chave de busca de uma Habilidade: o nome e os nomes, em português, do que ela atinge.
+ *
+ * Mesma decisão de `chaveDeBuscaDeMove`: os nomes de habilidade são em inglês (convenção
+ * do PMP), mas quem consulta pensa a mecânica em português — "paralisado" tem de achar
+ * Limber e "granizo" tem de achar Ice Body. O que entra na chave são os VOCABULÁRIOS DO
+ * SISTEMA (condições, tipos e climas), não a descrição: o texto do livro fica fora do
+ * índice, e é por isso que ele continua enxuto.
+ */
+export function chaveDeBuscaDeHabilidade(habilidade: HabilidadeBuscavel): string {
+	return [
+		normalizarParaBusca(habilidade.nome),
+		...habilidade.imunidadesDeStatus.map((s) => normalizarParaBusca(nomeDoStatus(s))),
+		...habilidade.imunidadesDeTipo.map((t) => normalizarParaBusca(nomeDoTipo(t))),
+		...habilidade.climas.map((c) => normalizarParaBusca(nomeDoClima(c))),
+	].join(" ")
 }
 
 /**

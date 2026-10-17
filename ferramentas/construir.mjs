@@ -10,6 +10,7 @@ import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs"
 import { join } from "node:path"
 import { interpretarEfeitos } from "./efeitos.mjs"
 import { criarInterpretadorDeEvolucao } from "./evolucao.mjs"
+import { CLIMA_POR_MOVE, interpretarHabilidade, regraAusente } from "./habilidades.mjs"
 import {
 	CHAVE_DE_TIPO_VARIAVEL, TIPO_DE_MOVE_POR_CHAVE, classificarResolucao, criarReparadorDeMoves,
 	interpretarAlcance, interpretarAtivacao, interpretarDados, interpretarDuracao, prioridadeDeclarada,
@@ -57,6 +58,13 @@ const relatorio = {
 	dadosDeMoveNaoClassificados: [],
 	efeitosDeMoveNaoInterpretados: [],
 	textosDeMoveContaminados: [],
+	habilidadesSemRegra: [],
+	efeitosDeHabilidadeNaoInterpretados: [],
+	movesDeHabilidadeNaoResolvidos: [],
+	movesDeClimaAusentes: [],
+	habilidadesDeMegaNaoResolvidas: [],
+	megasSemEspecieBase: [],
+	habilidadesSemPortador: [],
 }
 
 const dex = carregar("pokedex")
@@ -371,10 +379,147 @@ const indiceDeMoves = moves.map((m) => ({
 	poder: m.poder.texto,
 }))
 
-const habilidades = {}
-for (const documento of carregar("abilities")) {
-	habilidades[documento.name] = textoSimples(documento.system?.description?.value ?? "")
+// ------------------------------------------------------------------ Habilidades
+// O pack `abilities` é o mais pobre dos três: de todos os campos do documento, só `name`,
+// `system.description.value` e o flag `placeholder` variam nas 313 habilidades. O resto é
+// constante — inclusive `flags["pokemon-mundo-perfeito"].category`, que é
+// `"habilidade-passiva"` em todas. O nome promete um vocabulário de categorias e entrega
+// uma constante: não existe taxonomia de habilidade no módulo, e tudo o que esta seção
+// estrutura além do nome sai do texto, em `habilidades.mjs`.
+//
+// Em contrapartida, as referências das fichas de espécie vêm limpas: as 2.662 entradas de
+// `passiveAbility.options` e `hiddenAbility` casam com o pack nas 2.662, sem nenhum dos
+// defeitos de extração que obrigam a reparar `moveTable`, `tms` e `eggMoves`. Aqui não
+// há reparador, de propósito.
+const documentosDeHabilidade = carregar("abilities")
+
+const ID_DE_MOVE_POR_NOME = new Map(moves.map((m) => [ m.nome, m.id ]))
+
+// A tabela que traduz Move de clima em clima é conferida contra o dicionário: um Move
+// renomeado na fonte tem de aparecer como trabalho, não sumir com o clima dele.
+for (const nome of Object.keys(CLIMA_POR_MOVE)) {
+	if (!ID_DE_MOVE_POR_NOME.has(nome)) relatorio.movesDeClimaAusentes.push(nome)
 }
+
+/** Acrescenta o `id` da rota aos efeitos que nomeiam um Move, como a evolução faz. */
+function resolverMoves(efeitos, nomeDaHabilidade) {
+	return efeitos.map((efeito) => {
+		if (efeito.move == null) return efeito
+
+		const moveId = ID_DE_MOVE_POR_NOME.get(efeito.move) ?? null
+		if (moveId == null) {
+			relatorio.movesDeHabilidadeNaoResolvidos.push({ habilidade: nomeDaHabilidade, move: efeito.move })
+		}
+
+		return { ...efeito, moveId }
+	})
+}
+
+// ------------------------------------------------------------------ Megas por habilidade
+// Onze habilidades do pack não pertencem a nenhuma espécie da Pokédex, e três delas
+// (Delta Stream, Aerilate, Parental Bond) são de Mega Evolução: o portador está em
+// `mega-evolutions.json`, num campo que o pipeline não lia. Sem isto a ficha diria
+// "nenhuma espécie tem esta habilidade" onde o módulo diz que Mega Rayquaza tem.
+//
+// Cuidado com o vizinho: `mega.abilityChoices` NÃO é escolha de Habilidade — o conteúdo é
+// `{ options: ["str","dex"], delta: 5 }`, escolha de ATRIBUTO. É o `ability` do dnd5e
+// (ability score), não a Habilidade Passiva do PMP, e lido como habilidade produziria
+// "str" e "dex" como nomes de habilidade.
+const NOMES_DE_HABILIDADE = new Set(documentosDeHabilidade.map((d) => d.name))
+const megasPorHabilidade = new Map()
+
+for (const documento of carregarOpcional("mega-evolutions") ?? []) {
+	const mega = flags(documento).mega
+	const habilidade = mega?.passiveAbility
+
+	if (habilidade == null || habilidade === "") continue
+
+	// Dez pedras gravam a string de pendência `"[ainda a ser lançada]"` como nome de
+	// habilidade, e outras oito nomeiam habilidades sem ficha no pack (Desolate Land e
+	// Primordial Sea, dos Primal, entre elas). Nenhuma das duas situações vira dado.
+	if (!NOMES_DE_HABILIDADE.has(habilidade)) {
+		relatorio.habilidadesDeMegaNaoResolvidas.push({ pedra: documento.name, habilidade })
+		continue
+	}
+
+	// Nenhuma das 93 `megaForm` existe como espécie na Pokédex; a espécie-base existe em
+	// 90, e é para ela que o link aponta. As três que não casam por nome são formas que a
+	// Pokédex publica separadas (Floette, Meowstic, Tatsugiri).
+	const especieId = ID_POR_NOME.get(mega.species) ?? null
+	if (especieId == null) {
+		relatorio.megasSemEspecieBase.push({ pedra: documento.name, especie: mega.species })
+	}
+
+	const lista = megasPorHabilidade.get(habilidade) ?? []
+	lista.push({ pedra: documento.name, forma: mega.megaForm, especie: mega.species, especieId })
+	megasPorHabilidade.set(habilidade, lista)
+}
+
+const habilidades = []
+const idsDeHabilidadeUsados = new Set()
+
+for (const documento of documentosDeHabilidade) {
+	let id = slug(documento.name)
+	while (idsDeHabilidadeUsados.has(id)) id = `${id}-2`
+	idsDeHabilidadeUsados.add(id)
+
+	const bruto = textoSimples(documento.system?.description?.value ?? "")
+
+	// Em 74 das 313 a "descrição" é a nota de que o módulo não achou a regra no livro.
+	// Publicá-la como descrição mostraria um erro de extração onde se espera uma regra,
+	// então o campo sai vazio e a página diz o que aconteceu, com texto de interface.
+	const semRegra = regraAusente({ placeholder: flags(documento).placeholder, descricao: bruto })
+	if (semRegra) relatorio.habilidadesSemRegra.push({ habilidade: documento.name, texto: bruto })
+
+	const descricao = semRegra ? "" : bruto
+	const lido = semRegra ? { efeitos: [], naoInterpretado: [] } : interpretarHabilidade(descricao)
+
+	for (const item of lido.naoInterpretado) {
+		relatorio.efeitosDeHabilidadeNaoInterpretados.push({ habilidade: documento.name, ...item })
+	}
+
+	habilidades.push({
+		id,
+		nome: documento.name,
+		descricao,
+		semRegra,
+		efeitos: resolverMoves(lido.efeitos, documento.name),
+		megas: megasPorHabilidade.get(documento.name) ?? [],
+	})
+}
+
+habilidades.sort((a, b) => a.nome.localeCompare(b.nome, "en"))
+
+// Habilidades que nenhuma espécie e nenhuma Mega têm. Oito na v1.33.0: cinco concedem um
+// Move homônimo a uma forma alternativa (Air Slash, Overheat, Hydro Pump, Blizzard,
+// Leaf Storm) e três não têm portador nenhum (Transformer, Healing Rain, Paper Thin).
+const HABILIDADES_COM_PORTADOR = new Set(especies.flatMap((e) =>
+	[ ...e.habilidades, ...(e.habilidadeOculta != null ? [ e.habilidadeOculta ] : []) ]))
+
+relatorio.habilidadesSemPortador = habilidades
+	.filter((h) => !HABILIDADES_COM_PORTADOR.has(h.nome) && h.megas.length === 0)
+	.map((h) => h.nome)
+
+// A fatia que a listagem e a busca carregam. Os efeitos entram achatados, como os
+// `resolucoes` e `modos` do índice de Moves: é o que os filtros consultam, e a listagem
+// não precisa do texto da descrição para isso.
+const indiceDeHabilidades = habilidades.map((h) => ({
+	id: h.id,
+	nome: h.nome,
+	semRegra: h.semRegra,
+	imunidadesDeStatus: h.efeitos.filter((e) => e.status != null).map((e) => e.status),
+	imunidadesDeTipo: h.efeitos.filter((e) => e.tipoDeMove != null).map((e) => e.tipoDeMove),
+	climas: [ ...new Set(h.efeitos.filter((e) => e.tipo === "clima").map((e) => e.clima)) ]
+		.filter((c) => c != null),
+	// Air Lock e Cloud Nine suprimem o clima inteiro, sem nomear nenhum: sem esta marca
+	// elas sairiam da listagem como habilidades que não têm nada a ver com clima.
+	suprimeClima: h.efeitos.some((e) => e.tipo === "clima" && e.relacao === "suprime"),
+	concedeMove: h.efeitos.some((e) => e.tipo === "moveConcedido"),
+	// Quantas Megas concedem a habilidade. Entra no índice porque o cartão precisa dele
+	// para não dizer "sem portador" nas três habilidades cujo portador é uma forma Mega —
+	// ao contrário da contagem de espécies, que é relação inversa e se calcula na leitura.
+	megas: h.megas.length,
+}))
 
 function escrever(nome, dados) {
 	writeFileSync(join(saida, `${nome}.json`), JSON.stringify(dados))
@@ -390,6 +535,7 @@ escrever("indice", indice)
 escrever("moves", moves)
 escrever("indice-moves", indiceDeMoves)
 escrever("habilidades", habilidades)
+escrever("indice-habilidades", indiceDeHabilidades)
 writeFileSync(join(saida, "relatorio.json"), JSON.stringify(relatorio, null, 1))
 
 console.log(`\nQualidade do dado-fonte (detalhes em ${saida}/relatorio.json):`)
@@ -404,3 +550,10 @@ console.log(`  prioridade de Move divergente do texto: ${relatorio.prioridadeDeM
 console.log(`  dados de Move sem classificar (dano ou cura): ${relatorio.dadosDeMoveNaoClassificados.length}`)
 console.log(`  efeitos de Move declarados e não interpretados: ${relatorio.efeitosDeMoveNaoInterpretados.length}`)
 console.log(`  textos de Move contaminados na fonte: ${relatorio.textosDeMoveContaminados.length}`)
+console.log(`  habilidades sem regra no módulo: ${relatorio.habilidadesSemRegra.length}`)
+console.log(`  efeitos de habilidade declarados e não interpretados: ${relatorio.efeitosDeHabilidadeNaoInterpretados.length}`)
+console.log(`  habilidades sem portador: ${relatorio.habilidadesSemPortador.length}`)
+console.log(`  habilidades de Mega sem ficha no pack: ${relatorio.habilidadesDeMegaNaoResolvidas.length}`)
+console.log(`  Megas cuja espécie-base não casa com a Pokédex: ${relatorio.megasSemEspecieBase.length}`)
+console.log(`  Moves de clima ausentes do compêndio: ${relatorio.movesDeClimaAusentes.length}`)
+console.log(`  Moves concedidos por habilidade não resolvidos: ${relatorio.movesDeHabilidadeNaoResolvidos.length}`)

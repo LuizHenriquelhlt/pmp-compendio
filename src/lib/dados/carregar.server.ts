@@ -11,7 +11,8 @@ import { building } from "$app/environment"
 import { existsSync, readFileSync } from "node:fs"
 import { join } from "node:path"
 import type { Especie } from "$pmp/especie"
-import type { IdModo, IdResolucao, Move } from "$pmp/move"
+import type { Habilidade, IdClima } from "$pmp/habilidade"
+import type { IdModo, IdResolucao, IdStatus, Move } from "$pmp/move"
 import type { IdTamanho } from "$pmp/tamanhos"
 import type { IdTipo } from "$pmp/tipos"
 
@@ -75,8 +76,8 @@ export function lerEspecies(): Especie[] {
 	return ler<Especie[]>("especies")
 }
 
-export function lerHabilidades(): Record<string, string> {
-	return ler<Record<string, string>>("habilidades")
+export function lerHabilidades(): Habilidade[] {
+	return ler<Habilidade[]>("habilidades")
 }
 
 let porId: Map<string, Especie> | undefined
@@ -95,25 +96,60 @@ export function idsDeEspecie(): string[] {
 }
 
 /**
- * As habilidades de uma espécie com o texto de regra de cada uma, já resolvido.
- * `oculta` marca a habilidade oculta, que o livro apresenta separadamente.
+ * Uma habilidade na ficha de espécie: o texto de regra, o `id` da ficha própria e as duas
+ * ressalvas que a página precisa dizer em voz alta.
+ *
+ * `oculta` é propriedade do PAR espécie–habilidade, não da habilidade: das 302 com
+ * portador, 139 aparecem como padrão numa espécie e como oculta em outra (Sheer Force é
+ * oculta em 22 e padrão em 12). Por isso a marca vive aqui e não em `Habilidade`.
  */
-export function habilidadesDaEspecie(especie: Especie): { nome: string, texto: string, oculta: boolean }[] {
-	const catalogo = lerHabilidades()
+export type HabilidadeDaEspecie = {
+	nome: string
+	/** `null` se o nome não casar com o pack — não acontece na v1.33.0, mas o link precisa decidir. */
+	id: string | null
+	texto: string
+	oculta: boolean
+	/** O módulo não tem a regra: a página diz isso em vez de mostrar a nota de extração. */
+	semRegra: boolean
+}
 
-	const normais = especie.habilidades.map((nome) => ({
-		nome,
-		texto: catalogo[nome] ?? "",
-		oculta: false,
-	}))
+let habilidadePorNome: Map<string, Habilidade> | undefined
 
+function mapaDeHabilidades(): Map<string, Habilidade> {
+	// Mesma regra do cache de arquivos: memoiza no build, relê em desenvolvimento.
+	if (!building) return new Map(lerHabilidades().map((h) => [ h.nome, h ]))
+
+	habilidadePorNome ??= new Map(lerHabilidades().map((h) => [ h.nome, h ]))
+	return habilidadePorNome
+}
+
+/**
+ * As habilidades de uma espécie, já resolvidas contra o pack.
+ *
+ * As 2.662 referências das fichas casam com o pack nas 2.662 na v1.33.0 — nada do reparo
+ * que `moveTable`, `tms` e `eggMoves` exigem. Ainda assim o `id` pode ser `null`, porque
+ * é a página que decide entre link e texto, e não dá para supor que a fonte continue
+ * limpa na próxima versão.
+ */
+export function habilidadesDaEspecie(especie: Especie): HabilidadeDaEspecie[] {
+	const catalogo = mapaDeHabilidades()
+
+	const resolver = (nome: string, oculta: boolean): HabilidadeDaEspecie => {
+		const habilidade = catalogo.get(nome)
+
+		return {
+			nome,
+			id: habilidade?.id ?? null,
+			texto: habilidade?.descricao ?? "",
+			oculta,
+			semRegra: habilidade?.semRegra ?? false,
+		}
+	}
+
+	const normais = especie.habilidades.map((nome) => resolver(nome, false))
 	if (especie.habilidadeOculta == null) return normais
 
-	return [ ...normais, {
-		nome: especie.habilidadeOculta,
-		texto: catalogo[especie.habilidadeOculta] ?? "",
-		oculta: true,
-	} ]
+	return [ ...normais, resolver(especie.habilidadeOculta, true) ]
 }
 
 /**
@@ -251,4 +287,119 @@ export function especiesQueAprendem(nomeDoMove: string): QuemAprende {
 
 	const indice = quemAprende ?? indiceInversoDeMoves()
 	return indice.get(nomeDoMove) ?? { nivel: [], tm: [], ovo: [] }
+}
+
+// ------------------------------------------------------------------ Habilidades
+
+/**
+ * A fatia de Habilidade que a listagem e a busca consomem. Enxuta por desenho: fica de
+ * fora o texto da descrição, os efeitos detalhados e a lista de Megas.
+ *
+ * Os efeitos entram achatados em facetas, como `resolucoes` e `modos` no índice de
+ * Moves — é o que os filtros consultam.
+ */
+export type HabilidadeNoIndice = {
+	id: string
+	nome: string
+	/** O módulo não tem a regra. 74 das 313 na v1.33.0. */
+	semRegra: boolean
+	imunidadesDeStatus: IdStatus[]
+	imunidadesDeTipo: IdTipo[]
+	climas: IdClima[]
+	/** Air Lock e Cloud Nine suprimem o clima inteiro, sem nomear nenhum. */
+	suprimeClima: boolean
+	concedeMove: boolean
+	/**
+	 * Quantas Megas concedem a habilidade.
+	 *
+	 * Vem do pipeline, e não da leitura como a contagem de espécies, porque não é relação
+	 * inversa: a pedra declara a habilidade, e não o contrário. É o que impede o cartão de
+	 * dizer "sem portador" em Delta Stream, Aerilate e Parental Bond.
+	 */
+	megas: number
+}
+
+export function lerIndiceDeHabilidades(): HabilidadeNoIndice[] {
+	return ler<HabilidadeNoIndice[]>("indice-habilidades")
+}
+
+let habilidadePorId: Map<string, Habilidade> | undefined
+
+export function acharHabilidade(id: string): Habilidade | undefined {
+	// Mesma regra do cache de arquivos: memoiza no build, relê em desenvolvimento.
+	if (!building) return new Map(lerHabilidades().map((h) => [ h.id, h ])).get(id)
+
+	habilidadePorId ??= new Map(lerHabilidades().map((h) => [ h.id, h ]))
+	return habilidadePorId.get(id)
+}
+
+/** Todos os `id` de Habilidade, para o gerador de rotas do prerender. */
+export function idsDeHabilidade(): string[] {
+	return lerIndiceDeHabilidades().map((h) => h.id)
+}
+
+/** Uma espécie na lista de quem tem uma habilidade. */
+export type EspecieComHabilidade = { id: string, nome: string, numero: number }
+
+/**
+ * Quem tem a habilidade, separado pelo jeito de obtê-la.
+ *
+ * Os dois grupos existem porque "oculta" é propriedade do par espécie–habilidade: 139 das
+ * 302 habilidades com portador são padrão em algumas espécies e ocultas em outras, e
+ * juntá-las num grupo só apagaria a distinção que o livro faz.
+ */
+export type QuemTem = {
+	padrao: EspecieComHabilidade[]
+	oculta: EspecieComHabilidade[]
+}
+
+/**
+ * Índice inverso: de nome de Habilidade para as espécies que a têm.
+ *
+ * Construído de uma vez e memoizado no build pela mesma razão que o de Moves — é o
+ * oposto do caminho natural dos dados, e refazer a varredura em cada uma das 313 páginas
+ * de habilidade repetiria 1.149 leituras de ficha por página.
+ */
+let quemTem: Map<string, QuemTem> | undefined
+
+function indiceInversoDeHabilidades(): Map<string, QuemTem> {
+	const indice = new Map<string, QuemTem>()
+
+	const registrar = (nome: string, campo: keyof QuemTem, especie: EspecieComHabilidade) => {
+		const atual = indice.get(nome) ?? { padrao: [], oculta: [] }
+		atual[campo].push(especie)
+		indice.set(nome, atual)
+	}
+
+	for (const e of lerEspecies()) {
+		const resumo = { id: e.id, nome: e.nome, numero: e.numero }
+
+		// `Set` porque Rockruff é a única espécie com três opções e nada garante que a
+		// fonte não repita um nome na lista.
+		for (const nome of new Set(e.habilidades)) registrar(nome, "padrao", resumo)
+		if (e.habilidadeOculta != null) registrar(e.habilidadeOculta, "oculta", resumo)
+	}
+
+	return indice
+}
+
+export function especiesComHabilidade(nomeDaHabilidade: string): QuemTem {
+	if (building) quemTem ??= indiceInversoDeHabilidades()
+
+	const indice = quemTem ?? indiceInversoDeHabilidades()
+	return indice.get(nomeDaHabilidade) ?? { padrao: [], oculta: [] }
+}
+
+/**
+ * Quantos portadores cada habilidade tem, para a listagem.
+ *
+ * Vem daqui e não do pipeline de propósito: é relação inversa, e o projeto não a grava
+ * nos dados para não duplicar na fonte o que já está nas fichas de espécie — a mesma
+ * razão de `evoluiDe` não existir como campo.
+ */
+export function totalDePortadores(): Map<string, number> {
+	if (building) quemTem ??= indiceInversoDeHabilidades()
+
+	const indice = quemTem ?? indiceInversoDeHabilidades()
+	return new Map([ ...indice ].map(([ nome, { padrao, oculta } ]) => [ nome, padrao.length + oculta.length ]))
 }
