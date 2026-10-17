@@ -125,12 +125,6 @@ export type Especie = {
 	imagem: string | null
 }
 
-/** Nome exibível de um gênero, no formato do livro: `88% M / 12% F`. */
-export function formatarGenero(genero: Genero | null): string {
-	if (genero == null) return "Sem gênero"
-	return `${genero.machoPct}% M / ${genero.femeaPct}% F`
-}
-
 /** `9m de caminhada, 7,5m de natação` - números no formato brasileiro. */
 export function formatarDeslocamentos(deslocamentos: Deslocamento[]): string {
 	return deslocamentos.map(formatarDeslocamento).join(", ")

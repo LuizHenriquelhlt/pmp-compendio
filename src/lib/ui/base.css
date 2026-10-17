@@ -70,6 +70,15 @@
 	--marca-suave: oklch(0.95 0.03 25);
 	--marca-contraste: oklch(0.99 0 0);
 
+	/* Os dois sexos, na barra de gênero da ficha: vermelho e azul saturados, como na
+	   ficha que serviu de modelo. São as únicas cores do compêndio que não seguem a
+	   paleta suave do resto - aqui a fidelidade ao modelo ganha. A barra também traz o
+	   símbolo e a porcentagem escritos, então a cor nunca é a única portadora da
+	   informação, e os mesmos valores servem nos dois temas. */
+	--genero-femea: oklch(0.52 0.21 27);
+	--genero-macho: oklch(0.45 0.25 266);
+	--genero-contraste: oklch(1 0 0);
+
 	--foco: oklch(0.60 0.17 250);
 
 	--sombra-1: 0 1px 2px oklch(0.24 0.02 260 / 0.06), 0 1px 3px oklch(0.24 0.02 260 / 0.04);

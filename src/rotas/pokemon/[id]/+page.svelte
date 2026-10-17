@@ -1,7 +1,8 @@
 <script lang="ts">
 	import { t } from "$i18n"
-	import BotaoVoltar from "$ui/BotaoVoltar.svelte"
-	import { formatarDeslocamentos, formatarGenero, formatarSentido } from "$pmp/especie"
+	import BarraDeGenero from "$ui/BarraDeGenero.svelte"
+import BotaoVoltar from "$ui/BotaoVoltar.svelte"
+	import { formatarDeslocamentos, formatarSentido, type Genero } from "$pmp/especie"
 	import { descreverCondicoes } from "$pmp/evolucao"
 	import { nomeDoTamanho } from "$pmp/tamanhos"
 	import BlocoDeAtributos from "$ui/BlocoDeAtributos.svelte"
@@ -16,7 +17,12 @@
 
 	/** Ficha de identidade: só as linhas que a espécie realmente tem. */
 	const ficha = $derived.by(() => {
-		const linhas: { rotulo: string, valor: string }[] = [
+		// Uma linha ou traz texto, ou traz o gênero para a barra desenhar. O discriminante
+		// é a presença da chave, e não o valor: `genero` pode ser `null` de verdade, nas 162
+		// espécies sem sexo.
+		type Linha = { rotulo: string, valor: string } | { rotulo: string, genero: Genero | null }
+
+		const linhas: Linha[] = [
 			{ rotulo: t("especie.tamanho"), valor: nomeDoTamanho(especie.tamanho) },
 		]
 
@@ -29,7 +35,7 @@
 
 		linhas.push(
 			{ rotulo: t("especie.nivelMinimo"), valor: String(especie.nivelMinimo) },
-			{ rotulo: t("especie.genero"), valor: formatarGenero(especie.genero) },
+			{ rotulo: t("especie.genero"), genero: especie.genero },
 			{
 				rotulo: t("especie.estagio"),
 				valor: t("especie.estagio.valor", { atual: especie.estagio.atual, total: especie.estagio.total }),
@@ -83,12 +89,6 @@
 	<BotaoVoltar href="/pokemon" texto={t("especie.voltar")} />
 
 	<header class="cabecalho tipo-{especie.tipos[0]}">
-		<div class="arte">
-			{#if especie.imagem != null}
-				<img src={especie.imagem} alt={especie.nome} width="200" height="200" />
-			{/if}
-		</div>
-
 		<div class="identidade">
 			<p class="numero cadastro">{t("especie.numero", { n: numeroFormatado })}</p>
 			<h1>{especie.nome}</h1>
@@ -99,8 +99,27 @@
 				{/each}
 			</div>
 
+			<dl class="ficha identidade-dados">
+				{#each ficha as linha (linha.rotulo)}
+					<dt>{linha.rotulo}</dt>
+					<dd>
+						{#if "genero" in linha}
+							<BarraDeGenero genero={linha.genero} />
+						{:else}
+							{linha.valor}
+						{/if}
+					</dd>
+				{/each}
+			</dl>
+
 			{#if especie.descricao !== ""}
 				<p class="descricao">{especie.descricao}</p>
+			{/if}
+		</div>
+
+		<div class="arte">
+			{#if especie.imagem != null}
+				<img src={especie.imagem} alt={especie.nome} width="200" height="200" />
 			{/if}
 		</div>
 	</header>
@@ -330,23 +349,21 @@
 			<div class="lista-larga"><ListaDeMoves moves={data.tms} disposicao="grade" /></div>
 		</section>
 	{/if}
-
-	<section class="painel ficha-identidade">
-		<dl class="ficha">
-			{#each ficha as linha (linha.rotulo)}
-				<dt>{linha.rotulo}</dt>
-				<dd>{linha.valor}</dd>
-			{/each}
-		</dl>
-	</section>
 </article>
 
 <style>
 
 
+	/*
+	 * Dados à esquerda, foto à direita, como na ficha que serviu de modelo.
+	 *
+	 * A ordem na MARCAÇÃO também é essa, e não só na tela: quem usa leitor de tela ouve
+	 * o nome e os dados antes da imagem, que é a ordem útil. Inverter pelo CSS deixaria
+	 * as duas ordens diferentes.
+	 */
 	.cabecalho {
 		display: grid;
-		grid-template-columns: auto 1fr;
+		grid-template-columns: 1fr auto;
 		gap: var(--espaco-8);
 		align-items: center;
 		padding: var(--espaco-8);
@@ -561,8 +578,13 @@
 		color: var(--texto-suave);
 	}
 
-	.ficha-identidade {
-		margin-top: var(--espaco-6);
+	/*
+	 * A identidade (tamanho, altura, gênero, grupos de ovo…) fica DENTRO do cabeçalho,
+	 * ao lado da foto, como na ficha que serviu de modelo. Antes era um painel solto no
+	 * fim da página, longe da arte e do nome a que se refere.
+	 */
+	.identidade-dados {
+		margin-top: var(--espaco-5);
 	}
 
 	.de {
@@ -664,8 +686,20 @@
 			text-align: center;
 		}
 
+		/* Empilhado, a foto volta para cima: é a âncora visual da ficha, e deixada por
+		   último ficaria depois de sete linhas de dados. */
+		.arte {
+			order: -1;
+		}
+
 		.tipos {
 			justify-content: center;
+		}
+
+		/* O cabeçalho centraliza em tela estreita, mas lista de definição centralizada
+		   perde o alinhamento entre rótulo e valor, que é o que a torna legível. */
+		.identidade-dados {
+			text-align: left;
 		}
 
 		.combate {
