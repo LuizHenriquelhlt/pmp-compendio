@@ -6,7 +6,7 @@
   "type": "module",
   "scripts": {
     "dev": "vite dev",
-    "build": "vite build",
+    "build": "vite build && node ferramentas/portatil.mjs",
     "preview": "vite preview",
     "prepare": "svelte-kit sync",
     "verificar": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json",

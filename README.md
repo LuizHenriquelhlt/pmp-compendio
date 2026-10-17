@@ -71,17 +71,25 @@ docker compose up --build   # abre em http://localhost:8081
 As páginas são assadas no build da imagem, então conteúdo novo pede um `--build` novo.
 
 **Por que existe um `nginx.conf` aqui.** O adapter-static grava uma rota por ARQUIVO, não
-por pasta: `/moves` é `moves.html`, `/sobre` é `sobre.html`, `/moves/absorb` é
-`moves/absorb.html`. O `npm run dev` e o `npm run preview` tentam a extensão sozinhos, mas
-um servidor estático comum não — ele devolve 404 em `/sobre` e redireciona `/moves` para
-`/moves/`, uma pasta sem `index.html`. Fora do modo de desenvolvimento, isso quebra todas
-as abas. O `try_files $uri $uri.html` do [nginx.conf](nginx.conf) é o que resolve.
+por pasta: `/moves` sairia como `moves.html`. Quase nenhum servidor estático tenta a
+extensão sozinho — ele devolve 404 em `/sobre` e redireciona `/moves` para `/moves/`, uma
+pasta sem `index.html`. O `npm run dev` e o `npm run preview` resolvem a extensão por conta
+própria, e por isso o problema só aparece fora do modo de desenvolvimento.
 
-A alternativa seria `trailingSlash: "always"` no SvelteKit, que faz o build emitir
-`pasta/index.html` — mas mudaria toda a forma das URLs (`/moves/` em vez de `/moves`),
-inclusive as de espécie, que já estão decididas. Preferimos adaptar o servidor ao desenho
-das URLs. Quem for publicar isso em outro lugar precisa da mesma regra: tentar `.html`
-antes de desistir.
+Por isso o `npm run build` termina em [`ferramentas/portatil.mjs`](ferramentas/portatil.mjs),
+que renomeia cada `build/X.html` para `build/X/index.html` — a forma que **todo** servidor
+estático resolve sozinho, porque `index index.html` é o padrão do nginx, do Apache, do
+Caddy, do S3 e das Pages. As URLs do compêndio não mudam: quem muda é o arquivo no disco,
+não o link em `/moves/absorb`.
+
+É renomear, não copiar: o SvelteKit já grava `build/X/__data.json` ao lado de
+`build/X.html`, então a pasta de destino quase sempre existe e o passo não custa um byte.
+Servir as duas formas custaria os 60 MB de HTML de novo, e a forma com extensão é a que
+depende de configuração especial — não a com índice.
+
+A alternativa seria `trailingSlash: "always"` no SvelteKit, que resolve o mesmo problema
+pelo lado do framework — mas mudaria toda a forma das URLs (`/moves/` em vez de `/moves`),
+inclusive as de espécie, que já estão decididas.
 
 ## Como os dados chegam aqui
 
