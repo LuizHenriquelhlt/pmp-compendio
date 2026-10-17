@@ -453,7 +453,7 @@ para somar um idioma.
 ## Créditos
 
 - **Sistema Pokémon Mundo Perfeito** — comunidade autora do PMP.
-- **Módulo Foundry** [`pokemon-mundo-perfeito`](https://github.com/LuizHenriquelhlt/pokemon-mundo-perfeito), origem dos dados.
+- **Módulo Foundry** [`pokemon-mundo-perfeito`](https://github.com/LuizHenriquelhlt/Foundry-Modulos-Pokemon-Mundo-Perfeito), origem dos dados.
 - **Artes** — [PokéAPI](https://pokeapi.co).
 
 Projeto de fã, sem fim lucrativo. Pokémon é marca registrada de Nintendo, Game Freak e
