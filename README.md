@@ -103,10 +103,20 @@ primeiro nível, não dentro de uma pasta. Um nível a mais é o erro mais comum
 diz que não achou `index.html`.
 
 O [`squarecloud.app`](squarecloud.app) é a configuração do
-[Square Cloud](https://squarecloud.app): `RUNTIME=static` faz o host servir o pacote por
-nginx, que ele configura. O subdomínio se escolhe no painel, na hora do upload — não está
-no arquivo porque o painel valida disponibilidade, e um nome ocupado faria o deploy falhar.
-Não há plano gratuito: hospedagem de site começa no Hobby.
+[Square Cloud](https://squarecloud.app). `RUNTIME=static` faz o host servir o pacote por
+nginx, que ele configura sozinho, e `SUBDOMAIN` é o que define a URL: `pmp-compendio`
+atende em `https://pmp-compendio.squareweb.app`.
+
+**`SUBDOMAIN` tem de ir no PRIMEIRO upload.** Sem ele o deploy vira uma aplicação comum
+em vez de um site, e não há como converter depois — seria apagar e subir de novo. Trocar
+o subdomínio mais tarde funciona; removê-lo, não. O `publicar.mjs` confere isso antes de
+zipar, junto com as outras regras do arquivo: `DISPLAY_NAME` sem acento (o host recusa
+"Compêndio"), `VERSION` entre `recommended` e `latest`, limites de tamanho. Essas regras
+só são aplicadas pelo host DEPOIS do upload, e a do subdomínio não tem segunda chance.
+
+Domínio próprio existe, na aba *Domains* do painel, com os registros de DNS que ele
+mesmo mostra e certificado automático — mas só a partir do plano Standard. No Hobby o
+site fica no `squareweb.app`. Não há plano gratuito.
 
 Como o build é portátil, qualquer host estático serve igual — Cloudflare Pages e Netlify
 aceitam a pasta `build/` direto, sem zip e sem arquivo de configuração.
