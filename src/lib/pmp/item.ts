@@ -49,6 +49,22 @@ export type Item = {
 	 * na ficha de espécie: é conteúdo do livro, não vocabulário do sistema.
 	 */
 	grupo: string | null
+	/**
+	 * A seção do livro de onde o item vem, quando ele a declara.
+	 *
+	 * Os 77 itens que a v1.34.0 acrescentou (as expansões de Galar e Paldea) trazem o
+	 * cabeçalho da seção anexado ao fim da descrição — vazamento de diagramação que, ao
+	 * contrário da célula de preço, carrega informação. Extraído, vira a taxonomia que a
+	 * pasta não dá: "Itens Evolutivos", "Fósseis", "Lista de Tera Shards", "Itens-Chave".
+	 *
+	 * `null` nos 343 da v1.33.0, que não declaram seção.
+	 *
+	 * Sai como o livro escreve, sem uniformizar a caixa: ele mesmo alterna "Itens
+	 * Seguráveis consumíveis" e "Itens Seguráveis Consumíveis".
+	 */
+	secao: string | null
+	/** A expansão de onde o item vem: `"Expansão da Nona Geração (Paldea)"`. */
+	expansao: string | null
 	/** Gasta-se no uso (128 dos 343). */
 	consumivel: boolean
 	/** Carrega outros itens — só Mochila e Mochila Energizada. */

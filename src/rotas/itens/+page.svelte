@@ -22,9 +22,9 @@
 
 	// Como nas outras listagens: as chaves são calculadas uma vez por conjunto de dados,
 	// não a cada tecla digitada. O grupo entra na chave porque é como se procura uma
-	// família inteira — "berry" tem de trazer as 53.
+	// família inteira — "berry" tem de trazer as 53, e "fósseis" os quatro de Galar.
 	const chaves = $derived.by(() => new Map(data.itens.map((i) =>
-		[ i.id, [ i.nome, i.grupo ?? "" ].map(normalizarParaBusca).join(" ") ])))
+		[ i.id, [ i.nome, i.grupo ?? "", i.secao ?? "" ].map(normalizarParaBusca).join(" ") ])))
 
 	/** Os grupos que o catálogo tem, na ordem em que aparecem. */
 	const grupos = $derived([ ...new Set(data.itens.map((i) => i.grupo).filter((g) => g != null)) ].sort())

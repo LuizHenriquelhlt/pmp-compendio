@@ -320,6 +320,8 @@
 	"item.semPreco": "Não vendido",
 	"item.semPreco.nota": "O livro não dá preço a este item.",
 	"item.grupo": "Grupo",
+	"item.secao": "Seção no livro",
+	"item.expansao": "Expansão",
 	"item.uso": "Uso",
 	"item.efeito": "Efeito",
 	"item.semEfeito": "O módulo não traz texto para este item.",

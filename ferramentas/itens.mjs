@@ -52,6 +52,49 @@ export function precoDivergente(bruto, campo) {
 }
 
 // ------------------------------------------------------------------ Descrição
+/**
+ * O título da seção do livro, que a v1.34.0 anexou ao fim de cada item novo.
+ *
+ * Os 77 itens que a v1.34.0 acrescentou (as expansões de Galar e Paldea) trazem, como
+ * ÚLTIMA LINHA da descrição, o cabeçalho da seção de onde vieram:
+ *
+ *     Itens Evolutivos — Expansão da Nona Geração (Paldea)
+ *     Lista de Tera Shards — Expansão da Nona Geração (Paldea)
+ *     Consumíveis — Expansão da Oitava Geração (Galar)
+ *
+ * É vazamento de diagramação como os outros — ninguém quer ler isso no meio da regra —,
+ * mas ao contrário da célula de preço ele CARREGA informação: diz a seção do livro e a
+ * expansão. Então em vez de descartar, extraímos: vira a taxonomia que o pack não tem
+ * (`folder` joga 259 itens num balde chamado "Itens").
+ *
+ * O padrão é estreito de propósito — exige o travessão e a forma "Expansão da … Geração
+ * (…)" na última linha —, porque quatro itens antigos têm segundo parágrafo legítimo
+ * (Fire Gem e as três Incubadoras) e não podem perder nada.
+ *
+ * A seção sai como o livro a escreve, sem normalizar: ele mesmo alterna "Itens Seguráveis
+ * consumíveis" e "Itens Seguráveis Consumíveis", e uniformizar a caixa seria corrigir a
+ * fonte por conta própria. A divergência vai para o relatório.
+ */
+const TITULO_DE_SECAO = /^(.+?)\s+—\s+(Expansão da .+? Geração \([^)]+\))\s*$/
+
+/**
+ * Separa o título de seção do fim da descrição.
+ *
+ * @returns {{ descricao: string, secao: string | null, expansao: string | null }}
+ */
+export function tituloDeSecao(descricao = "") {
+	const linhas = descricao.split(/\r?\n/)
+	const casa = (linhas[linhas.length - 1] ?? "").match(TITULO_DE_SECAO)
+
+	if (casa == null || linhas.length < 2) return { descricao, secao: null, expansao: null }
+
+	return {
+		descricao: linhas.slice(0, -1).join("\n").trim(),
+		secao: casa[1].trim(),
+		expansao: casa[2].trim(),
+	}
+}
+
 
 /**
  * A célula de preço vazia da tabela, que a extração anexou ao fim do texto.

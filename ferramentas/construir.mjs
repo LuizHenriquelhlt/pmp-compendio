@@ -13,7 +13,7 @@ import { criarInterpretadorDeEvolucao } from "./evolucao.mjs"
 import { CLIMA_POR_MOVE, interpretarHabilidade, regraAusente } from "./habilidades.mjs"
 import {
 	aparicaoDaCelulaDePreco, contaminacao, interpretarPreco, precoDivergente, referenciaDePagina,
-	textoCortado,
+	textoCortado, tituloDeSecao,
 } from "./itens.mjs"
 import {
 	contaminacaoNaDescricao, habilidadePendente, interpretarDeslocamentoConcedido,
@@ -848,10 +848,15 @@ for (const documento of documentosDeItem) {
 		})
 	}
 
+	// O cabeçalho da seção do livro, que a v1.34.0 anexou ao fim dos 77 itens novos. Sai
+	// da descrição e vira dado: é a taxonomia que o pack não tem, porque `folder` joga 259
+	// itens num balde chamado "Itens".
+	const { descricao: semTitulo, secao, expansao } = tituloDeSecao(
+		textoSimples(documento.system?.description?.value ?? ""))
+
 	// A célula de preço vazia da tabela, anexada ao fim do texto. Aparar é seguro só
 	// quando os dois sinais concordam: o token está no fim E o item não tem preço.
-	const { descricao: semCelula, aparado } = aparicaoDaCelulaDePreco(
-		textoSimples(documento.system?.description?.value ?? ""), temPreco)
+	const { descricao: semCelula, aparado } = aparicaoDaCelulaDePreco(semTitulo, temPreco)
 
 	if (aparado != null) {
 		relatorio.celulasDePrecoEmItens.push({ item: documento.name, aparado })
@@ -891,6 +896,11 @@ for (const documento of documentosDeItem) {
 		preco,
 		precoTexto: precoNoTexto,
 		grupo: PASTA_DE_ITEM.get(documento.folder) ?? null,
+		// A seção do livro, só nos itens que a declaram. Sai como o livro escreve: ele
+		// mesmo alterna "Itens Seguráveis consumíveis" e "…Consumíveis", e uniformizar a
+		// caixa seria corrigir a fonte por conta própria.
+		secao,
+		expansao,
 		// A divisão do dnd5e, que separa os 343 onde a pasta não separa.
 		consumivel: documento.type === "consumable",
 		recipiente: documento.type === "container",
@@ -966,6 +976,8 @@ const indiceDeItens = itens.map((i) => ({
 	preco: i.preco,
 	precoTexto: i.precoTexto,
 	grupo: i.grupo,
+	secao: i.secao,
+	expansao: i.expansao,
 	consumivel: i.consumivel,
 	recipiente: i.recipiente,
 	especie: i.especie,

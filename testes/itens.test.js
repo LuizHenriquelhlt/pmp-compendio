@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest"
 import {
 	aparicaoDaCelulaDePreco, contaminacao, interpretarPreco, precoDivergente,
-	referenciaDePagina, textoCortado,
+	referenciaDePagina, textoCortado, tituloDeSecao,
 } from "../ferramentas/itens.mjs"
 
 // As entradas destes testes são do corpus da v1.33.0, não inventadas. O pack de itens é o
@@ -178,5 +178,57 @@ describe("texto cortado", () => {
 
 	it("não acusa um texto terminado em ponto", () => {
 		expect(textoCortado("Restaura 2d4+2 PV.")).toBe(false)
+	})
+})
+
+describe("título de seção", () => {
+	// A v1.34.0 acrescentou 77 itens (expansões de Galar e Paldea) e TODOS trazem o
+	// cabeçalho da seção do livro como última linha. É vazamento de diagramação, mas ao
+	// contrário da célula de preço ele carrega informação: vira a taxonomia que o pack não
+	// tem, já que `folder` joga 259 itens num balde chamado "Itens".
+	it.each([
+		[ "Evolui Charcadet para Armarouge.", "Itens Evolutivos", "Expansão da Nona Geração (Paldea)" ],
+		[ "Um broto de bambu raro.", "Tesouros e itens destinados à venda", "Expansão da Nona Geração (Paldea)" ],
+		[ "Permite Terastalizar no tipo Aço.", "Lista de Tera Shards", "Expansão da Nona Geração (Paldea)" ],
+		[ "Restaura PP.", "Consumíveis", "Expansão da Oitava Geração (Galar)" ],
+	])("separa %j da seção %j", (texto, secao, expansao) => {
+		const lido = tituloDeSecao(`${texto}
+${secao} — ${expansao}`)
+
+		expect(lido.descricao).toBe(texto)
+		expect(lido.secao).toBe(secao)
+		expect(lido.expansao).toBe(expansao)
+	})
+
+	// Quatro itens antigos têm segundo parágrafo legítimo (Fire Gem e as três
+	// Incubadoras). O padrão exige o travessão e a forma "Expansão da … Geração (…)"
+	// justamente para não comê-los.
+	it("não toca em segundo parágrafo que não é título de seção", () => {
+		const texto = `Esta Incubadora reduz o Tempo de Eclosão.
+Um segundo parágrafo comum.`
+		const lido = tituloDeSecao(texto)
+
+		expect(lido.descricao).toBe(texto)
+		expect(lido.secao).toBe(null)
+	})
+
+	// Os 343 itens da v1.33.0 são um parágrafo só.
+	it("não mexe em descrição de uma linha", () => {
+		const lido = tituloDeSecao("Restaura 2d4+2 PV.")
+
+		expect(lido.descricao).toBe("Restaura 2d4+2 PV.")
+		expect(lido.secao).toBe(null)
+		expect(lido.expansao).toBe(null)
+	})
+
+	// O título pode vir depois de um texto de dois parágrafos (Dynamax Candy).
+	it("pega o título mesmo quando o texto já tem dois parágrafos", () => {
+		const lido = tituloDeSecao(`Aumenta o nível de Dynamax.
+(Usado apenas na Opção 3.)
+Consumíveis — Expansão da Oitava Geração (Galar)`)
+
+		expect(lido.descricao).toBe(`Aumenta o nível de Dynamax.
+(Usado apenas na Opção 3.)`)
+		expect(lido.secao).toBe("Consumíveis")
 	})
 })

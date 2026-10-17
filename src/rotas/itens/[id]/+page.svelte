@@ -75,6 +75,20 @@
 		</div>
 
 		<div class="coluna">
+			{#if item.secao != null}
+				<!--
+					Só os 77 itens das expansões de Galar e Paldea declaram a seção: ela vem do
+					cabeçalho que o livro deixou colado no fim da descrição deles.
+				-->
+				<section class="painel">
+					<h2>{t("item.secao")}</h2>
+					<p class="secao">{item.secao}</p>
+					{#if item.expansao != null}
+						<p class="tenue">{item.expansao}</p>
+					{/if}
+				</section>
+			{/if}
+
 			<section class="painel">
 				<h2>{t("item.preco")}</h2>
 				{#if preco != null}
@@ -236,6 +250,11 @@
 
 	.painel .tenue {
 		margin-top: 0.4rem;
+	}
+
+	.secao {
+		font-size: var(--txt-g);
+		font-weight: 650;
 	}
 
 	.valor {

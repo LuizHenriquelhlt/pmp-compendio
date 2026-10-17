@@ -25,7 +25,7 @@ Pré-requisitos: Node.js 20+ (testado no 24) e o módulo Foundry
 npm install
 
 # 1. Converte os compêndios LevelDB do módulo em JSON cru (dados-crus/)
-npm run dados:desempacotar -- "../pokemon-mundo-perfeito-v1.33.0"
+npm run dados:desempacotar -- "../pokemon-mundo-perfeito"
 
 # 2. Normaliza para o formato do site (dados/)
 npm run dados:construir
@@ -150,17 +150,17 @@ e **a relação Mega↔habilidade é N:N** — Magic Bounce e Tough Claws são c
 quatro pedras cada.
 
 Os **itens** não estão no pack chamado `items`, que tem dois documentos: uma pasta e o
-Fator Terastal. Os 343 estão em `trainer-features.json`, um saco misto de 522 documentos e
-doze categorias (talentos, naturezas, classes de treinador, as mecânicas Terastal e
-Dynamax), do qual `category: "item-treinador"` é uma fatia:
+Fator Terastal. Os 420 estão em `trainer-features.json`, um saco misto de 600 documentos e
+onze categorias mais 64 pastas (talentos, naturezas, classes de treinador, as mecânicas
+Terastal e Dynamax), do qual `category: "item-treinador"` é a maior fatia:
 
 | Campo do módulo | Por que não dá para usar direto |
 |---|---|
 | `system.price.value` | Está **1000x menor** em 2 itens: o módulo leu a vírgula de `"₽20,000"` como decimal e gravou 20. O pack mistura as duas convenções de milhar — 150 itens escrevem `₽1.500` e 2 escrevem `₽20,000` —, e nenhum dos 343 tem centavos |
-| `system.price.value: 0` | Não é "de graça": 15 itens-chave (Mega Pedra, Pedra-Chave, Bracelete-Z, Cristal-Z…) o livro não vende. É `null`, como o `armorClassDelta` das Megas |
+| `system.price.value: 0` | Não é "de graça": 31 itens-chave (Mega Pedra, Pedra-Chave, Bracelete-Z, Cristal-Z…) o livro não vende. É `null`, como o `armorClassDelta` das Megas |
 | `system.description.value` | A tabela do PDF vazou para dentro em 10 itens, de quatro jeitos — ver abaixo |
-| `folder` | É a única taxonomia do pack, e cobre um quarto dele: 259 dos 343 caem num balde chamado "Itens"; Berries, Hortelãs, Doces e Poções dividem 84 |
-| `img` | 113 dos 343 apontam para a biblioteca de ícones do próprio Foundry (`icons/equipment/…`), que não é publicada com o site. Só os 230 que são URL viram imagem |
+| `folder` | É a taxonomia mais fraca do pack: 310 dos 420 caem num balde chamado "Itens"; Berries, Tera Shards, Hortelãs, Doces e Poções dividem 110 |
+| `img` | 190 dos 420 apontam para a biblioteca de ícones do próprio Foundry (`icons/equipment/…`), que não é publicada com o site; só os 230 que são URL viram imagem. Nenhum dos 77 itens novos da v1.34.0 tem arte publicável |
 
 As quatro formas de contaminação do texto, todas da extração do PDF:
 
@@ -177,6 +177,14 @@ Nos 10 contaminados a descrição **não é publicada**, como nas descrições d
 habilidades sem regra: publicá-la atribuiria ao item uma regra que não é dele. Os 7 do
 caso 1 são aparados e publicados normalmente.
 
+A v1.34.0 trouxe um quinto padrão, e esse **carrega informação**: os 77 itens das
+expansões de Galar e Paldea têm o cabeçalho da seção do livro colado no fim da descrição
+("Itens Evolutivos — Expansão da Nona Geração (Paldea)"). Em vez de descartar, o pipeline
+o extrai para `secao` e `expansao` — vira a taxonomia que a pasta não dá, com 12 seções
+("Itens Evolutivos", "Fósseis", "Lista de Tera Shards", "Itens-Chave"…). O padrão exige o
+travessão e a forma "Expansão da … Geração (…)" na última linha, porque quatro itens
+antigos têm segundo parágrafo legítimo e não podem perder nada.
+
 Cinco Berries (Iapapa, Aguav, Wiki, Figy e Mago) compartilham uma descrição cortada
 exatamente na palavra que as distingue — "causa confusão caso seja de Natureza" —, e seis
 itens mandam o leitor virar a página do livro ("veja a página seguinte"), que num site não
@@ -188,32 +196,32 @@ na fonte. O relatório cobre:
 
 | Campo | O que lista |
 |---|---|
-| `deslocamentoIncompleto` | Espécies cujo deslocamento está truncado no módulo (66 na v1.33.0) |
-| `movesNaoResolvidos` | Entradas das listas de Move das fichas que o reparo não reconheceu (29 na v1.33.0) |
+| `deslocamentoIncompleto` | Espécies cujo deslocamento está truncado no módulo (66 na v1.34.0) |
+| `movesNaoResolvidos` | Entradas das listas de Move das fichas que o reparo não reconheceu (29 na v1.34.0) |
 | `evolucoesNaoResolvidas` | Evoluções cujo alvo não existe no compêndio |
 | `evolucoesSuspeitas` | Evoluções em que o estágio não aumenta |
-| `formasOrfas` | Formas de estágio >1 para as quais nenhuma espécie evolui (23 na v1.33.0) |
+| `formasOrfas` | Formas de estágio >1 para as quais nenhuma espécie evolui (23 na v1.34.0) |
 | `tiposDesconhecidos`, `tamanhosDesconhecidos`, `tiposDeMoveDesconhecidos` | Valores fora do vocabulário esperado |
-| `alcanceDeMoveTruncado` | Moves com o campo de alcance cortado na fonte (1 na v1.33.0) |
-| `prioridadeDeMoveDivergente` | Moves em que o campo `priority` discorda do texto (3 na v1.33.0) |
-| `dadosDeMoveNaoClassificados` | Moves cujos dados não deu para dizer se são de dano ou de cura (1 na v1.33.0) |
-| `efeitosDeMoveNaoInterpretados` | Frases que **declaram** um efeito mecânico que o parser não estruturou (24 na v1.33.0) |
-| `textosDeMoveContaminados` | Texto de regra com conteúdo vazado de outro lugar, como crédito de arte (1 na v1.33.0) |
-| `habilidadesSemRegra` | Habilidades cuja regra o módulo não achou no livro, com a nota original (74 na v1.33.0) |
-| `efeitosDeHabilidadeNaoInterpretados` | Frases que declaram um efeito de habilidade que o parser não estruturou (13 na v1.33.0) |
-| `habilidadesSemPortador` | Habilidades que nenhuma espécie e nenhuma Mega têm (8 na v1.33.0) |
-| `habilidadesDeMegaNaoResolvidas` | Habilidades que uma pedra Mega nomeia e que não existem no pack (20 na v1.33.0: 8 nomes reais, 11 vezes a marca de pendência `"[ainda a ser lançada]"` e 1 truncada na fonte) |
-| `megasSemEspecieBase` | Megas cuja espécie-base não casa com a Pokédex, com os nomes candidatos (3 na v1.33.0) |
-| `descricoesDeMegaContaminadas` | Descrições de Mega com texto de outro documento do livro, com a marca que o denunciou e o original (4 na v1.33.0) |
-| `efeitosDeMegaNaoInterpretados` | Frases de `otherEffects` que declaram um efeito que o parser não estruturou (1 na v1.33.0: o tamanho "Imenso") |
-| `tiposDeMegaDesconhecidos`, `tamanhosDeMegaDesconhecidos`, `deslocamentosDeMegaDesconhecidos`, `camposDeMegaNaoInterpretados`, `categoriasDeMegaDesconhecidas` | Valores de Mega fora do vocabulário ou do formato esperado (0 na v1.33.0) |
-| `precosDeItemDivergentes` | Itens em que o número do módulo discorda do preço impresso (2 na v1.33.0, os dois 1000x menores) |
-| `textosDeItemContaminados` | Itens cujo texto carrega conteúdo de outra linha da tabela, com a marca e o original (10 na v1.33.0) |
-| `celulasDePrecoEmItens` | Células de preço aparadas do fim do texto (7 na v1.33.0) |
-| `textosDeItemCortados` | Itens cujo texto foi cortado antes de dizer a regra (8 na v1.33.0) |
-| `referenciasDePaginaEmItens` | Itens que mandam virar a página do livro (6 na v1.33.0) |
-| `itensDeEvolucaoNaoResolvidos` | Itens citados numa evolução que não têm ficha (0 na v1.33.0) |
-| `movesDeClimaAusentes`, `movesDeHabilidadeNaoResolvidos` | Moves nomeados por uma habilidade que não existem no compêndio (0 na v1.33.0) |
+| `alcanceDeMoveTruncado` | Moves com o campo de alcance cortado na fonte (1 na v1.34.0) |
+| `prioridadeDeMoveDivergente` | Moves em que o campo `priority` discorda do texto (3 na v1.34.0) |
+| `dadosDeMoveNaoClassificados` | Moves cujos dados não deu para dizer se são de dano ou de cura (1 na v1.34.0) |
+| `efeitosDeMoveNaoInterpretados` | Frases que **declaram** um efeito mecânico que o parser não estruturou (24 na v1.34.0) |
+| `textosDeMoveContaminados` | Texto de regra com conteúdo vazado de outro lugar, como crédito de arte (1 na v1.34.0) |
+| `habilidadesSemRegra` | Habilidades cuja regra o módulo não achou no livro, com a nota original (74 na v1.34.0) |
+| `efeitosDeHabilidadeNaoInterpretados` | Frases que declaram um efeito de habilidade que o parser não estruturou (13 na v1.34.0) |
+| `habilidadesSemPortador` | Habilidades que nenhuma espécie e nenhuma Mega têm (8 na v1.34.0) |
+| `habilidadesDeMegaNaoResolvidas` | Habilidades que uma pedra Mega nomeia e que não existem no pack (20 na v1.34.0: 8 nomes reais, 11 vezes a marca de pendência `"[ainda a ser lançada]"` e 1 truncada na fonte) |
+| `megasSemEspecieBase` | Megas cuja espécie-base não casa com a Pokédex, com os nomes candidatos (3 na v1.34.0) |
+| `descricoesDeMegaContaminadas` | Descrições de Mega com texto de outro documento do livro, com a marca que o denunciou e o original (4 na v1.34.0) |
+| `efeitosDeMegaNaoInterpretados` | Frases de `otherEffects` que declaram um efeito que o parser não estruturou (1 na v1.34.0: o tamanho "Imenso") |
+| `tiposDeMegaDesconhecidos`, `tamanhosDeMegaDesconhecidos`, `deslocamentosDeMegaDesconhecidos`, `camposDeMegaNaoInterpretados`, `categoriasDeMegaDesconhecidas` | Valores de Mega fora do vocabulário ou do formato esperado (0 na v1.34.0) |
+| `precosDeItemDivergentes` | Itens em que o número do módulo discorda do preço impresso (2 na v1.34.0, os dois 1000x menores) |
+| `textosDeItemContaminados` | Itens cujo texto carrega conteúdo de outra linha da tabela, com a marca e o original (10 na v1.34.0) |
+| `celulasDePrecoEmItens` | Células de preço aparadas do fim do texto (7 na v1.34.0) |
+| `textosDeItemCortados` | Itens cujo texto foi cortado antes de dizer a regra (8 na v1.34.0) |
+| `referenciasDePaginaEmItens` | Itens que mandam virar a página do livro (6 na v1.34.0) |
+| `itensDeEvolucaoNaoResolvidos` | Itens citados numa evolução que não têm ficha (0 na v1.34.0) |
+| `movesDeClimaAusentes`, `movesDeHabilidadeNaoResolvidos` | Moves nomeados por uma habilidade que não existem no compêndio (0 na v1.34.0) |
 
 Boa parte dessas categorias aponta lacunas no texto do próprio livro, não falhas do
 pipeline — são a lista de trabalho para melhorar o módulo.
