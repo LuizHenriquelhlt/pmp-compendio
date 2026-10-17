@@ -39,6 +39,12 @@ npm run dev
 
 Os dois passos de dados juntos: `npm run dados`.
 
+> **`dados-crus/sem-genero.json` não vem do módulo.** O módulo gravou todas as espécies
+> como 50/50, e a lista das que não têm gênero foi tirada do PDF à mão. Ela não é
+> regenerada pelo passo 1: se você desempacotar numa pasta limpa, copie o arquivo para lá
+> antes do passo 2, senão as espécies sem gênero voltam a sair 50/50 — e o aviso é só um
+> `console.warn` fácil de não ver.
+
 Se você já tem os packs desempacotados em outro lugar, aponte o segundo passo para lá:
 
 ```bash
