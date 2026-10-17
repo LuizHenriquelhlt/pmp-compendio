@@ -2,8 +2,8 @@
 
 *Referência do sistema **Pokémon Mundo Perfeito**, em português do Brasil.*
 
-Site estático de consulta para o PMP: statblocks de espécies, fichas de Move e de
-Habilidade Passiva, com busca e filtros, pensado para ser aberto no meio de uma sessão.
+Site estático de consulta para o PMP: statblocks de espécies, fichas de Move, Habilidade
+Passiva e Mega Evolução, com busca e filtros, pensado para ser aberto no meio de uma sessão.
 Construído em
 [SvelteKit](https://svelte.dev/docs/kit), sem servidor e sem banco — tudo é gerado no build.
 
@@ -45,7 +45,7 @@ npm run dados:construir -- ../pmp-rpg/data/raw dados
 
 | Comando | O que faz |
 |---|---|
-| `npm run build` | Gera o site estático em `build/` (uma página por espécie, Move e Habilidade) |
+| `npm run build` | Gera o site estático em `build/` (uma página por espécie, Move, Habilidade e Mega) |
 | `npm run preview` | Serve o build de produção |
 | `npm run teste` | Roda a suíte de testes |
 | `npm run verificar` | Checagem de tipos (`svelte-check`) |
@@ -115,6 +115,39 @@ espécie–habilidade**, não da habilidade (139 das 302 com portador são padr�
 espécie e ocultas em outra), e **três habilidades não pertencem a espécie nenhuma da
 Pokédex** — quem as tem é uma forma Mega, declarada em `mega-evolutions.json`.
 
+O pack `mega-evolutions` é o oposto do `abilities`: treze campos de `flags[…].mega`
+carregam dado útil nas 93 pedras, e nada do documento Foundry em volta serve (`system.*` é
+constante nas 93). Quase tudo sai de campo. Em compensação, é onde o texto está pior:
+
+| Campo do módulo | Por que não dá para usar direto |
+|---|---|
+| `flags[…].species`, `flags[…].megaForm` | Os duplicados de topo **não existem** nas 3 pedras especiais. Quem os lê em vez de `mega.*` perde Groudon, Kyogre e Rayquaza em silêncio |
+| `mega.abilityChoices` | Não é escolha de Habilidade: é escolha de **atributo** (o *ability score* do dnd5e). O próprio módulo escreve "+5 em FOR ou DES (à escolha do jogador)" |
+| `movementBonusFeet` | Está em **pés**, enquanto a Pokédex grava deslocamento em metros em 1.148 das 1.149. A equivalência (0,3 m/pé) é declarada 3 vezes no próprio corpus |
+| `movementBonusFeet: 0`, `movementGrants: []` | Querem dizer "campo não preenchido", não "não há": Mega Eelektross declara "+ 10 pés" e Mega Delphox ganha voo de 40 pés **só na prosa** |
+| `types.type2: null` com `type1` preenchido | Não é dado faltando: é **monotipo**. Mega Aggron vem de Aço/Pedra e fica Aço puro, e o módulo renderiza "Tipo muda para Aço" |
+| `size` | Usa 4 degraus onde as espécies usam 6 (`tiny` e `huge` só existem na base). E o texto de Mega Hawlucha pede "Imenso", palavra que a escala do PMP não tem |
+| `otherEffects` | 10 frases em 10 pedras, e nenhuma é redundante: elas **corrigem** os campos acima. Uma está truncada no meio ("Snow Warning (torna-se Snow") |
+| `passiveAbility` | Vazio em 4 pedras — mas **duas delas** declaram a habilidade em `otherEffects`, e a de Mega Floette (Fairy Aura) existe no pack |
+| `description` | 4 das 93 carregam texto de outro documento: a de Mega Delphox traz um bloco de estatísticas de espécie inteiro, a de Mega Hawlucha traz o statblock do Move Nihil Light |
+| `img` | 42 são SVG de tipo, 48 são PNG de item e 3 são um ícone genérico. Usá-lo como sinal de tipo acerta em 42 e inventa em 51 |
+
+O `<ul>` de `system.description.value` fica de fora por inteiro: agrupando os 475 `<li>`
+do corpus em formas de frase, **todas** saem de um campo estruturado. Nenhum fato vive só
+ali — o que ele dá de graça é o vocabulário em português do próprio módulo, que a
+interface copia.
+
+`category` merece nota por ser um dos raríssimos campos de categoria do módulo que de fato
+**variam** (90 `mega-stone`, 3 `mega-stone-especial`). O que ele distingue não é "Primal":
+são duas Reversões Primal (Groudon, Kyogre) mais um Pokémon que Mega Evolui sem pedra
+nenhuma (Rayquaza). O que as três têm em comum é não seguir a regra comum da Mega Pedra.
+
+Três consequências para a modelagem: **nenhuma das 93 formas existe como espécie na
+Pokédex** (o link vai para a espécie-base, que casa em 90), **seis espécies têm duas
+pedras** (Charizard, Mewtwo e Raichu com X e Y; Garchomp, Absol e Lucario com a forma Z),
+e **a relação Mega↔habilidade é N:N** — Magic Bounce e Tough Claws são concedidas por
+quatro pedras cada.
+
 **O pipeline não inventa dado.** O que não for possível interpretar com segurança vai
 para `dados/relatorio.json`, com o texto original, para conferência no livro e correção
 na fonte. O relatório cobre:
@@ -135,8 +168,11 @@ na fonte. O relatório cobre:
 | `habilidadesSemRegra` | Habilidades cuja regra o módulo não achou no livro, com a nota original (74 na v1.33.0) |
 | `efeitosDeHabilidadeNaoInterpretados` | Frases que declaram um efeito de habilidade que o parser não estruturou (13 na v1.33.0) |
 | `habilidadesSemPortador` | Habilidades que nenhuma espécie e nenhuma Mega têm (8 na v1.33.0) |
-| `habilidadesDeMegaNaoResolvidas` | Habilidades que uma pedra Mega nomeia e que não existem no pack (18 na v1.33.0, 10 delas literalmente `"[ainda a ser lançada]"`) |
-| `megasSemEspecieBase` | Megas cuja espécie-base não casa com a Pokédex (1 na v1.33.0) |
+| `habilidadesDeMegaNaoResolvidas` | Habilidades que uma pedra Mega nomeia e que não existem no pack (20 na v1.33.0: 8 nomes reais, 11 vezes a marca de pendência `"[ainda a ser lançada]"` e 1 truncada na fonte) |
+| `megasSemEspecieBase` | Megas cuja espécie-base não casa com a Pokédex, com os nomes candidatos (3 na v1.33.0) |
+| `descricoesDeMegaContaminadas` | Descrições de Mega com texto de outro documento do livro, com a marca que o denunciou e o original (4 na v1.33.0) |
+| `efeitosDeMegaNaoInterpretados` | Frases de `otherEffects` que declaram um efeito que o parser não estruturou (1 na v1.33.0: o tamanho "Imenso") |
+| `tiposDeMegaDesconhecidos`, `tamanhosDeMegaDesconhecidos`, `deslocamentosDeMegaDesconhecidos`, `camposDeMegaNaoInterpretados`, `categoriasDeMegaDesconhecidas` | Valores de Mega fora do vocabulário ou do formato esperado (0 na v1.33.0) |
 | `movesDeClimaAusentes`, `movesDeHabilidadeNaoResolvidos` | Moves nomeados por uma habilidade que não existem no compêndio (0 na v1.33.0) |
 
 Boa parte dessas categorias aponta lacunas no texto do próprio livro, não falhas do
@@ -159,10 +195,11 @@ ferramentas/        pipeline de dados (Node puro, fora do app)
   moves.mjs           alcance, ativação, resolução, dados e reparo de nomes de Move
   efeitos.mjs         efeitos mecânicos do texto do Move (a parte mais frágil de todas)
   habilidades.mjs     imunidade, clima e Move concedido no texto da Habilidade
+  megas.mjs           habilidade, tamanho e deslocamento no texto da pedra Mega; contaminação
   texto.mjs           HTML→texto, slug, deslocamento, sentidos
 mensagens/          catálogos de interface, um por idioma
 src/
-  lib/pmp/            domínio: tipos, atributos, tamanhos, busca, espécie, move, habilidade
+  lib/pmp/            domínio: tipos, atributos, tamanhos, busca, espécie, move, habilidade, mega
   lib/dados/          leitura dos JSONs durante o prerender (só servidor)
   lib/i18n/           acesso às mensagens
   lib/ui/             design system e componentes
@@ -170,16 +207,23 @@ src/
 testes/             testes do pipeline
 ```
 
-Os quatro módulos de interpretação (`evolucao`, `moves`, `efeitos`, `habilidades`) são
-separados de `construir.mjs` pela mesma razão: leem prosa do livro, cada padrão novo é
-uma chance de ler errado, e isolados cada padrão vira um teste. As entradas dos testes
-são frases do corpus real, não inventadas.
+Os cinco módulos de interpretação (`evolucao`, `moves`, `efeitos`, `habilidades`,
+`megas`) são separados de `construir.mjs` pela mesma razão: leem prosa do livro, cada
+padrão novo é uma chance de ler errado, e isolados cada padrão vira um teste. As
+entradas dos testes são frases do corpus real, não inventadas.
 
 Em `habilidades.mjs` o risco tem nome: a palavra "imune" aparece 37 vezes no corpus e em
 11 delas **não** é imunidade de quem tem a habilidade. Justified diz que *não* fornece
 imunidade, Prankster concede a imunidade ao **oponente**, e Shields Down retira num
 marcador o que concedeu na primeira frase. Por isso a família de imunidade ancora no
 sujeito (`Este Pokémon é imune a…`) e traz a lista de citações junto.
+
+Em `megas.mjs` o risco é outro: o corpus da família é **minúsculo** — dez frases em dez
+das 93 pedras —, e com dez exemplos é fácil escrever um padrão que casa os dez por
+acidente. Por isso os testes trazem as dez na íntegra, e não uma amostra, e cada uma
+está anotada com o campo estruturado que ela contradiz. A detecção de contaminação da
+descrição é conferida nos dois sentidos: pega as 4 sujas e não acusa a maior das 89
+limpas.
 
 Os dados são lidos de `dados/` **durante o prerender** e ficam assados em cada página.
 Eles não vão para `static/`: o site publicado contém as páginas renderizadas, não um

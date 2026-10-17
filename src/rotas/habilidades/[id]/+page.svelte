@@ -123,13 +123,7 @@
 					<ul class="megas">
 						{#each habilidade.megas as mega (mega.pedra)}
 							<li>
-								{#if mega.especieId != null}
-									<a href="/pokemon/{mega.especieId}">{mega.forma}</a>
-								{:else}
-									<!-- A Pokédex publica algumas formas separadas e o nome-base não
-									     casa (Meowstic na v1.33.0): fica como texto, sem link. -->
-									<span class="sem-ficha">{mega.forma}</span>
-								{/if}
+								<a href="/megas/{mega.megaId}">{mega.forma}</a>
 								<span class="tenue">{mega.pedra}</span>
 							</li>
 						{/each}

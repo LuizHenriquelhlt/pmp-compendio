@@ -38,6 +38,12 @@
 		</article>
 
 		<article>
+			<h2>{t("inicio.cartao.megas.titulo")}</h2>
+			<p>{t("inicio.cartao.megas.texto", { n: data.totalDeMegas.toLocaleString("pt-BR") })}</p>
+			<a href="/megas">{t("nav.megas")} →</a>
+		</article>
+
+		<article>
 			<h2>{t("inicio.cartao.dados.titulo")}</h2>
 			<p>{t("inicio.cartao.dados.texto")}</p>
 			<a href="/sobre">{t("nav.sobre")} →</a>

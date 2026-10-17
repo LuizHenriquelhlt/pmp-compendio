@@ -1,4 +1,4 @@
-import { lerIndice, lerIndiceDeHabilidades, lerIndiceDeMoves } from "$dados/carregar.server"
+import { lerIndice, lerIndiceDeHabilidades, lerIndiceDeMegas, lerIndiceDeMoves } from "$dados/carregar.server"
 import type { PageServerLoad } from "./$types"
 
 export const load: PageServerLoad = () => {
@@ -6,5 +6,6 @@ export const load: PageServerLoad = () => {
 		totalDeEspecies: lerIndice().length,
 		totalDeMoves: lerIndiceDeMoves().length,
 		totalDeHabilidades: lerIndiceDeHabilidades().length,
+		totalDeMegas: lerIndiceDeMegas().length,
 	}
 }

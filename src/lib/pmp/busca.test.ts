@@ -1,5 +1,7 @@
 import { describe, expect, it } from "vitest"
-import { chaveDeBusca, chaveDeBuscaDeHabilidade, corresponde, normalizarParaBusca } from "./busca"
+import {
+	chaveDeBusca, chaveDeBuscaDeHabilidade, chaveDeBuscaDeMega, corresponde, normalizarParaBusca,
+} from "./busca"
 
 describe("normalizarParaBusca", () => {
 	it("ignora acento e caixa", () => {
@@ -108,5 +110,79 @@ describe("corresponde", () => {
 
 	it("não casa quem não tem o termo", () => {
 		expect(corresponde(charmander, "pikachu")).toBe(false)
+	})
+})
+
+describe("chaveDeBuscaDeMega", () => {
+	// Dados reais da v1.33.0. Mega Charizard X é o caso que exercita as quatro entradas da
+	// chave de uma vez: a forma, a pedra, a espécie-base e um tipo que ela PASSA a ter.
+	const charizardX = chaveDeBuscaDeMega({
+		nome: "Mega Charizard X",
+		pedra: "Charizardite X",
+		especie: "Charizard",
+		tipos: [ "fogo", "dragao" ],
+		habilidades: [ { nome: "Tough Claws", id: "tough-claws" } ],
+	})
+
+	it("acha pela forma", () => {
+		expect(corresponde(charizardX, "mega charizard x")).toBe(true)
+	})
+
+	// Quem tem a pedra na mão procura por ela, não pelo nome da forma.
+	it("acha pela pedra", () => {
+		expect(corresponde(charizardX, "charizardite")).toBe(true)
+	})
+
+	// Nenhuma das 93 formas Mega existe como espécie na Pokédex do módulo: procurar
+	// "charizard" na listagem de Megas tem de achar as duas formas dele.
+	it("acha pela espécie-base", () => {
+		expect(corresponde(charizardX, "charizard")).toBe(true)
+	})
+
+	// Mesma decisão de `chaveDeBuscaDeMove`: os nomes de forma são em inglês, mas quem
+	// consulta pensa o tipo em português.
+	it("acha pelo nome do tipo em português, com acento ou sem", () => {
+		expect(corresponde(charizardX, "dragão")).toBe(true)
+		expect(corresponde(charizardX, "dragao")).toBe(true)
+	})
+
+	it("acha pela habilidade que a pedra concede", () => {
+		expect(corresponde(charizardX, "tough claws")).toBe(true)
+	})
+
+	// O tipo que a forma NÃO passa a ter não entra na chave: Mega Charizard X troca Voador
+	// por Dragão, e procurar "voador" não deve trazê-la.
+	it("não acha pelo tipo que a forma deixa de ter", () => {
+		expect(corresponde(charizardX, "voador")).toBe(false)
+	})
+
+	// Groudon Primal não começa com "Mega", e a habilidade dela não tem ficha no pack
+	// (`id: null`) — o nome ainda tem de entrar na chave.
+	it("inclui a habilidade sem ficha e a forma que não começa com Mega", () => {
+		const groudon = chaveDeBuscaDeMega({
+			nome: "Groudon Primal",
+			pedra: "Red Orb",
+			especie: "Groudon",
+			tipos: [ "terrestre", "fogo" ],
+			habilidades: [ { nome: "Desolate Land", id: null } ],
+		})
+
+		expect(corresponde(groudon, "primal")).toBe(true)
+		expect(corresponde(groudon, "red orb")).toBe(true)
+		expect(corresponde(groudon, "desolate")).toBe(true)
+	})
+
+	// As 74 que não trocam de tipo têm `tipos: []` — a chave não pode quebrar sem eles.
+	it("funciona sem tipos e sem habilidade", () => {
+		const latias = chaveDeBuscaDeMega({
+			nome: "Mega Latias",
+			pedra: "Latiasite",
+			especie: "Latias",
+			tipos: [],
+			habilidades: [],
+		})
+
+		expect(corresponde(latias, "latias")).toBe(true)
+		expect(corresponde(latias, "latiasite")).toBe(true)
 	})
 })

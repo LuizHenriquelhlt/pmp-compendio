@@ -176,6 +176,17 @@
 				</dl>
 			</section>
 
+			{#if data.megas.length > 0}
+				<section class="painel">
+					<h2>{t("especie.megas")}</h2>
+					<ul class="lista-larga">
+						{#each data.megas as mega (mega.id)}
+							<li><a href="/megas/{mega.id}">{mega.nome}</a> <span class="tenue">({mega.pedra})</span></li>
+						{/each}
+					</ul>
+				</section>
+			{/if}
+
 			{#if especie.defesasAlteradas != null}
 				<section class="painel">
 					<h2>{t("especie.defesas")}</h2>

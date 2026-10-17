@@ -12,6 +12,7 @@ import { existsSync, readFileSync } from "node:fs"
 import { join } from "node:path"
 import type { Especie } from "$pmp/especie"
 import type { Habilidade, IdClima } from "$pmp/habilidade"
+import type { Mega, MegaNoIndice } from "$pmp/mega"
 import type { IdModo, IdResolucao, IdStatus, Move } from "$pmp/move"
 import type { IdTamanho } from "$pmp/tamanhos"
 import type { IdTipo } from "$pmp/tipos"
@@ -78,6 +79,47 @@ export function lerEspecies(): Especie[] {
 
 export function lerHabilidades(): Habilidade[] {
 	return ler<Habilidade[]>("habilidades")
+}
+
+// ------------------------------------------------------------------ Megas
+
+export function lerMegas(): Mega[] {
+	return ler<Mega[]>("megas")
+}
+
+export function lerIndiceDeMegas(): MegaNoIndice[] {
+	return ler<MegaNoIndice[]>("indice-megas")
+}
+
+let megaPorId: Map<string, Mega> | undefined
+
+export function acharMega(id: string): Mega | undefined {
+	// Mesma regra do cache de arquivos: memoiza no build, relê em desenvolvimento.
+	if (!building) return new Map(lerMegas().map((m) => [ m.id, m ])).get(id)
+
+	megaPorId ??= new Map(lerMegas().map((m) => [ m.id, m ]))
+	return megaPorId.get(id)
+}
+
+/** Todos os `id` de Mega, para o gerador de rotas do prerender. */
+export function idsDeMega(): string[] {
+	return lerIndiceDeMegas().map((m) => m.id)
+}
+
+/**
+ * As Megas de uma espécie — uma LISTA, não um campo.
+ *
+ * Seis espécies têm duas pedras na v1.33.0: Charizard, Mewtwo e Raichu com as formas X e
+ * Y, e Garchomp, Absol e Lucario com a forma Z que o PMP acrescentou. Um campo único
+ * esconderia metade.
+ *
+ * É relação inversa, como `evoluiDe` e `especiesComHabilidade`: a pedra declara a
+ * espécie-base, e não o contrário, então o pipeline não grava a volta na ficha de espécie.
+ * Varrer 93 registros por página de espécie é barato — ao contrário do índice inverso de
+ * Moves, que precisou de memoização por ter 77 mil referências.
+ */
+export function megasDaEspecie(especieId: string): MegaNoIndice[] {
+	return lerIndiceDeMegas().filter((m) => m.especieId === especieId)
 }
 
 let porId: Map<string, Especie> | undefined

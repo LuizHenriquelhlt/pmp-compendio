@@ -12,6 +12,10 @@ import { interpretarEfeitos } from "./efeitos.mjs"
 import { criarInterpretadorDeEvolucao } from "./evolucao.mjs"
 import { CLIMA_POR_MOVE, interpretarHabilidade, regraAusente } from "./habilidades.mjs"
 import {
+	contaminacaoNaDescricao, habilidadePendente, interpretarDeslocamentoConcedido,
+	interpretarOutrosEfeitos, pesEmMetros, prosaDaDescricao,
+} from "./megas.mjs"
+import {
 	CHAVE_DE_TIPO_VARIAVEL, TIPO_DE_MOVE_POR_CHAVE, classificarResolucao, criarReparadorDeMoves,
 	interpretarAlcance, interpretarAtivacao, interpretarDados, interpretarDuracao, prioridadeDeclarada,
 } from "./moves.mjs"
@@ -64,6 +68,13 @@ const relatorio = {
 	movesDeClimaAusentes: [],
 	habilidadesDeMegaNaoResolvidas: [],
 	megasSemEspecieBase: [],
+	descricoesDeMegaContaminadas: [],
+	efeitosDeMegaNaoInterpretados: [],
+	tiposDeMegaDesconhecidos: [],
+	tamanhosDeMegaDesconhecidos: [],
+	deslocamentosDeMegaDesconhecidos: [],
+	camposDeMegaNaoInterpretados: [],
+	categoriasDeMegaDesconhecidas: [],
 	habilidadesSemPortador: [],
 }
 
@@ -415,45 +426,298 @@ function resolverMoves(efeitos, nomeDaHabilidade) {
 	})
 }
 
-// ------------------------------------------------------------------ Megas por habilidade
-// Onze habilidades do pack não pertencem a nenhuma espécie da Pokédex, e três delas
-// (Delta Stream, Aerilate, Parental Bond) são de Mega Evolução: o portador está em
-// `mega-evolutions.json`, num campo que o pipeline não lia. Sem isto a ficha diria
-// "nenhuma espécie tem esta habilidade" onde o módulo diz que Mega Rayquaza tem.
+// ------------------------------------------------------------------ Megas
+// O pack `mega-evolutions` é o MAIS estruturado dos quatro: treze campos de
+// `flags[…].mega` carregam dado (contra três no `abilities`), e nada do documento Foundry
+// em volta serve — `system.*` é constante nas 93. Então quase tudo aqui é leitura de
+// campo, e a interpretação de texto fica restrita a `otherEffects` e `description`, nos
+// dois casos isolada em `megas.mjs` com testes.
 //
-// Cuidado com o vizinho: `mega.abilityChoices` NÃO é escolha de Habilidade — o conteúdo é
-// `{ options: ["str","dex"], delta: 5 }`, escolha de ATRIBUTO. É o `ability` do dnd5e
-// (ability score), não a Habilidade Passiva do PMP, e lido como habilidade produziria
-// "str" e "dex" como nomes de habilidade.
+// Quatro armadilhas que mudam o desenho desta seção, todas medidas sobre as 93 pedras:
+//
+//   1. `flags[…].species` e `flags[…].megaForm` (os duplicados de topo) NÃO EXISTEM nas
+//      três pedras especiais — a chave não está lá. Quem lê o flag de topo em vez de
+//      `mega.*` perde Groudon, Kyogre e Rayquaza em silêncio. Lemos sempre de `mega.*`.
+//
+//   2. `mega.abilityChoices` não é escolha de Habilidade: o conteúdo é
+//      `{ options: ["str","dex"], delta: 5 }`, escolha de ATRIBUTO — o `ability` do dnd5e
+//      (ability score). O próprio módulo confirma, no `<li>` que gera: "+5 em FOR ou DES
+//      (à escolha do jogador)". Lido como habilidade, produz "str" e "dex" como nomes.
+//
+//   3. `movementBonusFeet` está em PÉS, e o resto do compêndio está em metros (a Pokédex
+//      grava "9m de caminhada" em 1.148 das 1.149, sem uma ocorrência de "pés"). A
+//      conversão vive em `megas.mjs`, no fator que o próprio corpus declara.
+//
+//   4. Zero e lista vazia querem dizer "campo não preenchido", não "não há": Mega
+//      Eelektross tem `movementBonusFeet: 0` e declara "+ 10 pés em todos os seus
+//      deslocamentos" só na prosa, e Mega Delphox tem `movementGrants: []` e ganha voo de
+//      40 pés só no texto. É por isso que `otherEffects` é lido, e não descartado.
+//
+// `system.description.value` fica de fora por inteiro: agrupando os 475 `<li>` do corpus
+// em formas de frase, todas saem de um campo estruturado — nenhum fato vive só ali.
 const NOMES_DE_HABILIDADE = new Set(documentosDeHabilidade.map((d) => d.name))
 const megasPorHabilidade = new Map()
+const documentosDeMega = carregarOpcional("mega-evolutions") ?? []
+const megas = []
+const idsDeMegaUsados = new Set()
 
-for (const documento of carregarOpcional("mega-evolutions") ?? []) {
-	const mega = flags(documento).mega
-	const habilidade = mega?.passiveAbility
+/** As chaves de atributo do Foundry. `con` não aparece em nenhuma das 93 pedras. */
+const ATRIBUTOS_DO_FOUNDRY = [ "str", "dex", "con", "int", "wis", "cha" ]
 
-	if (habilidade == null || habilidade === "") continue
+for (const documento of documentosDeMega) {
+	const m = flags(documento).mega
+	if (m == null) continue
 
-	// Dez pedras gravam a string de pendência `"[ainda a ser lançada]"` como nome de
-	// habilidade, e outras oito nomeiam habilidades sem ficha no pack (Desolate Land e
-	// Primordial Sea, dos Primal, entre elas). Nenhuma das duas situações vira dado.
-	if (!NOMES_DE_HABILIDADE.has(habilidade)) {
-		relatorio.habilidadesDeMegaNaoResolvidas.push({ pedra: documento.name, habilidade })
-		continue
+	// `id` pela FORMA, não pela pedra. Os dois dão 93 slugs distintos sem colisão, mas a
+	// forma é o que se procura e o que a ficha descreve — a pedra é o requisito. E a forma
+	// gera URL legível onde a pedra não: `/megas/mega-charizard-x` contra
+	// `/megas/rayquazanite-nao-requer-mega-pedra`.
+	let id = slug(m.megaForm)
+	while (idsDeMegaUsados.has(id)) id = `${id}-2`
+	idsDeMegaUsados.add(id)
+
+	// `types` é sempre o par COMPLETO novo, nunca um delta — Mega Pinsir (`bug` →
+	// `bug/flying`) repete `type1`. E `type2: null` com `type1` preenchido é MONOTIPO, não
+	// dado faltando: Mega Aggron vem de `steel/rock` e fica `steel`, e o módulo renderiza
+	// "Tipo muda para Aço", um nome só. Lista vazia = não troca de tipo (74 das 93).
+	const tipos = [ m.types?.type1, m.types?.type2 ]
+		.filter((t) => t != null && t !== "")
+		.map((chave) => {
+			const tipo = TIPO_POR_CHAVE[chave]
+			if (tipo == null) relatorio.tiposDeMegaDesconhecidos.push({ forma: m.megaForm, chave })
+			return tipo
+		})
+		.filter((t) => t != null)
+
+	// `size` é absoluto, não delta, e `null` em 69 = não muda de tamanho.
+	const tamanho = m.size == null || m.size === "" ? null : TAMANHO_POR_CHAVE[m.size] ?? null
+	if (m.size != null && m.size !== "" && tamanho == null) {
+		relatorio.tamanhosDeMegaDesconhecidos.push({ forma: m.megaForm, chave: m.size })
 	}
 
-	// Nenhuma das 93 `megaForm` existe como espécie na Pokédex; a espécie-base existe em
-	// 90, e é para ela que o link aponta. As três que não casam por nome são formas que a
-	// Pokédex publica separadas (Floette, Meowstic, Tatsugiri).
-	const especieId = ID_POR_NOME.get(mega.species) ?? null
+	// Na ordem canônica dos atributos, e não na do módulo (que grava Mega Hawlucha como
+	// wis, cha, str, dex, int): a ficha mostra FOR, DES, CON, INT, SAB, CAR, e sem isto
+	// duas Megas com os mesmos bônus sairiam em ordens diferentes na tela.
+	const atributos = ATRIBUTOS_DO_FOUNDRY
+		.filter((chave) => typeof (m.abilityDeltas ?? {})[chave] === "number")
+		.map((chave) => ({ id: chave, delta: m.abilityDeltas[chave] }))
+
+	for (const [ chave, delta ] of Object.entries(m.abilityDeltas ?? {})) {
+		if (!ATRIBUTOS_DO_FOUNDRY.includes(chave) || typeof delta !== "number") {
+			relatorio.camposDeMegaNaoInterpretados.push({
+				forma: m.megaForm, campo: "abilityDeltas", original: { [chave]: delta },
+			})
+		}
+	}
+
+	// Sempre uma entrada com duas opções nas 11 que têm. Em Mega Hawlucha as duas opções
+	// (`str`, `dex`) TAMBÉM estão em `abilityDeltas`: são dois fatos que se somam, não um
+	// repetido, e a ficha mostra os dois separados.
+	const escolhasDeAtributo = (m.abilityChoices ?? []).flatMap((escolha) => {
+		const opcoes = (escolha.options ?? []).filter((a) => ATRIBUTOS_DO_FOUNDRY.includes(a))
+
+		if (opcoes.length !== (escolha.options ?? []).length || typeof escolha.delta !== "number") {
+			relatorio.camposDeMegaNaoInterpretados.push({
+				forma: m.megaForm, campo: "abilityChoices", original: escolha,
+			})
+			return []
+		}
+
+		return [ { opcoes, delta: escolha.delta } ]
+	})
+
+	// ---------------------------------------------------------------- Texto da pedra
+	const lido = interpretarOutrosEfeitos(m.otherEffects ?? [])
+
+	for (const item of lido.naoInterpretado) {
+		relatorio.efeitosDeMegaNaoInterpretados.push({ forma: m.megaForm, ...item })
+	}
+
+	for (const efeito of m.otherEffects ?? []) {
+		if (typeof efeito !== "string") {
+			relatorio.camposDeMegaNaoInterpretados.push({
+				forma: m.megaForm, campo: "otherEffects", original: efeito,
+			})
+		}
+	}
+
+	// Deslocamento: o campo e o texto preenchem a MESMA lista, porque descrevem o mesmo
+	// fato de dois jeitos — `movementGrants` dá o modo e a base ("igual ao de caminhada"),
+	// a prosa dá o modo e um valor absoluto ("de 40 pés"). Separá-los em dois campos faria
+	// a ficha mostrar dois painéis para a mesma coisa.
+	const deslocamentosConcedidos = []
+
+	for (const concessao of m.movementGrants ?? []) {
+		const concedido = interpretarDeslocamentoConcedido(concessao)
+		if (concedido != null) deslocamentosConcedidos.push(concedido)
+		else relatorio.deslocamentosDeMegaDesconhecidos.push({ forma: m.megaForm, original: concessao })
+	}
+
+	for (const efeito of lido.efeitos) {
+		if (efeito.tipo === "deslocamentoConcedido") {
+			const { tipo, ...concedido } = efeito
+			deslocamentosConcedidos.push(concedido)
+		}
+	}
+
+	const bonusDoTexto = lido.efeitos.find((e) => e.tipo === "deslocamentoBonus")?.metros ?? null
+	const bonusDoCampo = typeof m.movementBonusFeet === "number" && m.movementBonusFeet !== 0
+		? pesEmMetros(m.movementBonusFeet)
+		: null
+
+	// Habilidade concedida: 0, 1 ou 2 por pedra, e de DOIS campos. Quatro pedras têm
+	// `passiveAbility` vazia e duas delas declaram a habilidade em `otherEffects` — uma
+	// (Mega Floette → Fairy Aura) nomeando uma habilidade que EXISTE no pack. Lendo só
+	// `passiveAbility`, a ficha diz "sem habilidade" para Mega Floette e a ficha de Fairy
+	// Aura nunca descobre que uma Mega a concede.
+	const declaradas = []
+	let habilidadePendenteNaPedra = false
+
+	const passiva = typeof m.passiveAbility === "string" ? m.passiveAbility.trim() : ""
+	if (passiva !== "") {
+		if (habilidadePendente(passiva)) habilidadePendenteNaPedra = true
+		else declaradas.push({ nome: passiva, campo: "passiveAbility" })
+	}
+
+	for (const efeito of lido.efeitos) {
+		if (efeito.tipo === "habilidadePendente") habilidadePendenteNaPedra = true
+		if (efeito.tipo === "habilidadeConcedida") {
+			declaradas.push({ nome: efeito.nome, campo: "otherEffects", truncado: efeito.truncado === true })
+		}
+	}
+
+	const habilidades = declaradas.map(({ nome, campo, truncado }) => {
+		const existe = NOMES_DE_HABILIDADE.has(nome)
+
+		// O nome que não casa fica visível na ficha SEM link, como o projeto já faz com os
+		// Moves não resolvidos: a pedra declara a habilidade, e calar a declaração por
+		// falta de ficha encurtaria o que o livro diz.
+		if (!existe) {
+			relatorio.habilidadesDeMegaNaoResolvidas.push({
+				pedra: documento.name, habilidade: nome, campo,
+				...(truncado ? { truncado: true } : {}),
+			})
+		}
+
+		return { nome, id: existe ? slug(nome) : null }
+	})
+
+	// Os dez `"[ainda a ser lançada]"` continuam no relatório, agora marcados: a chave
+	// contava 18 nomes sem ficha e não pode perder nenhum só porque a pendência passou a
+	// ter campo próprio.
+	if (habilidadePendenteNaPedra) {
+		relatorio.habilidadesDeMegaNaoResolvidas.push({
+			pedra: documento.name, habilidade: "[ainda a ser lançada]", pendente: true,
+		})
+	}
+
+	// ---------------------------------------------------------------- Espécie-base
+	// Nenhuma das 93 `megaForm` existe como espécie na Pokédex — as Megas não estão lá. A
+	// espécie-base existe em 90, e é para ela que o link aponta.
+	//
+	// O teste das 93 é feito aqui, UMA vez por pedra e independente da habilidade. Antes
+	// ele vinha depois de um `continue` que saltava a pedra cuja habilidade não resolvia, e
+	// por isso a chave contava 1 onde há 3: Floettite (`passiveAbility: ""`) e
+	// Tatsugirinite (`"[ainda a ser lançada]"`) nunca chegavam ao teste.
+	const especieId = ID_POR_NOME.get(m.species) ?? null
+
 	if (especieId == null) {
-		relatorio.megasSemEspecieBase.push({ pedra: documento.name, especie: mega.species })
+		// Os candidatos vêm da própria Pokédex (nomes que contêm a última palavra do nome
+		// procurado) e são o que falta para corrigir a fonte: "Meowstic" → Meowstic Macho /
+		// Meowstic Fêmea. Não são uma resolução — escolher um deles seria adivinhar, e no
+		// caso de Tatsugiri exigiria traduzir "(Curly Form)" para "Forma Curva".
+		const ultima = String(m.species ?? "").split(/\s+/).pop()?.toLowerCase() ?? ""
+		const candidatos = ultima === ""
+			? []
+			: especies.filter((e) => e.nome.toLowerCase().includes(ultima)).map((e) => e.nome)
+
+		relatorio.megasSemEspecieBase.push({ pedra: documento.name, especie: m.species, candidatos })
 	}
 
-	const lista = megasPorHabilidade.get(habilidade) ?? []
-	lista.push({ pedra: documento.name, forma: mega.megaForm, especie: mega.species, especieId })
-	megasPorHabilidade.set(habilidade, lista)
+	const categoriaBruta = flags(documento).category
+	if (![ "mega-stone", "mega-stone-especial" ].includes(categoriaBruta)) {
+		relatorio.categoriasDeMegaDesconhecidas.push({ pedra: documento.name, categoria: categoriaBruta ?? null })
+	}
+
+	// ---------------------------------------------------------------- Descrição
+	// Prosa de sabor: nenhuma das 93 repete os deltas, então descrição e deltas convivem
+	// na ficha sem dizer a mesma coisa duas vezes. A deixa que o módulo repete nas 93
+	// ("<espécie> recebe os seguintes benefícios:") sai fora — ver `prosaDaDescricao`.
+	const descricaoBruta = textoSimples(m.description ?? "")
+	const contaminacao = contaminacaoNaDescricao(descricaoBruta)
+
+	if (contaminacao != null) {
+		relatorio.descricoesDeMegaContaminadas.push({
+			forma: m.megaForm, marca: contaminacao, texto: descricaoBruta,
+		})
+	}
+
+	megas.push({
+		id,
+		nome: m.megaForm,
+		pedra: documento.name,
+		especie: m.species,
+		especieId,
+		// O número da espécie-base, para a listagem poder sair na ordem da Pokédex — que é
+		// a ordem em que o livro apresenta as espécies. 0 nas três sem base resolvida.
+		numero: especieId != null ? ESPECIE_POR_ID.get(especieId)?.numero ?? 0 : 0,
+		// `category` é um dos raríssimos campos de categoria do módulo que de fato variam.
+		// O que ele distingue não é "Primal": são 2 Primal (Groudon, Kyogre) mais 1 que não
+		// precisa de pedra (Rayquaza). O que as três têm em comum é não seguir a regra comum
+		// da Mega Pedra, e a regra de cada uma está em `outrosTextos`.
+		categoria: categoriaBruta === "mega-stone"
+			? "mega"
+			: categoriaBruta === "mega-stone-especial" ? "especial" : "desconhecida",
+		tipos,
+		tamanho,
+		// `null` e não 0 de propósito: 11 pedras têm delta 0 de CA, e um campo ausente lido
+		// como 0 diria "não muda a CA" onde o certo é "o módulo não gravou".
+		deltaCA: typeof m.armorClassDelta === "number" ? m.armorClassDelta : null,
+		atributos,
+		escolhasDeAtributo,
+		habilidades,
+		// Mega Hawlucha tem No Guard E uma segunda habilidade pendente: são compatíveis.
+		habilidadePendente: habilidadePendenteNaPedra,
+		// Em metros, como o resto do compêndio. O texto tem precedência sobre o campo
+		// porque é o texto que corrige o campo zerado (Mega Eelektross).
+		deslocamentoBonusM: bonusDoTexto ?? bonusDoCampo,
+		deslocamentosConcedidos,
+		deslocamentoMetade: lido.efeitos.some((e) => e.tipo === "deslocamentoMetade"),
+		deslocamentosPerdidos: lido.efeitos
+			.filter((e) => e.tipo === "deslocamentoPerdido")
+			.map((e) => e.modo),
+		// Só a prosa que nenhuma família leu: as regras de ativação das três especiais e a
+		// frase que o parser não estruturou. O que saiu estruturado não se repete aqui.
+		outrosTextos: lido.textos,
+		// A descrição contaminada NÃO é publicada. Ao contrário do crédito de arte vazado
+		// em Swallow (`textosDeMoveContaminados`), que é uma linha num campo separado e dá
+		// para ver onde a regra acaba, aqui são até 2.600 caracteres DENTRO do único campo
+		// de prosa: a ficha de Mega Delphox mostraria "CA: 17" e a regra de Flower Veil
+		// como se fossem dela. A página diz o que aconteceu, com texto de interface, e o
+		// original inteiro fica no relatório — o mesmo trato das 74 habilidades sem regra.
+		descricao: contaminacao != null ? "" : prosaDaDescricao(descricaoBruta),
+		descricaoContaminada: contaminacao != null,
+		imagem: typeof m.tokenImage === "string" && m.tokenImage.startsWith("http") ? m.tokenImage : null,
+	})
+
+	for (const habilidade of habilidades) {
+		if (habilidade.id == null) continue
+
+		const lista = megasPorHabilidade.get(habilidade.nome) ?? []
+		lista.push({ pedra: documento.name, forma: m.megaForm, megaId: id, especie: m.species, especieId })
+		megasPorHabilidade.set(habilidade.nome, lista)
+	}
 }
+
+// Pela espécie-base na ordem da Pokédex, com a forma como desempate: é o que mantém Mega
+// Charizard X e Y lado a lado, e Mega Mewtwo X e Y juntos num outro ponto da lista.
+//
+// As três sem espécie-base resolvida (número 0) vão para o FIM, não para o começo: são as
+// de dado incompleto, e abrir a listagem com elas as apresentaria como as principais.
+megas.sort((a, b) =>
+	(a.numero || Number.MAX_SAFE_INTEGER) - (b.numero || Number.MAX_SAFE_INTEGER)
+	|| a.nome.localeCompare(b.nome, "pt-BR"))
+
 
 const habilidades = []
 const idsDeHabilidadeUsados = new Set()
@@ -521,6 +785,43 @@ const indiceDeHabilidades = habilidades.map((h) => ({
 	megas: h.megas.length,
 }))
 
+// A fatia de Mega que a listagem e a busca carregam. Fica de fora o que só a ficha usa —
+// a descrição, a prosa de `outrosTextos` e os fatos de deslocamento, que são de 5 a 10
+// casos cada e não sustentam filtro.
+//
+// `atributosAumentados` e `trocaDeTipo` entram achatados pela mesma razão que `resolucoes`
+// no índice de Moves: é o que o filtro consulta, e perguntar "quais Megas aumentam FOR"
+// não deve custar a leitura dos 93 registros inteiros.
+const indiceDeMegas = megas.map((m) => ({
+	id: m.id,
+	nome: m.nome,
+	pedra: m.pedra,
+	especie: m.especie,
+	especieId: m.especieId,
+	numero: m.numero,
+	categoria: m.categoria,
+	tipos: m.tipos,
+	tamanho: m.tamanho,
+	deltaCA: m.deltaCA,
+	atributos: m.atributos,
+	escolhasDeAtributo: m.escolhasDeAtributo,
+	habilidades: m.habilidades,
+	habilidadePendente: m.habilidadePendente,
+	// Só os atributos que SOBEM: um filtro "aumenta FOR" não deve trazer Mega Hawlucha,
+	// que tem `str: -2`. As opções de `abilityChoices` entram porque o jogador pode
+	// escolher aquele atributo — é um aumento possível, e o cartão marca a diferença.
+	atributosAumentados: [ ...new Set([
+		...m.atributos.filter((a) => a.delta > 0).map((a) => a.id),
+		...m.escolhasDeAtributo.flatMap((e) => e.opcoes),
+	]) ],
+	// A soma dos deltas fixos, para ordenar por "quanto a forma ganha". Os deltas
+	// negativos entram com o sinal, e a escolha de atributo fica fora: ela vale uma vez,
+	// não uma por opção.
+	totalDeAtributos: m.atributos.reduce((soma, a) => soma + a.delta, 0),
+	trocaDeTipo: m.tipos.length > 0,
+	imagem: m.imagem,
+}))
+
 function escrever(nome, dados) {
 	writeFileSync(join(saida, `${nome}.json`), JSON.stringify(dados))
 	const total = Array.isArray(dados) ? dados.length : Object.keys(dados).length
@@ -536,6 +837,8 @@ escrever("moves", moves)
 escrever("indice-moves", indiceDeMoves)
 escrever("habilidades", habilidades)
 escrever("indice-habilidades", indiceDeHabilidades)
+escrever("megas", megas)
+escrever("indice-megas", indiceDeMegas)
 writeFileSync(join(saida, "relatorio.json"), JSON.stringify(relatorio, null, 1))
 
 console.log(`\nQualidade do dado-fonte (detalhes em ${saida}/relatorio.json):`)
@@ -555,5 +858,7 @@ console.log(`  efeitos de habilidade declarados e não interpretados: ${relatori
 console.log(`  habilidades sem portador: ${relatorio.habilidadesSemPortador.length}`)
 console.log(`  habilidades de Mega sem ficha no pack: ${relatorio.habilidadesDeMegaNaoResolvidas.length}`)
 console.log(`  Megas cuja espécie-base não casa com a Pokédex: ${relatorio.megasSemEspecieBase.length}`)
+console.log(`  descrições de Mega contaminadas na fonte: ${relatorio.descricoesDeMegaContaminadas.length}`)
+console.log(`  efeitos de Mega declarados e não interpretados: ${relatorio.efeitosDeMegaNaoInterpretados.length}`)
 console.log(`  Moves de clima ausentes do compêndio: ${relatorio.movesDeClimaAusentes.length}`)
 console.log(`  Moves concedidos por habilidade não resolvidos: ${relatorio.movesDeHabilidadeNaoResolvidos.length}`)

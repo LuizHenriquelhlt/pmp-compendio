@@ -12,6 +12,7 @@
 		{ href: "/pokemon", rotulo: t("nav.pokemon") },
 		{ href: "/moves", rotulo: t("nav.moves") },
 		{ href: "/habilidades", rotulo: t("nav.habilidades") },
+		{ href: "/megas", rotulo: t("nav.megas") },
 		{ href: "/sobre", rotulo: t("nav.sobre") },
 	]
 

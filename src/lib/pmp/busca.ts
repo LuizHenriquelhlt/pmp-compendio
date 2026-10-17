@@ -8,6 +8,7 @@
 import { nomeDoClima, type IdClima } from "./habilidade"
 import { nomeDoStatus, type IdStatus } from "./move"
 import { nomeDoTipo, type IdTipo } from "./tipos"
+import type { MegaBuscavel } from "./mega"
 
 /** O mínimo que a busca precisa conhecer de uma espécie. */
 export type Buscavel = {
@@ -91,6 +92,28 @@ export function chaveDeBuscaDeHabilidade(habilidade: HabilidadeBuscavel): string
 		...habilidade.imunidadesDeTipo.map((t) => normalizarParaBusca(nomeDoTipo(t))),
 		...habilidade.climas.map((c) => normalizarParaBusca(nomeDoClima(c))),
 	].join(" ")
+}
+
+/**
+ * Chave de busca de Mega: a forma, a pedra, a espécie-base, os tipos e as habilidades.
+ *
+ * A pedra entra porque é por ela que a mesa chega na forma — quem tem uma Charizardite X
+ * na mão procura por ela, não por "Mega Charizard X". E a espécie-base entra porque
+ * procurar "charizard" tem de achar as duas formas, já que nenhuma das 93 `megaForm`
+ * existe como espécie na Pokédex.
+ *
+ * Os tipos entram pelo NOME em português, como em `chaveDeBuscaDeMove`: os nomes de forma
+ * são em inglês, mas quem consulta pensa o tipo em português — "dragão" tem de achar Mega
+ * Charizard X, que passa a ser Fogo/Dragão.
+ */
+export function chaveDeBuscaDeMega(mega: MegaBuscavel): string {
+	return [
+		mega.nome,
+		mega.pedra,
+		mega.especie,
+		...mega.tipos.map(nomeDoTipo),
+		...mega.habilidades.map((h) => h.nome),
+	].map(normalizarParaBusca).join(" ")
 }
 
 /**
