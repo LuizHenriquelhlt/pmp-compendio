@@ -375,19 +375,25 @@ import BotaoVoltar from "$ui/BotaoVoltar.svelte"
 		border-radius: var(--raio-grande);
 	}
 
+	/*
+	 * Sem cartão atrás do sprite: nem fundo, nem sombra, nem canto arredondado.
+	 *
+	 * Os PNG da PokéAPI têm fundo transparente, então o sprite assenta direto sobre o
+	 * tom do tipo primário que tinge o cabeçalho. O cartão branco criava uma segunda
+	 * caixa dentro de uma caixa que já tinha borda e fundo próprios.
+	 */
 	.arte {
 		display: grid;
 		place-items: center;
-		width: 9rem;
-		height: 9rem;
-		background: var(--superficie);
-		border-radius: var(--raio-grande);
-		box-shadow: var(--sombra-1);
 	}
 
+	/* 11rem = 176px. O `width="200"` da marcação é só dica de layout para o navegador
+	   reservar espaço antes de baixar; o arquivo da PokéAPI tem 475px, então há folga de
+	   resolução de sobra. Quem limita o tamanho aqui é o equilíbrio com a coluna de
+	   dados ao lado, não a imagem. */
 	.arte img {
-		width: 8rem;
-		height: 8rem;
+		width: 11rem;
+		height: 11rem;
 		object-fit: contain;
 	}
 
