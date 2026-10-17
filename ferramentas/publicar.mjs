@@ -11,9 +11,10 @@
  *
  * Requer um build já feito e já portátil: `npm run build` faz os dois.
  */
-import { existsSync, copyFileSync, mkdirSync, rmSync, statSync, readFileSync } from "node:fs"
+import { existsSync, copyFileSync, mkdirSync, rmSync, statSync } from "node:fs"
 import { execFileSync } from "node:child_process"
 import { join, resolve } from "node:path"
+import { conferirArquivo } from "./configuracao-square.mjs"
 
 const BUILD = "build"
 const CONFIG = "squarecloud.app"
@@ -22,52 +23,6 @@ const SAIDA = join("publicacao", "compendio-pmp.zip")
 function pare(mensagem) {
 	console.error(mensagem)
 	process.exit(1)
-}
-
-/**
- * As regras do squarecloud.app, conferidas aqui porque o host só as aplica DEPOIS do
- * upload — e uma delas não tem segunda chance.
- *
- * SUBDOMAIN é obrigatório no PRIMEIRO upload. Sem ele o deploy vira uma aplicação comum,
- * não um site, e não há como converter: seria apagar e subir de novo. DISPLAY_NAME só
- * aceita letra SEM acento, o que é fácil de esquecer num projeto escrito em português —
- * "Compêndio" seria recusado.
- *
- * Fonte: docs.squarecloud.app/en/getting-started/config-file
- */
-function conferirConfig(texto) {
-	const campos = {}
-	for (const linha of texto.split("\n")) {
-		const corte = linha.indexOf("=")
-		if (corte > 0) campos[linha.slice(0, corte).trim()] = linha.slice(corte + 1).trim()
-	}
-
-	const problemas = []
-	const { DISPLAY_NAME = "", SUBDOMAIN = "", VERSION = "", DESCRIPTION = "", MEMORY = "" } = campos
-
-	if (!DISPLAY_NAME) problemas.push("DISPLAY_NAME é obrigatório")
-	else if (DISPLAY_NAME.length > 32) problemas.push(`DISPLAY_NAME tem ${DISPLAY_NAME.length} caracteres (limite 32)`)
-	else if (!/^[A-Za-z0-9 _-]+$/.test(DISPLAY_NAME)) {
-		const fora = [...DISPLAY_NAME].filter((c) => !/[A-Za-z0-9 _-]/.test(c))
-		problemas.push(`DISPLAY_NAME só aceita letra sem acento, dígito, espaço, - e _; achei ${fora.join(" ")}`)
-	}
-
-	if (!SUBDOMAIN) {
-		problemas.push(
-			"SUBDOMAIN está faltando. Ele TEM de ir no primeiro upload: sem ele o deploy vira\n" +
-			"  aplicação em vez de site, e não dá para converter depois — só apagando e subindo de novo.",
-		)
-	} else if (!/^[a-z0-9]([a-z0-9-]{0,61}[a-z0-9])?$/.test(SUBDOMAIN.toLowerCase())) {
-		problemas.push(`SUBDOMAIN inválido: "${SUBDOMAIN}" (letras, dígitos e hífen, sem começar nem terminar em hífen, até 63)`)
-	}
-
-	if (!["recommended", "latest"].includes(VERSION)) problemas.push(`VERSION é "recommended" ou "latest", não "${VERSION}"`)
-	if (DESCRIPTION.length > 280) problemas.push(`DESCRIPTION tem ${DESCRIPTION.length} caracteres (limite 280)`)
-	if (!/^\d+$/.test(MEMORY)) problemas.push(`MEMORY é um número em MB, não "${MEMORY}"`)
-
-	if (problemas.length > 0) pare(`${CONFIG} não passa nas regras do Square Cloud:\n` + problemas.map((p) => `- ${p}`).join("\n"))
-
-	return SUBDOMAIN
 }
 
 if (!existsSync(join(BUILD, "index.html"))) pare("Falta o build. Rode 'npm run build' antes.")
@@ -82,7 +37,7 @@ if (!existsSync(join(BUILD, "pokemon", "index.html"))) {
 	pare(`Não achei ${BUILD}/pokemon/index.html — o build não parece completo.`)
 }
 
-const subdominio = conferirConfig(readFileSync(CONFIG, "utf8"))
+const { SUBDOMAIN: subdominio } = conferirArquivo(CONFIG)
 
 copyFileSync(CONFIG, join(BUILD, CONFIG))
 

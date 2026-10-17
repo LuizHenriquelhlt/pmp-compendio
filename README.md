@@ -118,6 +118,37 @@ Domínio próprio existe, na aba *Domains* do painel, com os registros de DNS qu
 mesmo mostra e certificado automático — mas só a partir do plano Standard. No Hobby o
 site fica no `squareweb.app`. Não há plano gratuito.
 
+### Publicando pelo GitHub
+
+A integração do Square Cloud com o GitHub **não constrói nada**: ela sincroniza os
+arquivos do repositório e reinicia o container. Por isso ela não serve para o
+`pmp-compendio`, que é código-fonte — não há `index.html` na raiz, e `dados/` está fora do
+Git, de modo que nem um build em CI funcionaria sem resolver isso antes.
+
+O que funciona é um **repositório de publicação separado**, só com o build:
+
+```bash
+npm run build
+node ferramentas/publicar-github.mjs
+```
+
+Ele espelha `build/` mais o `squarecloud.app` em `LuizHenriquelhlt/pmp-compendio-site`
+(privado, ramo `main`) e empurra. No painel do Square Cloud, conecte **esse** repositório,
+não o do código. É o arranjo do gh-pages: fonte num lugar, artefato em outro — e quem
+clona o fonte não baixa 90 MB de HTML gerado junto.
+
+O repositório de publicação é um espelho, não um acúmulo: o script apaga tudo antes de
+copiar, para que um arquivo que deixou de ser gerado desapareça de lá também. O
+`.gitattributes` dele desliga a conversão de fim de linha (`* -text`) porque aqui o
+`core.autocrlf` está ligado: sem isso o Git reescreveria as quebras de linha dos 2.815
+HTML, e o que é servido deixaria de ser byte a byte o que o build produziu.
+
+**Por que este caminho e não o .zip.** O upload do .zip falha na extração, no painel. O
+arquivo está correto — integridade conferida, nomes todos em ASCII, barras normais,
+deflate comum, sem zip64 — mas são 5.981 arquivos e 77,7 MB descomprimidos, e a extração
+não aguenta. A integração do GitHub clona em vez de extrair, e para o Git esse número é
+banal. O `publicar.mjs` continua existindo para hosts que recebem .zip.
+
 Como o build é portátil, qualquer host estático serve igual — Cloudflare Pages e Netlify
 aceitam a pasta `build/` direto, sem zip e sem arquivo de configuração.
 
