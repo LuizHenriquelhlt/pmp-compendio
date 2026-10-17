@@ -94,7 +94,7 @@
 		left: 50%;
 		transform: translate(-50%, -110%);
 		z-index: 10;
-		padding: 0.6rem 1rem;
+		padding: 0.6rem var(--espaco-6);
 		background: var(--marca);
 		color: var(--marca-contraste);
 		border-radius: 0 0 var(--raio) var(--raio);
@@ -120,14 +120,14 @@
 
 	.barra {
 		display: flex;
-		gap: 1rem;
+		gap: var(--espaco-6);
 		align-items: center;
 		min-height: 3.5rem;
 	}
 
 	.marca {
 		display: flex;
-		gap: 0.5rem;
+		gap: var(--espaco-3);
 		align-items: center;
 		color: var(--secao);
 		font-weight: 700;
@@ -169,7 +169,7 @@
 
 	nav a {
 		display: block;
-		padding: 0.4rem 0.7rem;
+		padding: var(--espaco-2) var(--espaco-4);
 		border-radius: var(--raio);
 		color: var(--cromo-texto-suave);
 		font-size: var(--txt-pequeno);
@@ -223,7 +223,7 @@
 	}
 
 	footer .aviso {
-		margin-top: 0.4rem;
+		margin-top: var(--espaco-2);
 		font-size: var(--txt-miudo);
 	}
 

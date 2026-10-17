@@ -55,9 +55,9 @@
 <style>
 	.cartao {
 		display: grid;
-		gap: 0.5rem;
+		gap: var(--espaco-3);
 		align-content: space-between;
-		padding: 0.75rem 0.875rem;
+		padding: 0.75rem var(--espaco-5);
 		background: var(--superficie);
 		border: 1px solid var(--borda);
 		border-left: 4px solid var(--marca);
@@ -108,7 +108,7 @@
 	.rodape {
 		display: flex;
 		flex-wrap: wrap;
-		gap: 0.3rem;
+		gap: var(--espaco-1);
 		align-items: center;
 	}
 

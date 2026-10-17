@@ -103,9 +103,9 @@
 <style>
 	.cartao {
 		display: grid;
-		gap: 0.5rem;
+		gap: var(--espaco-3);
 		align-content: start;
-		padding: 0.875rem;
+		padding: var(--espaco-5);
 		background: var(--superficie);
 		border: 1px solid var(--borda);
 		/* Faixa à esquerda como no CartaoMove: aqui ela carrega a cor do tipo que a forma
@@ -188,7 +188,7 @@
 	.facetas {
 		display: flex;
 		flex-wrap: wrap;
-		gap: 0.3rem;
+		gap: var(--espaco-1);
 		align-items: center;
 	}
 

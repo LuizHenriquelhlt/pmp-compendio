@@ -299,9 +299,9 @@
 	.cabecalho {
 		display: grid;
 		grid-template-columns: auto 1fr;
-		gap: 1.5rem;
+		gap: var(--espaco-8);
 		align-items: center;
-		padding: 1.5rem;
+		padding: var(--espaco-8);
 		/* A cor do tipo primário tinge o cabeçalho de leve — identidade sem ruído.
 		   `color-mix` mantém a mistura legível nos dois temas, porque parte sempre
 		   da superfície vigente. */
@@ -337,19 +337,19 @@
 	}
 
 	h1 {
-		margin-block: 0.15rem 0.7rem;
+		margin-block: 0.15rem var(--espaco-4);
 		overflow-wrap: break-word;
 	}
 
 	.tipos {
 		display: flex;
 		flex-wrap: wrap;
-		gap: 0.4rem;
+		gap: var(--espaco-2);
 	}
 
 	.descricao {
 		max-width: var(--largura-leitura);
-		margin-top: 0.875rem;
+		margin-top: var(--espaco-5);
 		color: var(--texto-suave);
 	}
 
@@ -357,13 +357,13 @@
 		display: grid;
 		grid-template-columns: repeat(4, 1fr);
 		gap: 0.75rem;
-		margin-top: 1rem;
+		margin-top: var(--espaco-6);
 	}
 
 	.destaque {
 		display: grid;
 		gap: 0.15rem;
-		padding: 0.875rem 0.5rem;
+		padding: var(--espaco-5) var(--espaco-3);
 		background: var(--superficie);
 		border: 1px solid var(--borda);
 		border-radius: var(--raio);
@@ -388,14 +388,14 @@
 	.colunas {
 		display: grid;
 		grid-template-columns: 1fr 1fr;
-		gap: 1rem;
-		margin-top: 1rem;
+		gap: var(--espaco-6);
+		margin-top: var(--espaco-6);
 		align-items: start;
 	}
 
 	.coluna {
 		display: grid;
-		gap: 1rem;
+		gap: var(--espaco-6);
 		/* Sem isso, uma lista longa de TMs estica a coluna e desalinha a outra. */
 		min-width: 0;
 	}
@@ -434,7 +434,7 @@
 
 	.habilidades {
 		display: grid;
-		gap: 0.875rem;
+		gap: var(--espaco-5);
 		margin: 0;
 	}
 
@@ -457,7 +457,7 @@
 
 	.etiqueta {
 		display: inline-block;
-		margin-left: 0.4rem;
+		margin-left: var(--espaco-2);
 		padding: 0.1em 0.5em;
 		background: var(--marca-suave);
 		border-radius: var(--raio-pilula);
@@ -472,7 +472,7 @@
 	.ficha {
 		display: grid;
 		grid-template-columns: auto 1fr;
-		gap: 0.4rem 1.25rem;
+		gap: var(--espaco-2) var(--espaco-7);
 		margin: 0;
 		font-size: var(--txt-pequeno);
 	}
@@ -488,7 +488,7 @@
 	}
 
 	.ficha-identidade {
-		margin-top: 1rem;
+		margin-top: var(--espaco-6);
 	}
 
 	.de {
@@ -505,7 +505,7 @@
 	.evolucoes li {
 		display: flex;
 		flex-wrap: wrap;
-		gap: 0.4rem;
+		gap: var(--espaco-2);
 		align-items: center;
 		padding: 0.6rem 0.75rem;
 		background: var(--superficie-afundada);
@@ -519,7 +519,7 @@
 	.condicoes {
 		display: flex;
 		flex-wrap: wrap;
-		gap: 0.3rem;
+		gap: var(--espaco-1);
 	}
 
 	.condicao {
@@ -532,8 +532,8 @@
 	}
 
 	.texto-do-livro {
-		margin-top: 0.875rem;
-		padding-top: 0.875rem;
+		margin-top: var(--espaco-5);
+		padding-top: var(--espaco-5);
 		border-top: 1px solid var(--borda);
 		font-size: var(--txt-pequeno);
 		font-style: italic;
@@ -546,7 +546,7 @@
 	}
 
 	th, td {
-		padding: 0.4rem 0.5rem;
+		padding: var(--espaco-2) var(--espaco-3);
 		text-align: left;
 		vertical-align: top;
 	}

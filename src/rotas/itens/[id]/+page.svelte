@@ -144,9 +144,9 @@
 	.cabecalho {
 		display: flex;
 		flex-wrap: wrap;
-		gap: 1.25rem;
+		gap: var(--espaco-7);
 		align-items: center;
-		padding: 1.5rem;
+		padding: var(--espaco-8);
 		/* Sem cor de tipo para mostrar: o item não tem tipo. A tinta da marca faz o papel,
 		   como no cabeçalho de habilidade. */
 		background: color-mix(in oklab, var(--marca) 8%, var(--superficie));
@@ -173,7 +173,7 @@
 	.emblemas {
 		display: flex;
 		flex-wrap: wrap;
-		gap: 0.4rem;
+		gap: var(--espaco-2);
 		align-items: center;
 	}
 
@@ -199,14 +199,14 @@
 	.colunas {
 		display: grid;
 		grid-template-columns: minmax(0, 3fr) minmax(0, 2fr);
-		gap: 1rem;
-		margin-top: 1rem;
+		gap: var(--espaco-6);
+		margin-top: var(--espaco-6);
 		align-items: start;
 	}
 
 	.coluna {
 		display: grid;
-		gap: 1rem;
+		gap: var(--espaco-6);
 		min-width: 0;
 	}
 
@@ -217,11 +217,11 @@
 	}
 
 	.painel p + p {
-		margin-top: 0.7rem;
+		margin-top: var(--espaco-4);
 	}
 
 	.ressalva {
-		padding: 0.7rem 0.875rem;
+		padding: var(--espaco-4) var(--espaco-5);
 		background: var(--superficie-afundada);
 		border-left: 3px solid var(--borda-forte);
 		border-radius: var(--raio);
@@ -235,7 +235,7 @@
 	}
 
 	.painel .tenue {
-		margin-top: 0.4rem;
+		margin-top: var(--espaco-2);
 	}
 
 	.secao {

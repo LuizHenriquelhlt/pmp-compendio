@@ -63,9 +63,9 @@
 	.cartao {
 		display: grid;
 		grid-template-columns: auto 1fr;
-		gap: 0.875rem;
+		gap: var(--espaco-5);
 		align-items: center;
-		padding: 0.875rem;
+		padding: var(--espaco-5);
 		background: var(--superficie);
 		border: 1px solid var(--borda);
 		/* A cor do tipo primário entra como uma faixa à esquerda, não como fundo:
@@ -107,7 +107,7 @@
 
 	.corpo {
 		display: grid;
-		gap: 0.3rem;
+		gap: var(--espaco-1);
 		min-width: 0;
 	}
 
@@ -131,19 +131,19 @@
 	.tipos {
 		display: flex;
 		flex-wrap: wrap;
-		gap: 0.3rem;
+		gap: var(--espaco-1);
 		margin-top: 0.1rem;
 	}
 
 	.medidas {
 		display: flex;
-		gap: 0.875rem;
+		gap: var(--espaco-5);
 		margin: 0.35rem 0 0;
 	}
 
 	.medidas div {
 		display: flex;
-		gap: 0.3rem;
+		gap: var(--espaco-1);
 		align-items: baseline;
 	}
 

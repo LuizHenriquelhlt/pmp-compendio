@@ -246,7 +246,7 @@
 
 
 	.cabecalho {
-		padding: 1.5rem;
+		padding: var(--espaco-8);
 		/* Mesma mistura da ficha de espécie: a cor do tipo tinge o cabeçalho de leve,
 		   partindo sempre da superfície vigente para continuar legível nos dois temas. */
 		background: color-mix(in oklab, var(--tipo-cor) 10%, var(--superficie));
@@ -264,14 +264,14 @@
 	}
 
 	h1 {
-		margin-bottom: 0.7rem;
+		margin-bottom: var(--espaco-4);
 		overflow-wrap: break-word;
 	}
 
 	.tipos {
 		display: flex;
 		flex-wrap: wrap;
-		gap: 0.4rem;
+		gap: var(--espaco-2);
 		align-items: center;
 	}
 
@@ -289,14 +289,14 @@
 		display: grid;
 		grid-template-columns: repeat(4, 1fr);
 		gap: 0.75rem;
-		margin-top: 1rem;
+		margin-top: var(--espaco-6);
 	}
 
 	.destaque {
 		display: grid;
 		gap: 0.15rem;
 		align-content: start;
-		padding: 0.875rem 0.5rem;
+		padding: var(--espaco-5) var(--espaco-3);
 		background: var(--superficie);
 		border: 1px solid var(--borda);
 		border-radius: var(--raio);
@@ -322,14 +322,14 @@
 	.colunas {
 		display: grid;
 		grid-template-columns: 1fr 1fr;
-		gap: 1rem;
-		margin-top: 1rem;
+		gap: var(--espaco-6);
+		margin-top: var(--espaco-6);
 		align-items: start;
 	}
 
 	.coluna {
 		display: grid;
-		gap: 1rem;
+		gap: var(--espaco-6);
 		/* Sem isso, a lista de espécies estica a coluna e desalinha a outra. */
 		min-width: 0;
 	}
@@ -345,7 +345,7 @@
 	}
 
 	.ressalva {
-		margin-top: 1rem;
+		margin-top: var(--espaco-6);
 		padding: 0.6rem 0.75rem;
 		background: var(--superficie-afundada);
 		border-left: 3px solid var(--borda-forte);
@@ -363,7 +363,7 @@
 	.ficha {
 		display: grid;
 		grid-template-columns: auto 1fr;
-		gap: 0.4rem 1.25rem;
+		gap: var(--espaco-2) var(--espaco-7);
 		margin: 0;
 		font-size: var(--txt-pequeno);
 	}
@@ -380,16 +380,16 @@
 
 	.efeitos {
 		display: grid;
-		gap: 0.5rem;
+		gap: var(--espaco-3);
 		list-style: none;
 	}
 
 	.efeitos li {
 		display: flex;
 		flex-wrap: wrap;
-		gap: 0.4rem;
+		gap: var(--espaco-2);
 		align-items: center;
-		padding: 0.5rem 0.7rem;
+		padding: var(--espaco-3) var(--espaco-4);
 		background: var(--superficie-afundada);
 		border-radius: var(--raio);
 	}
@@ -408,11 +408,11 @@
 	}
 
 	details + details {
-		margin-top: 0.5rem;
+		margin-top: var(--espaco-3);
 	}
 
 	summary {
-		padding: 0.3rem 0;
+		padding: var(--espaco-1) 0;
 		font-size: var(--txt-pequeno);
 		font-weight: 650;
 		cursor: pointer;
@@ -424,7 +424,7 @@
 	}
 
 	.lista-larga {
-		margin-top: 0.4rem;
+		margin-top: var(--espaco-2);
 		font-size: var(--txt-pequeno);
 		line-height: 1.7;
 	}

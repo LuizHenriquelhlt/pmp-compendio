@@ -143,7 +143,7 @@
 		flex-wrap: wrap;
 		gap: 0.75rem;
 		align-items: center;
-		padding: 1.5rem;
+		padding: var(--espaco-8);
 		/* Sem cor de tipo para mostrar: a habilidade não tem tipo. A tinta da marca faz o
 		   papel que a cor do tipo faz nas outras fichas. */
 		background: color-mix(in oklab, var(--marca) 8%, var(--superficie));
@@ -179,14 +179,14 @@
 	.colunas {
 		display: grid;
 		grid-template-columns: minmax(0, 3fr) minmax(0, 2fr);
-		gap: 1rem;
-		margin-top: 1rem;
+		gap: var(--espaco-6);
+		margin-top: var(--espaco-6);
 		align-items: start;
 	}
 
 	.coluna {
 		display: grid;
-		gap: 1rem;
+		gap: var(--espaco-6);
 		min-width: 0;
 	}
 
@@ -197,11 +197,11 @@
 	}
 
 	.painel p + p {
-		margin-top: 0.7rem;
+		margin-top: var(--espaco-4);
 	}
 
 	.ressalva {
-		padding: 0.7rem 0.875rem;
+		padding: var(--espaco-4) var(--espaco-5);
 		background: var(--superficie-afundada);
 		border-left: 3px solid var(--borda-forte);
 		border-radius: var(--raio);
@@ -215,12 +215,12 @@
 	}
 
 	.painel .tenue {
-		margin-top: 0.7rem;
+		margin-top: var(--espaco-4);
 	}
 
 	.efeitos {
 		display: grid;
-		gap: 0.5rem;
+		gap: var(--espaco-3);
 		margin: 0;
 	}
 
@@ -240,7 +240,7 @@
 
 	details {
 		border-top: 1px solid var(--borda);
-		padding-block: 0.5rem;
+		padding-block: var(--espaco-3);
 	}
 
 	details:first-of-type {
@@ -255,27 +255,27 @@
 	}
 
 	.quantidade {
-		margin-left: 0.3rem;
+		margin-left: var(--espaco-1);
 		color: var(--texto-tenue);
 		font-weight: 600;
 	}
 
 	.lista-larga {
-		margin-top: 0.5rem;
+		margin-top: var(--espaco-3);
 		font-size: var(--txt-pequeno);
 		line-height: 1.7;
 	}
 
 	.megas {
 		display: grid;
-		gap: 0.4rem;
+		gap: var(--espaco-2);
 		list-style: none;
 	}
 
 	.megas li {
 		display: flex;
 		flex-wrap: wrap;
-		gap: 0.4rem;
+		gap: var(--espaco-2);
 		align-items: baseline;
 		font-size: var(--txt-pequeno);
 		font-weight: 600;

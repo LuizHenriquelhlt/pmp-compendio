@@ -79,6 +79,26 @@
 	--raio-grande: 0.875rem;
 	--raio-pilula: 999px;
 
+	/*
+	 * Escala de espaçamento, MEDIDA do código e não desenhada: são os nove valores que
+	 * carregam papel estrutural, com o valor exato que já estava em uso — adotar os tokens
+	 * não move um pixel.
+	 *
+	 * Cobrem 205 dos 275 usos de gap/padding/margin. Os 70 restantes continuam em rem cru
+	 * de propósito: 0.6rem, 0.75rem e 0.9rem ficam a menos de 1 px de `--espaco-4` e
+	 * `--espaco-5` e deveriam encostar neles, mas isso MUDA a tela e é decisão de desenho,
+	 * não de refatoração.
+	 */
+	--espaco-1: 0.3rem;
+	--espaco-2: 0.4rem;
+	--espaco-3: 0.5rem;
+	--espaco-4: 0.7rem;
+	--espaco-5: 0.875rem;
+	--espaco-6: 1rem;
+	--espaco-7: 1.25rem;
+	--espaco-8: 1.5rem;
+	--espaco-9: 3rem;
+
 	/* Escala tipográfica em passos de ~1.2. */
 	--txt-pequeno: 0.8125rem;
 	--txt-miudo: 0.6875rem;
@@ -103,12 +123,46 @@
 	--inclinacao-desfaz: 18deg;
 
 	/*
-	 * A cor da seção, que cada rota redefine no `<main>`. O padrão é a marca, para
+	 * As cinco cores de seção, declaradas aqui com os dois temas em vez de dentro das
+	 * classes `.secao-*`.
+	 *
+	 * Antes cada classe aparecia TRÊS vezes — uma no tema claro, uma na media query e uma
+	 * no seletor `data-tema` — e as duas cópias escuras redefiniam só parte dos valores.
+	 * `--secao-*-forte` ficava com o valor claro no escuro, o que invertia a direção do
+	 * hover: mais escuro que a cor de repouso em vez de mais claro.
+	 *
+	 * Com o par de temas aqui, cada classe vira uma linha e o tema deixa de ser problema
+	 * dela. Os valores escuros de `-forte` seguem a regra do par `--marca`/`--marca-forte`:
+	 * no claro o hover escurece, no escuro ele clareia.
+	 *
+	 * NÃO existe `--secao-*-suave`, e é de propósito. O único lugar que quer um tom suave
+	 * da seção é a faixa diagonal do layout, que precisa desbotar até transparente e deriva
+	 * isso de uma fonte só, com `color-mix(in oklab, var(--secao) 16%, transparent)`. Dez
+	 * valores ajustados à mão seriam uma cópia do que essa expressão calcula — e cópia
+	 * diverge. `--marca-suave` continua existindo porque tem consumidor de verdade: a
+	 * etiqueta da ficha de espécie, que é um fundo sólido, não um desbotamento.
+	 */
+	--secao-pokemon: oklch(0.55 0.19 25);
+	--secao-pokemon-forte: oklch(0.47 0.18 25);
+
+	--secao-moves: oklch(0.55 0.15 245);
+	--secao-moves-forte: oklch(0.47 0.15 245);
+
+	--secao-habilidades: oklch(0.52 0.18 300);
+	--secao-habilidades-forte: oklch(0.45 0.18 300);
+
+	--secao-megas: oklch(0.52 0.14 160);
+	--secao-megas-forte: oklch(0.44 0.13 160);
+
+	--secao-itens: oklch(0.58 0.13 75);
+	--secao-itens-forte: oklch(0.50 0.13 75);
+
+	/*
+	 * A cor da seção em vigor, que cada rota redefine no `<main>`. O padrão é a marca, para
 	 * qualquer página que não declare a sua (a home, o Sobre, o erro).
 	 */
 	--secao: var(--marca);
 	--secao-forte: var(--marca-forte);
-	--secao-suave: var(--marca-suave);
 
 	/* O cromo escuro — header e rodapé — é o mesmo nos dois temas, como no poke5e. */
 	--cromo: oklch(0.26 0.012 265);
@@ -139,6 +193,21 @@
 
 		--foco: oklch(0.72 0.14 250);
 
+		--secao-pokemon: oklch(0.70 0.16 25);
+		--secao-pokemon-forte: oklch(0.78 0.15 30);
+
+		--secao-moves: oklch(0.70 0.13 245);
+		--secao-moves-forte: oklch(0.78 0.12 245);
+
+		--secao-habilidades: oklch(0.70 0.15 300);
+		--secao-habilidades-forte: oklch(0.78 0.14 300);
+
+		--secao-megas: oklch(0.70 0.13 160);
+		--secao-megas-forte: oklch(0.78 0.12 160);
+
+		--secao-itens: oklch(0.75 0.13 75);
+		--secao-itens-forte: oklch(0.83 0.12 75);
+
 		--sombra-1: 0 1px 2px oklch(0 0 0 / 0.4);
 		--sombra-2: 0 2px 4px oklch(0 0 0 / 0.35), 0 6px 16px oklch(0 0 0 / 0.3);
 	}
@@ -165,6 +234,21 @@
 	--marca-contraste: oklch(0.16 0.01 25);
 
 	--foco: oklch(0.72 0.14 250);
+
+	--secao-pokemon: oklch(0.70 0.16 25);
+	--secao-pokemon-forte: oklch(0.78 0.15 30);
+
+	--secao-moves: oklch(0.70 0.13 245);
+	--secao-moves-forte: oklch(0.78 0.12 245);
+
+	--secao-habilidades: oklch(0.70 0.15 300);
+	--secao-habilidades-forte: oklch(0.78 0.14 300);
+
+	--secao-megas: oklch(0.70 0.13 160);
+	--secao-megas-forte: oklch(0.78 0.12 160);
+
+	--secao-itens: oklch(0.75 0.13 75);
+	--secao-itens-forte: oklch(0.83 0.12 75);
 
 	--sombra-1: 0 1px 2px oklch(0 0 0 / 0.4);
 	--sombra-2: 0 2px 4px oklch(0 0 0 / 0.35), 0 6px 16px oklch(0 0 0 / 0.3);
@@ -264,7 +348,7 @@ button, input, select {
 	width: 100%;
 	max-width: var(--largura-pagina);
 	margin-inline: auto;
-	padding-inline: 1rem;
+	padding-inline: var(--espaco-6);
 }
 
 /* ------------------------------------------------------------------ Seções
@@ -275,50 +359,35 @@ button, input, select {
  *
  * As cores são as da marca em matizes diferentes, não as do poke5e: ele tematiza por
  * tipo de Pokémon, e aqui a seção é que manda.
+ *
+ * Cada classe é uma linha por token porque os dois temas já estão resolvidos lá em cima,
+ * em `--secao-<id>`. A classe não sabe que existe tema — é o que permite que o hover
+ * (`-forte`) exista no escuro sem uma terceira cópia de cada seletor.
  */
 .secao-pokemon {
-	--secao: oklch(0.55 0.19 25);
-	--secao-forte: oklch(0.47 0.18 25);
-	--secao-suave: oklch(0.95 0.03 25);
+	--secao: var(--secao-pokemon);
+	--secao-forte: var(--secao-pokemon-forte);
 }
 
 .secao-moves {
-	--secao: oklch(0.55 0.15 245);
-	--secao-forte: oklch(0.47 0.15 245);
-	--secao-suave: oklch(0.95 0.03 245);
+	--secao: var(--secao-moves);
+	--secao-forte: var(--secao-moves-forte);
 }
 
 .secao-habilidades {
-	--secao: oklch(0.52 0.18 300);
-	--secao-forte: oklch(0.45 0.18 300);
-	--secao-suave: oklch(0.95 0.03 300);
+	--secao: var(--secao-habilidades);
+	--secao-forte: var(--secao-habilidades-forte);
 }
 
 .secao-megas {
-	--secao: oklch(0.52 0.14 160);
-	--secao-forte: oklch(0.44 0.13 160);
-	--secao-suave: oklch(0.94 0.04 160);
+	--secao: var(--secao-megas);
+	--secao-forte: var(--secao-megas-forte);
 }
 
 .secao-itens {
-	--secao: oklch(0.58 0.13 75);
-	--secao-forte: oklch(0.50 0.13 75);
-	--secao-suave: oklch(0.95 0.04 75);
+	--secao: var(--secao-itens);
+	--secao-forte: var(--secao-itens-forte);
 }
-
-@media (prefers-color-scheme: dark) {
-	:root:not([data-tema="claro"]) .secao-pokemon { --secao: oklch(0.70 0.16 25); --secao-suave: oklch(0.30 0.05 25); }
-	:root:not([data-tema="claro"]) .secao-moves { --secao: oklch(0.70 0.13 245); --secao-suave: oklch(0.30 0.04 245); }
-	:root:not([data-tema="claro"]) .secao-habilidades { --secao: oklch(0.70 0.15 300); --secao-suave: oklch(0.30 0.05 300); }
-	:root:not([data-tema="claro"]) .secao-megas { --secao: oklch(0.70 0.13 160); --secao-suave: oklch(0.29 0.05 160); }
-	:root:not([data-tema="claro"]) .secao-itens { --secao: oklch(0.75 0.13 75); --secao-suave: oklch(0.30 0.05 75); }
-}
-
-:root[data-tema="escuro"] .secao-pokemon { --secao: oklch(0.70 0.16 25); --secao-suave: oklch(0.30 0.05 25); }
-:root[data-tema="escuro"] .secao-moves { --secao: oklch(0.70 0.13 245); --secao-suave: oklch(0.30 0.04 245); }
-:root[data-tema="escuro"] .secao-habilidades { --secao: oklch(0.70 0.15 300); --secao-suave: oklch(0.30 0.05 300); }
-:root[data-tema="escuro"] .secao-megas { --secao: oklch(0.70 0.13 160); --secao-suave: oklch(0.29 0.05 160); }
-:root[data-tema="escuro"] .secao-itens { --secao: oklch(0.75 0.13 75); --secao-suave: oklch(0.30 0.05 75); }
 
 /* ------------------------------------------------------------------ Painel
  *
@@ -331,7 +400,7 @@ button, input, select {
  */
 .painel {
 	position: relative;
-	padding: 1.25rem;
+	padding: var(--espaco-7);
 	background: var(--superficie);
 	border: 1px solid var(--borda);
 	border-radius: var(--raio-grande);
@@ -344,8 +413,10 @@ button, input, select {
 	   atrás do texto do h2 e à frente do cartão. */
 	position: relative;
 	isolation: isolate;
-	margin: -1.25rem -1.25rem 0.9rem;
-	padding: 0.5rem 1.25rem;
+	/* A margem negativa TEM de acompanhar o padding do painel, senão a faixa deixa de
+	   encostar nas bordas. O `calc` amarra as duas a um valor só. */
+	margin: calc(-1 * var(--espaco-7)) calc(-1 * var(--espaco-7)) 0.9rem;
+	padding: var(--espaco-3) var(--espaco-7);
 	color: var(--cromo-texto);
 	font-size: var(--txt-pequeno);
 	font-weight: 700;

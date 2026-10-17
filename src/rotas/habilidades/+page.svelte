@@ -229,11 +229,11 @@
 
 <style>
 	.topo {
-		margin-bottom: 1.5rem;
+		margin-bottom: var(--espaco-8);
 	}
 
 	.topo p {
-		margin-top: 0.4rem;
+		margin-top: var(--espaco-2);
 		color: var(--texto-suave);
 	}
 
@@ -245,9 +245,9 @@
 	.controles {
 		display: flex;
 		flex-wrap: wrap;
-		gap: 0.875rem;
+		gap: var(--espaco-5);
 		align-items: end;
-		padding: 1rem;
+		padding: var(--espaco-6);
 		background: var(--superficie);
 		border: 1px solid var(--borda);
 		border-radius: var(--raio-grande);
@@ -256,7 +256,7 @@
 
 	.campo {
 		display: grid;
-		gap: 0.3rem;
+		gap: var(--espaco-1);
 	}
 
 	/* A busca é o controle principal: ocupa o espaço que sobra. */
@@ -273,7 +273,7 @@
 	}
 
 	input, select {
-		padding: 0.5rem 0.7rem;
+		padding: var(--espaco-3) var(--espaco-4);
 		background: var(--superficie-realcada);
 		border: 1px solid var(--borda-forte);
 		border-radius: var(--raio);
@@ -289,7 +289,7 @@
 	}
 
 	.limpar {
-		padding: 0.5rem 0.9rem;
+		padding: var(--espaco-3) 0.9rem;
 		background: transparent;
 		border: 1px solid var(--borda-forte);
 		border-radius: var(--raio);
@@ -305,7 +305,7 @@
 	}
 
 	.contagem {
-		margin-block: 1.25rem 0.875rem;
+		margin-block: var(--espaco-7) var(--espaco-5);
 		color: var(--texto-tenue);
 		font-size: var(--txt-pequeno);
 		font-weight: 600;
@@ -314,12 +314,12 @@
 	.grade {
 		display: grid;
 		grid-template-columns: repeat(auto-fill, minmax(min(100%, 17rem), 1fr));
-		gap: 0.875rem;
+		gap: var(--espaco-5);
 		list-style: none;
 	}
 
 	.vazio {
-		padding: 3rem 1.5rem;
+		padding: var(--espaco-9) var(--espaco-8);
 		background: var(--superficie-afundada);
 		border: 1px dashed var(--borda-forte);
 		border-radius: var(--raio-grande);
@@ -336,11 +336,11 @@
 	.mais {
 		display: grid;
 		place-items: center;
-		margin-top: 1.5rem;
+		margin-top: var(--espaco-8);
 	}
 
 	.mais button {
-		padding: 0.7rem 1.4rem;
+		padding: var(--espaco-4) 1.4rem;
 		background: var(--superficie);
 		border: 1px solid var(--borda-forte);
 		border-radius: var(--raio);

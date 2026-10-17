@@ -99,7 +99,7 @@
 	}
 
 	h1 {
-		margin-top: 0.5rem;
+		margin-top: var(--espaco-3);
 		/* Grande como a do poke5e: a tela principal é uma capa, não uma página de leitura. */
 		font-size: clamp(2.25rem, 7vw, 3.5rem);
 		letter-spacing: -0.03em;
@@ -108,7 +108,7 @@
 	}
 
 	.chamada {
-		margin-top: 0.875rem;
+		margin-top: var(--espaco-5);
 		color: var(--texto-suave);
 		font-size: var(--txt-g);
 	}
@@ -118,7 +118,7 @@
 		/* Duas colunas quando há largura; uma só abaixo de 52rem, senão o texto do cartão
 		   fica espremido entre a borda e o ícone. */
 		grid-template-columns: repeat(auto-fit, minmax(min(100%, 26rem), 1fr));
-		gap: 1rem;
+		gap: var(--espaco-6);
 		padding-bottom: 2rem;
 	}
 
@@ -129,12 +129,12 @@
 	.cartao {
 		position: relative;
 		display: flex;
-		gap: 1rem;
+		gap: var(--espaco-6);
 		align-items: center;
 		justify-content: space-between;
 		overflow: hidden;
 		min-height: 5rem;
-		padding: 1rem 0 1rem 1.75rem;
+		padding: var(--espaco-6) 0 var(--espaco-6) 1.75rem;
 		background: var(--superficie);
 		border: 1px solid var(--borda);
 		border-left: 6px solid var(--secao);
@@ -146,14 +146,21 @@
 	}
 
 	.cartao:hover {
-		border-color: var(--secao);
+		/* `-forte` e não `--secao`: em repouso o filete já é da cor da seção, então um hover
+		   na MESMA cor não sinaliza nada por cor — só por sombra e deslocamento. O contorno
+		   inteiro passa à versão forte, que escurece no tema claro e clareia no escuro.
+
+		   Isto vale aqui porque o cartão fica sobre `--superficie`. Sobre `--cromo`, que é
+		   escuro nos dois temas, `-forte` pioraria o contraste: lá o hover continua em
+		   `--secao`. */
+		border-color: var(--secao-forte);
 		box-shadow: var(--sombra-2);
 		transform: translateY(-2px);
 	}
 
 	.texto {
 		display: grid;
-		gap: 0.3rem;
+		gap: var(--espaco-1);
 		min-width: 0;
 		/* Acima do ícone, que avança por baixo do texto em telas estreitas. */
 		position: relative;
@@ -167,7 +174,8 @@
 	}
 
 	.cartao:hover .titulo {
-		color: var(--secao);
+		/* Sobre `--superficie`, `-forte` tem mais contraste que `--secao` nos dois temas. */
+		color: var(--secao-forte);
 	}
 
 	.descricao {
@@ -189,7 +197,7 @@
 			/* Pílula inteira em tela estreita viraria um comprimido: cantos grandes, mas
 			   não redondos, para o texto não bater na curva. */
 			min-height: 0;
-			padding: 1.25rem 0 1.25rem 1.25rem;
+			padding: var(--espaco-7) 0 var(--espaco-7) var(--espaco-7);
 			border-radius: var(--raio-grande);
 		}
 

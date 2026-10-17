@@ -32,14 +32,14 @@
 	.bloco {
 		display: grid;
 		grid-template-columns: repeat(6, 1fr);
-		gap: 0.5rem;
+		gap: var(--espaco-3);
 		margin: 0;
 	}
 
 	.atributo {
 		display: grid;
 		gap: 0.1rem;
-		padding: 0.6rem 0.4rem;
+		padding: 0.6rem var(--espaco-2);
 		background: var(--superficie-afundada);
 		border: 1px solid var(--borda);
 		border-radius: var(--raio);

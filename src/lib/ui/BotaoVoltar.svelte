@@ -42,7 +42,7 @@
 	.envolto {
 		position: relative;
 		display: inline-block;
-		margin-bottom: 1rem;
+		margin-bottom: var(--espaco-6);
 	}
 
 	.voltar {
@@ -70,7 +70,7 @@
 		top: 50%;
 		left: calc(100% + 0.5rem);
 		z-index: 4;
-		padding: 0.3rem 0.6rem;
+		padding: var(--espaco-1) 0.6rem;
 		background: var(--cromo);
 		border-radius: var(--raio);
 		color: var(--cromo-texto);

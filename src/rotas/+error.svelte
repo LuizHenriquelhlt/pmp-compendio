@@ -27,7 +27,7 @@
 <style>
 	.erro {
 		max-width: var(--largura-leitura);
-		padding-block: 3rem;
+		padding-block: var(--espaco-9);
 	}
 
 	.codigo {
@@ -46,7 +46,7 @@
 
 	a {
 		display: inline-block;
-		margin-top: 1.5rem;
+		margin-top: var(--espaco-8);
 		font-weight: 650;
 		text-decoration: none;
 	}

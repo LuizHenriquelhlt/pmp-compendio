@@ -70,7 +70,7 @@
 	}
 
 	h1 {
-		margin-bottom: 0.5rem;
+		margin-bottom: var(--espaco-3);
 	}
 
 	section {

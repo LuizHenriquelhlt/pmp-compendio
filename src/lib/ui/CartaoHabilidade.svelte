@@ -65,9 +65,9 @@
 <style>
 	.cartao {
 		display: grid;
-		gap: 0.4rem;
+		gap: var(--espaco-2);
 		align-content: start;
-		padding: 0.875rem;
+		padding: var(--espaco-5);
 		background: var(--superficie);
 		border: 1px solid var(--borda);
 		/* Faixa à esquerda como no CartaoMove, só que aqui ela marca a procedência do
@@ -98,7 +98,7 @@
 	.cabeca {
 		display: flex;
 		flex-wrap: wrap;
-		gap: 0.4rem;
+		gap: var(--espaco-2);
 		align-items: center;
 		justify-content: space-between;
 	}
@@ -136,7 +136,7 @@
 	.facetas {
 		display: flex;
 		flex-wrap: wrap;
-		gap: 0.3rem;
+		gap: var(--espaco-1);
 	}
 
 	.pilula {

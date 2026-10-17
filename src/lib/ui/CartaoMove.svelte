@@ -62,9 +62,9 @@
 <style>
 	.cartao {
 		display: grid;
-		gap: 0.5rem;
+		gap: var(--espaco-3);
 		align-content: start;
-		padding: 0.875rem;
+		padding: var(--espaco-5);
 		background: var(--superficie);
 		border: 1px solid var(--borda);
 		/* A cor do tipo entra como faixa à esquerda, não como fundo — identifica o tipo
@@ -92,7 +92,7 @@
 	.cabeca {
 		display: flex;
 		flex-wrap: wrap;
-		gap: 0.5rem;
+		gap: var(--espaco-3);
 		align-items: center;
 		justify-content: space-between;
 	}
@@ -122,7 +122,7 @@
 	.medidas {
 		display: grid;
 		grid-template-columns: repeat(2, minmax(0, 1fr));
-		gap: 0.3rem 0.875rem;
+		gap: var(--espaco-1) var(--espaco-5);
 		margin: 0;
 	}
 
@@ -149,7 +149,7 @@
 	.resolucoes {
 		display: flex;
 		flex-wrap: wrap;
-		gap: 0.3rem;
+		gap: var(--espaco-1);
 	}
 
 	.pilula {
