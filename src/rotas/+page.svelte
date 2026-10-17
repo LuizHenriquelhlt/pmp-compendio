@@ -115,6 +115,9 @@
 
 	.secoes {
 		display: grid;
+		/* Duas colunas quando há largura; uma só abaixo de 52rem, senão o texto do cartão
+		   fica espremido entre a borda e o ícone. */
+		grid-template-columns: repeat(auto-fit, minmax(min(100%, 26rem), 1fr));
 		gap: 1rem;
 		padding-bottom: 2rem;
 	}
