@@ -91,6 +91,30 @@ A alternativa seria `trailingSlash: "always"` no SvelteKit, que resolve o mesmo 
 pelo lado do framework — mas mudaria toda a forma das URLs (`/moves/` em vez de `/moves`),
 inclusive as de espécie, que já estão decididas.
 
+## Publicando
+
+```bash
+npm run build
+node ferramentas/publicar.mjs   # publicacao/compendio-pmp.zip (~22 MB)
+```
+
+O pacote leva o conteúdo de `build/` na RAIZ do zip — `index.html` e `squarecloud.app` no
+primeiro nível, não dentro de uma pasta. Um nível a mais é o erro mais comum, e o painel só
+diz que não achou `index.html`.
+
+O [`squarecloud.app`](squarecloud.app) é a configuração do
+[Square Cloud](https://squarecloud.app): `RUNTIME=static` faz o host servir o pacote por
+nginx, que ele configura. O subdomínio se escolhe no painel, na hora do upload — não está
+no arquivo porque o painel valida disponibilidade, e um nome ocupado faria o deploy falhar.
+Não há plano gratuito: hospedagem de site começa no Hobby.
+
+Como o build é portátil, qualquer host estático serve igual — Cloudflare Pages e Netlify
+aceitam a pasta `build/` direto, sem zip e sem arquivo de configuração.
+
+**Lembre que `dados/` é conteúdo do PMP.** O build assa esse conteúdo dentro das páginas:
+publicar o site é publicar o compêndio. Isso é decisão de quem tem os direitos, não do
+deploy — veja "Conteúdo não acompanha o código", no começo deste arquivo.
+
 ## Como os dados chegam aqui
 
 ```
