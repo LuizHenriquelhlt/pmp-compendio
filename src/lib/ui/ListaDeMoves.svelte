@@ -17,6 +17,13 @@
 -->
 <span class="lista">
 	{#each moves as move, indice (move.nome)}
+		<!--
+			O número do TM vem antes do nome, como o livro imprime ("TM114: Grass Knot"), num
+			`<span>` próprio para ter peso e cor diferentes sem duplicar o link. Só a lista de
+			TMs traz número: a tabela por nível e os Moves de Ovo são os mesmos Moves sem
+			disco nenhum.
+		-->
+		{#if move.tm != null}<span class="tm numero">TM{move.tm}</span>{/if}
 		{#if move.id != null}
 			<a href="/moves/{move.id}">{move.nome}</a>
 		{:else}
@@ -41,5 +48,12 @@
 
 	.separador {
 		color: var(--texto-tenue);
+	}
+
+	.tm {
+		margin-right: 0.2rem;
+		color: var(--texto-tenue);
+		font-size: var(--txt-miudo);
+		font-weight: 700;
 	}
 </style>

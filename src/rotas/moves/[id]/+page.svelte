@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { t, tPlural } from "$i18n"
+	import BotaoVoltar from "$ui/BotaoVoltar.svelte"
 	import {
 		descreverEfeito, formatarEscalonamento, formatarPP, nomeDaResolucao, nomeDoModo,
 	} from "$pmp/move"
@@ -65,7 +66,7 @@
 </svelte:head>
 
 <article class="pagina">
-	<a class="voltar" href="/moves">← {t("move.voltar")}</a>
+	<BotaoVoltar href="/moves" texto={t("move.voltar")} />
 
 	<header class="cabecalho {move.tipo != null ? `tipo-${move.tipo}` : 'sem-tipo'}">
 		<div class="identidade">
@@ -242,18 +243,7 @@
 </article>
 
 <style>
-	.voltar {
-		display: inline-block;
-		margin-bottom: 1rem;
-		color: var(--texto-suave);
-		font-size: var(--txt-pequeno);
-		font-weight: 600;
-		text-decoration: none;
-	}
 
-	.voltar:hover {
-		color: var(--marca);
-	}
 
 	.cabecalho {
 		padding: 1.5rem;
@@ -344,18 +334,7 @@
 		min-width: 0;
 	}
 
-	.painel {
-		padding: 1.25rem;
-		background: var(--superficie);
-		border: 1px solid var(--borda);
-		border-radius: var(--raio-grande);
-		box-shadow: var(--sombra-1);
-	}
 
-	.painel h2 {
-		margin-bottom: 0.75rem;
-		font-size: var(--txt-g);
-	}
 
 	.painel p {
 		color: var(--texto-suave);

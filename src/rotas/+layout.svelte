@@ -22,6 +22,20 @@
 		if (href === "/") return page.url.pathname === "/"
 		return page.url.pathname === href || page.url.pathname.startsWith(`${href}/`)
 	}
+
+	/**
+	 * A cor que a seção veste, como no poke5e.
+	 *
+	 * Sai do primeiro segmento da URL, e não de uma prop por página, para que toda rota
+	 * nova já nasça temática — inclusive as fichas, que são a maior parte das páginas.
+	 * A home, o Sobre e o erro ficam sem classe e herdam a cor da marca.
+	 */
+	const SECOES_COM_COR = [ "pokemon", "moves", "habilidades", "megas", "itens" ]
+
+	const classeDaSecao = $derived.by(() => {
+		const primeiro = page.url.pathname.split("/")[1] ?? ""
+		return SECOES_COM_COR.includes(primeiro) ? `secao-${primeiro}` : ""
+	})
 </script>
 
 <a class="pular" href="#conteudo">{t("nav.pular")}</a>
@@ -54,7 +68,14 @@
 	</div>
 </header>
 
-<main id="conteudo">
+<main id="conteudo" class={classeDaSecao}>
+	<!--
+		A faixa diagonal do topo, a marca registrada do poke5e. É decoração pura, então sai
+		do fluxo e fica `aria-hidden`; a altura é pequena o bastante para não empurrar o
+		conteúdo em telas baixas.
+	-->
+	<div class="faixa" aria-hidden="true"></div>
+
 	{@render children()}
 </main>
 
@@ -86,12 +107,14 @@
 		transform: translate(-50%, 0);
 	}
 
+	/* Cromo escuro nos dois temas, como no poke5e: a barra emoldura o conteúdo em vez de
+	   se misturar com ele. */
 	header {
 		position: sticky;
 		top: 0;
 		z-index: 5;
-		background: color-mix(in oklab, var(--superficie) 88%, transparent);
-		border-bottom: 1px solid var(--borda);
+		background: color-mix(in oklab, var(--cromo) 92%, transparent);
+		border-bottom: 1px solid oklch(0 0 0 / 0.3);
 		backdrop-filter: blur(8px);
 	}
 
@@ -106,7 +129,7 @@
 		display: flex;
 		gap: 0.5rem;
 		align-items: center;
-		color: var(--marca);
+		color: var(--secao);
 		font-weight: 700;
 		text-decoration: none;
 	}
@@ -114,11 +137,11 @@
 	.marca-nome {
 		font-size: var(--txt-g);
 		letter-spacing: -0.02em;
-		color: var(--texto);
+		color: var(--cromo-texto);
 	}
 
 	.marca:hover .marca-nome {
-		color: var(--marca);
+		color: var(--secao);
 	}
 
 	nav {
@@ -148,7 +171,7 @@
 		display: block;
 		padding: 0.4rem 0.7rem;
 		border-radius: var(--raio);
-		color: var(--texto-suave);
+		color: var(--cromo-texto-suave);
 		font-size: var(--txt-pequeno);
 		font-weight: 600;
 		text-decoration: none;
@@ -156,26 +179,42 @@
 	}
 
 	nav a:hover {
-		background: var(--superficie-afundada);
-		color: var(--texto);
+		background: oklch(1 0 0 / 0.1);
+		color: var(--cromo-texto);
 	}
 
-	/* `aria-current` já carrega o estado — o estilo só o torna visível. */
+	/* `aria-current` já carrega o estado — o estilo só o torna visível. A seção atual
+	   acende na própria cor dela. */
 	nav a[aria-current="page"] {
-		background: var(--marca-suave);
-		color: var(--marca);
+		background: var(--secao);
+		color: var(--cromo-texto);
 	}
 
 	main {
+		position: relative;
 		min-height: 60vh;
 		padding-block: 2rem 4rem;
+		isolation: isolate;
+	}
+
+	/* A faixa diagonal: um bloco da cor da seção, cortado em diagonal e desbotando. */
+	.faixa {
+		position: absolute;
+		inset: 0 0 auto 0;
+		z-index: -1;
+		height: 13rem;
+		background: linear-gradient(
+			to bottom,
+			color-mix(in oklab, var(--secao) 16%, transparent),
+			transparent
+		);
+		clip-path: polygon(0 0, 100% 0, 100% 62%, 0 100%);
 	}
 
 	footer {
 		padding-block: 1.75rem;
-		border-top: 1px solid var(--borda);
-		background: var(--superficie-afundada);
-		color: var(--texto-tenue);
+		background: var(--cromo);
+		color: var(--cromo-texto-suave);
 		font-size: var(--txt-pequeno);
 	}
 

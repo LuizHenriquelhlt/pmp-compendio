@@ -105,6 +105,13 @@ nome promete:
 | `activation.type` | Guarda só o primeiro modo: os 18 Moves de "1 ação / reação" ficam como `action` |
 | `priority` | Zerado em 3 Moves que declaram prioridade no próprio texto |
 
+O **número do TM** não é campo: está no NOME do documento, `"TM114: Grass Knot"`. São 321,
+numerados de 1 a 321 sem repetição nem buraco, e os 321 Moves que eles ensinam existem
+todos no compêndio. A ficha de espécie lista TMs por nome de Move, então o pipeline emite
+a volta (`dados/tms.json`, Move → número) e a lista mostra `TM114 Grass Knot`. Os 21 nomes
+que não casam são exatamente as entradas contaminadas que `movesNaoResolvidos` já acusa,
+não TMs que faltam.
+
 As Habilidades Passivas vêm do pack `abilities`, e ele é o mais pobre dos três: de todos
 os campos do documento, só `name`, `system.description.value` e o flag `placeholder`
 variam nas 313. Tudo o mais é constante, e alguns campos enganam pelo nome:
@@ -277,6 +284,7 @@ na fonte. O relatório cobre:
 | `evolucoesNaoResolvidas` | Evoluções cujo alvo não existe no compêndio |
 | `evolucoesSuspeitas` | Evoluções em que o estágio não aumenta |
 | `formasOrfas` | Formas de estágio >1 para as quais nenhuma espécie evolui (23 na v1.35.0) |
+| `tmsSemNumero`, `movesComDoisTms` | TMs cujo nome não traz o número, e Moves com dois discos (0 e 0 na v1.35.0) |
 | `tiposDesconhecidos`, `tamanhosDesconhecidos`, `tiposDeMoveDesconhecidos` | Valores fora do vocabulário esperado |
 | `alcanceDeMoveTruncado` | Moves com o campo de alcance cortado na fonte (1 na v1.35.0) |
 | `prioridadeDeMoveDivergente` | Moves em que o campo `priority` discorda do texto (3 na v1.35.0) |
@@ -360,6 +368,48 @@ completas, iam todas para o relatório. A âncora passou a ser um espaço.
 Os dados são lidos de `dados/` **durante o prerender** e ficam assados em cada página.
 Eles não vão para `static/`: o site publicado contém as páginas renderizadas, não um
 dump do conteúdo do sistema.
+
+## O visual
+
+O compêndio é parente visual do [poke5e](https://poke5e.app), de onde vêm quatro traços
+deliberados: a fonte **Rubik**, o **cromo escuro** de cabeçalho e rodapé, a **faixa
+diagonal** no topo de cada página e os **cabeçalhos de painel** em faixa escura com a
+ponta cortada na diagonal. Os emblemas de tipo também são inclinados.
+
+Cada seção veste uma cor — Pokémon vermelho, Moves azul, Habilidades roxo, Megas verde,
+Itens âmbar —, aplicada por uma classe no `<main>` que vem do primeiro segmento da URL.
+Assim uma rota nova já nasce temática, inclusive as fichas, que são a maior parte das
+páginas. Tudo abaixo herda por `--secao`.
+
+Duas diferenças de propósito:
+
+- **A estrutura não é a do poke5e.** Lá a navegação é mestre-detalhe, com a lista fixa à
+  esquerda e o conteúdo num painel ao lado. Aqui cada entidade tem URL e página própria,
+  porque o site é prerenderizado e as URLs são parte do desenho.
+- **A cor é da seção, não do tipo.** O poke5e tematiza pelo tipo do Pokémon; aqui o tipo
+  já colore os emblemas, e deixar a página inteira mudar de cor a cada espécie tiraria a
+  referência de onde o leitor está.
+
+A **tela principal** segue o desenho do poke5e: uma pílula larga por seção, com o nome à
+esquerda e um ícone grande à direita, cortado pela curva do cartão (`overflow: hidden` é o
+que dá o efeito). Em telas estreitas a pílula vira um retângulo de cantos grandes — pílula
+inteira em 375px viraria um comprimido, e o texto bateria na curva.
+
+Os ícones de seção e o de voltar são desenhados em `currentColor`, como os dos itens: sem
+dependência, sem licença de terceiros, e acompanham o tema. O **voltar** das fichas virou
+um botão de ícone com dica em texto; o nome continua existindo em `aria-label`, que é o
+que o leitor de tela anuncia, e a dica visível é `aria-hidden` para não ser lida duas
+vezes. Ela aparece no `:hover` **e** no `:focus-visible` — dica que só responde ao mouse
+deixa quem navega por teclado sem saber para onde o botão vai.
+
+A faixa do cabeçalho de painel é recortada com `clip-path`, e não inclinada com
+`transform: skewX`. Inclinar a caixa inclinaria o texto junto, obrigando a desincliná-lo
+num elemento interno — e isso exigiria mexer na marcação de todos os painéis de todas as
+fichas. O recorte dá a mesma diagonal sem tocar no HTML.
+
+A Rubik é hospedada em `static/fontes/`, não no Google Fonts, pela mesma razão que a arte
+dos itens: o container precisa funcionar offline. Licença SIL OFL, que acompanha os
+arquivos.
 
 ## Idiomas
 

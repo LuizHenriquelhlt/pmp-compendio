@@ -86,6 +86,8 @@ const relatorio = {
 	textosDeItemCortados: [],
 	referenciasDePaginaEmItens: [],
 	itensDeEvolucaoNaoResolvidos: [],
+	tmsSemNumero: [],
+	movesComDoisTms: [],
 }
 
 const dex = carregar("pokedex")
@@ -1012,6 +1014,38 @@ const indiceDeItens = itens.map((i) => ({
 	imagem: i.imagem,
 }))
 
+// ------------------------------------------------------------------ TMs
+// O número do TM não é campo: está no NOME do documento, "TM114: Grass Knot". São 321,
+// numerados de 1 a 321 sem repetição nem buraco, e os 321 Moves que eles ensinam existem
+// todos no compêndio — conferido.
+//
+// A ficha de espécie lista os TMs por nome de Move, então o que o site precisa é a volta:
+// Move → número. Os 21 nomes das listas de espécie que não casam aqui são exatamente as
+// entradas contaminadas que `movesNaoResolvidos` já acusa, não TMs que faltam.
+const NUMERO_DE_TM = /^TM(\d+)\s*:\s*(.+)$/
+
+const TM_POR_MOVE = {}
+
+for (const documento of carregarOpcional("tms") ?? []) {
+	const casa = String(documento.name ?? "").match(NUMERO_DE_TM)
+	if (casa == null) {
+		relatorio.tmsSemNumero.push(documento.name)
+		continue
+	}
+
+	const move = casa[2].trim()
+	const numero = Number(casa[1])
+
+	// Dois TMs para o mesmo Move seria ambíguo na ficha; o corpus não tem nenhum, e se
+	// aparecer é trabalho na fonte, não uma escolha a fazer aqui.
+	if (TM_POR_MOVE[move] != null) {
+		relatorio.movesComDoisTms.push({ move, numeros: [ TM_POR_MOVE[move], numero ] })
+		continue
+	}
+
+	TM_POR_MOVE[move] = numero
+}
+
 function escrever(nome, dados) {
 	writeFileSync(join(saida, `${nome}.json`), JSON.stringify(dados))
 	const total = Array.isArray(dados) ? dados.length : Object.keys(dados).length
@@ -1029,6 +1063,7 @@ escrever("habilidades", habilidades)
 escrever("indice-habilidades", indiceDeHabilidades)
 escrever("megas", megas)
 escrever("indice-megas", indiceDeMegas)
+escrever("tms", TM_POR_MOVE)
 escrever("itens", itens)
 escrever("indice-itens", indiceDeItens)
 writeFileSync(join(saida, "relatorio.json"), JSON.stringify(relatorio, null, 1))
@@ -1057,5 +1092,6 @@ console.log(`  textos de item contaminados na fonte: ${relatorio.textosDeItemCon
 console.log(`  textos de item cortados na fonte: ${relatorio.textosDeItemCortados.length}`)
 console.log(`  células de preço aparadas de itens: ${relatorio.celulasDePrecoEmItens.length}`)
 console.log(`  itens de evolução não resolvidos: ${relatorio.itensDeEvolucaoNaoResolvidos.length}`)
+console.log(`  TMs sem número no nome: ${relatorio.tmsSemNumero.length}`)
 console.log(`  Moves de clima ausentes do compêndio: ${relatorio.movesDeClimaAusentes.length}`)
 console.log(`  Moves concedidos por habilidade não resolvidos: ${relatorio.movesDeHabilidadeNaoResolvidos.length}`)

@@ -320,8 +320,42 @@ function mapaDeMoves(): Map<string, string> {
 	return idPorNomeDeMove
 }
 
-/** Um nome de Move de ficha de espécie, com o `id` da rota quando ele existe. */
-export type MoveReferenciado = { nome: string, id: string | null }
+/**
+ * Um nome de Move de ficha de espécie, com o `id` da rota quando ele existe.
+ *
+ * `tm` vem preenchido só na lista de TMs, e é o número que o livro dá ao disco — está no
+ * nome do documento no módulo ("TM114: Grass Knot"), não num campo.
+ */
+export type MoveReferenciado = { nome: string, id: string | null, tm?: number }
+
+let numeroDeTm: Record<string, number> | undefined
+
+function tmPorMove(): Record<string, number> {
+	if (!building) return ler<Record<string, number>>("tms")
+
+	numeroDeTm ??= ler<Record<string, number>>("tms")
+	return numeroDeTm
+}
+
+/**
+ * A lista de TMs de uma espécie, com o número de cada disco.
+ *
+ * Separada de `referenciarMoves` porque só os TMs têm número: a tabela por nível e os
+ * Moves de Ovo são os mesmos Moves sem disco nenhum.
+ *
+ * `tm` fica ausente nas 21 entradas que não casam — e essas são justamente as linhas
+ * contaminadas que `movesNaoResolvidos` já acusa, não TMs que faltam no pack.
+ */
+export function referenciarTms(nomes: string[]): MoveReferenciado[] {
+	const porNome = mapaDeMoves()
+	const numero = tmPorMove()
+
+	return nomes.map((nome) => ({
+		nome,
+		id: porNome.get(nome) ?? null,
+		...(numero[nome] != null ? { tm: numero[nome] } : {}),
+	}))
+}
 
 /**
  * Resolve nomes de Move em links.

@@ -1,5 +1,6 @@
 import {
-	acharEspecie, evoluiDe, habilidadesDaEspecie, idsDeEspecie, megasDaEspecie, movesPorNivelComLinks, referenciarMoves,
+	acharEspecie, evoluiDe, habilidadesDaEspecie, idsDeEspecie, megasDaEspecie, movesPorNivelComLinks,
+	referenciarMoves, referenciarTms,
 } from "$dados/carregar.server"
 import { error } from "@sveltejs/kit"
 import type { EntryGenerator, PageServerLoad } from "./$types"
@@ -19,7 +20,7 @@ export const load: PageServerLoad = ({ params }) => {
 		// Os nomes de Move viram links aqui, e não no componente: a resolução precisa do
 		// índice de Moves, que só o lado servidor lê.
 		movesPorNivel: movesPorNivelComLinks(especie),
-		tms: referenciarMoves(especie.tms),
+		tms: referenciarTms(especie.tms),
 		movesDeOvo: referenciarMoves(especie.movesDeOvo),
 	}
 }

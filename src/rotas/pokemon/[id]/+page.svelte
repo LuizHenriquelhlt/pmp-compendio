@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { t } from "$i18n"
+	import BotaoVoltar from "$ui/BotaoVoltar.svelte"
 	import { formatarDeslocamentos, formatarGenero, formatarSentido } from "$pmp/especie"
 	import { descreverCondicoes } from "$pmp/evolucao"
 	import { nomeDoTamanho } from "$pmp/tamanhos"
@@ -64,7 +65,7 @@
 </svelte:head>
 
 <article class="pagina">
-	<a class="voltar" href="/pokemon">← {t("especie.voltar")}</a>
+	<BotaoVoltar href="/pokemon" texto={t("especie.voltar")} />
 
 	<header class="cabecalho tipo-{especie.tipos[0]}">
 		<div class="arte">
@@ -293,18 +294,7 @@
 </article>
 
 <style>
-	.voltar {
-		display: inline-block;
-		margin-bottom: 1rem;
-		color: var(--texto-suave);
-		font-size: var(--txt-pequeno);
-		font-weight: 600;
-		text-decoration: none;
-	}
 
-	.voltar:hover {
-		color: var(--marca);
-	}
 
 	.cabecalho {
 		display: grid;
@@ -410,18 +400,7 @@
 		min-width: 0;
 	}
 
-	.painel {
-		padding: 1.25rem;
-		background: var(--superficie);
-		border: 1px solid var(--borda);
-		border-radius: var(--raio-grande);
-		box-shadow: var(--sombra-1);
-	}
 
-	.painel h2 {
-		margin-bottom: 0.75rem;
-		font-size: var(--txt-g);
-	}
 
 	.quantidade {
 		color: var(--texto-tenue);

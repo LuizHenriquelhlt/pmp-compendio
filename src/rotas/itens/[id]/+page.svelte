@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { t } from "$i18n"
+	import BotaoVoltar from "$ui/BotaoVoltar.svelte"
 	import { formatarPreco } from "$pmp/item"
 	import IconeDeItem from "$ui/IconeDeItem.svelte"
 	import type { PageData } from "./$types"
@@ -24,7 +25,7 @@
 </svelte:head>
 
 <article class="pagina">
-	<a class="voltar" href="/itens">← {t("item.voltar")}</a>
+	<BotaoVoltar href="/itens" texto={t("item.voltar")} />
 
 	<header class="cabecalho">
 		{#if item.imagem != null}
@@ -138,18 +139,7 @@
 </article>
 
 <style>
-	.voltar {
-		display: inline-block;
-		margin-bottom: 1rem;
-		color: var(--texto-suave);
-		font-size: var(--txt-pequeno);
-		font-weight: 600;
-		text-decoration: none;
-	}
 
-	.voltar:hover {
-		color: var(--marca);
-	}
 
 	.cabecalho {
 		display: flex;
@@ -220,22 +210,7 @@
 		min-width: 0;
 	}
 
-	.painel {
-		padding: 1.25rem;
-		background: var(--superficie);
-		border: 1px solid var(--borda);
-		border-radius: var(--raio-grande);
-		box-shadow: var(--sombra-1);
-	}
 
-	.painel h2 {
-		margin-bottom: 0.7rem;
-		font-size: var(--txt-pequeno);
-		font-weight: 700;
-		text-transform: uppercase;
-		letter-spacing: 0.05em;
-		color: var(--texto-tenue);
-	}
 
 	.painel p {
 		max-width: var(--largura-leitura);

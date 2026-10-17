@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { t } from "$i18n"
+	import BotaoVoltar from "$ui/BotaoVoltar.svelte"
 	import { formatarDeslocamentos } from "$pmp/especie"
 	import {
 		descreverDeslocamentoDeMega, descreverEscolhaDeAtributo, formatarDelta, linhasDeAtributo,
@@ -46,7 +47,7 @@
 </svelte:head>
 
 <article class="pagina">
-	<a class="voltar" href="/megas">← {t("mega.voltar")}</a>
+	<BotaoVoltar href="/megas" texto={t("mega.voltar")} />
 
 	<header class="cabecalho {mega.tipos.length > 0 ? `tipo-${mega.tipos[0]}` : 'sem-tipo'}">
 		{#if mega.imagem != null}
@@ -326,18 +327,7 @@
 </article>
 
 <style>
-	.voltar {
-		display: inline-block;
-		margin-bottom: 1rem;
-		color: var(--texto-suave);
-		font-size: var(--txt-pequeno);
-		font-weight: 600;
-		text-decoration: none;
-	}
 
-	.voltar:hover {
-		color: var(--marca);
-	}
 
 	.cabecalho {
 		display: flex;
@@ -413,22 +403,7 @@
 		min-width: 0;
 	}
 
-	.painel {
-		padding: 1.25rem;
-		background: var(--superficie);
-		border: 1px solid var(--borda);
-		border-radius: var(--raio-grande);
-		box-shadow: var(--sombra-1);
-	}
 
-	.painel h2 {
-		margin-bottom: 0.7rem;
-		font-size: var(--txt-pequeno);
-		font-weight: 700;
-		text-transform: uppercase;
-		letter-spacing: 0.05em;
-		color: var(--texto-tenue);
-	}
 
 	.painel p {
 		max-width: var(--largura-leitura);

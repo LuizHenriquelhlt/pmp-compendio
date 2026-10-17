@@ -13,20 +13,29 @@
 <!--
 	A classe `tipo-<id>` vem de `ui/tipos.css` e só define `--tipo-cor` e
 	`--tipo-contraste`. O emblema consome as duas e não sabe nada sobre cores.
+
+	A caixa é inclinada e o texto volta ao prumo por dentro, como no poke5e: inclinar o
+	texto junto o deixaria torto. Por isso são dois elementos, e não um.
 -->
-<span class="emblema tipo-{tipo} {tamanho}">{nomeDoTipo(tipo)}</span>
+<span class="emblema tipo-{tipo} {tamanho}"><span class="rotulo">{nomeDoTipo(tipo)}</span></span>
 
 <style>
 	.emblema {
 		display: inline-block;
 		background: var(--tipo-cor);
 		color: var(--tipo-contraste);
-		border-radius: var(--raio-pilula);
+		border-radius: var(--raio);
 		font-weight: 600;
 		line-height: 1;
 		white-space: nowrap;
 		/* Maiúsculas pequenas pedem um pouco de ar entre as letras. */
 		letter-spacing: 0.02em;
+		transform: skewX(var(--inclinacao));
+	}
+
+	.rotulo {
+		display: inline-block;
+		transform: skewX(var(--inclinacao-desfaz));
 	}
 
 	.pequeno {

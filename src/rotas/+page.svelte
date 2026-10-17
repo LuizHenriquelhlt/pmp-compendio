@@ -1,8 +1,56 @@
 <script lang="ts">
 	import { t } from "$i18n"
+	import IconeDeSecao, { type Secao } from "$ui/IconeDeSecao.svelte"
 	import type { PageData } from "./$types"
 
 	let { data }: { data: PageData } = $props()
+
+	/**
+	 * Os cartões da tela principal, no desenho do poke5e: uma pílula larga por seção, com
+	 * o nome à esquerda e um ícone grande à direita, cada uma na cor da sua seção.
+	 *
+	 * A lista vive aqui, e não no layout, porque a ordem é editorial — Pokémon primeiro
+	 * porque é o que mais se consulta, "Dados da sua mesa" por último porque é sobre o
+	 * projeto, não sobre o sistema.
+	 */
+	const secoes: { id: Secao, href: string, titulo: string, texto: string }[] = $derived([
+		{
+			id: "pokemon",
+			href: "/pokemon",
+			titulo: t("inicio.cartao.pokemon.titulo"),
+			texto: t("inicio.cartao.pokemon.texto", { n: data.totalDeEspecies.toLocaleString("pt-BR") }),
+		},
+		{
+			id: "moves",
+			href: "/moves",
+			titulo: t("inicio.cartao.moves.titulo"),
+			texto: t("inicio.cartao.moves.texto", { n: data.totalDeMoves.toLocaleString("pt-BR") }),
+		},
+		{
+			id: "habilidades",
+			href: "/habilidades",
+			titulo: t("inicio.cartao.habilidades.titulo"),
+			texto: t("inicio.cartao.habilidades.texto", { n: data.totalDeHabilidades.toLocaleString("pt-BR") }),
+		},
+		{
+			id: "megas",
+			href: "/megas",
+			titulo: t("inicio.cartao.megas.titulo"),
+			texto: t("inicio.cartao.megas.texto", { n: data.totalDeMegas.toLocaleString("pt-BR") }),
+		},
+		{
+			id: "itens",
+			href: "/itens",
+			titulo: t("inicio.cartao.itens.titulo"),
+			texto: t("inicio.cartao.itens.texto", { n: data.totalDeItens.toLocaleString("pt-BR") }),
+		},
+		{
+			id: "dados",
+			href: "/sobre",
+			titulo: t("inicio.cartao.dados.titulo"),
+			texto: t("inicio.cartao.dados.texto"),
+		},
+	])
 </script>
 
 <svelte:head>
@@ -15,52 +63,31 @@
 		<p class="sobretitulo">{t("site.descricao")}</p>
 		<h1>{t("site.nome")}</h1>
 		<p class="chamada">{t("site.chamada")}</p>
-		<a class="acao" href="/pokemon">{t("inicio.explorar")}</a>
 	</section>
 
-	<section class="cartoes">
-		<article>
-			<h2>{t("inicio.cartao.pokemon.titulo")}</h2>
-			<p>{t("inicio.cartao.pokemon.texto", { n: data.totalDeEspecies.toLocaleString("pt-BR") })}</p>
-			<a href="/pokemon">{t("nav.pokemon")} →</a>
-		</article>
-
-		<article>
-			<h2>{t("inicio.cartao.moves.titulo")}</h2>
-			<p>{t("inicio.cartao.moves.texto", { n: data.totalDeMoves.toLocaleString("pt-BR") })}</p>
-			<a href="/moves">{t("nav.moves")} →</a>
-		</article>
-
-		<article>
-			<h2>{t("inicio.cartao.habilidades.titulo")}</h2>
-			<p>{t("inicio.cartao.habilidades.texto", { n: data.totalDeHabilidades.toLocaleString("pt-BR") })}</p>
-			<a href="/habilidades">{t("nav.habilidades")} →</a>
-		</article>
-
-		<article>
-			<h2>{t("inicio.cartao.megas.titulo")}</h2>
-			<p>{t("inicio.cartao.megas.texto", { n: data.totalDeMegas.toLocaleString("pt-BR") })}</p>
-			<a href="/megas">{t("nav.megas")} →</a>
-		</article>
-
-		<article>
-			<h2>{t("inicio.cartao.itens.titulo")}</h2>
-			<p>{t("inicio.cartao.itens.texto", { n: data.totalDeItens.toLocaleString("pt-BR") })}</p>
-			<a href="/itens">{t("nav.itens")} →</a>
-		</article>
-
-		<article>
-			<h2>{t("inicio.cartao.dados.titulo")}</h2>
-			<p>{t("inicio.cartao.dados.texto")}</p>
-			<a href="/sobre">{t("nav.sobre")} →</a>
-		</article>
-	</section>
+	<!--
+		Cada cartão é um link inteiro, como os das listagens: a área de toque é a pílula
+		toda, e o leitor de tela anuncia um alvo em vez de três.
+	-->
+	<nav class="secoes" aria-label={t("inicio.secoes")}>
+		{#each secoes as secao (secao.href)}
+			<a class="cartao secao-{secao.id}" href={secao.href}>
+				<span class="texto">
+					<span class="titulo">{secao.titulo}</span>
+					<span class="descricao">{secao.texto}</span>
+				</span>
+				<IconeDeSecao secao={secao.id} />
+			</a>
+		{/each}
+	</nav>
 </div>
 
 <style>
 	.abertura {
 		max-width: var(--largura-leitura);
-		padding-block: 2rem 3rem;
+		padding-block: 2.5rem 2rem;
+		text-align: center;
+		margin-inline: auto;
 	}
 
 	.sobretitulo {
@@ -68,11 +95,16 @@
 		font-size: var(--txt-pequeno);
 		font-weight: 700;
 		text-transform: uppercase;
-		letter-spacing: 0.06em;
+		letter-spacing: 0.08em;
 	}
 
 	h1 {
-		margin-top: 0.4rem;
+		margin-top: 0.5rem;
+		/* Grande como a do poke5e: a tela principal é uma capa, não uma página de leitura. */
+		font-size: clamp(2.25rem, 7vw, 3.5rem);
+		letter-spacing: -0.03em;
+		/* O `nowrap` global dos títulos estouraria em 375px com o nome inteiro. */
+		white-space: normal;
 	}
 
 	.chamada {
@@ -81,59 +113,86 @@
 		font-size: var(--txt-g);
 	}
 
-	.acao {
-		display: inline-block;
-		margin-top: 1.5rem;
-		padding: 0.7rem 1.4rem;
-		background: var(--marca);
-		color: var(--marca-contraste);
-		border-radius: var(--raio);
-		font-weight: 650;
-		text-decoration: none;
-		box-shadow: var(--sombra-1);
-		transition: background 150ms ease, transform 150ms ease;
-	}
-
-	.acao:hover {
-		background: var(--marca-forte);
-		color: var(--marca-contraste);
-		transform: translateY(-1px);
-	}
-
-	.cartoes {
+	.secoes {
 		display: grid;
-		grid-template-columns: repeat(auto-fit, minmax(min(100%, 20rem), 1fr));
 		gap: 1rem;
+		padding-bottom: 2rem;
 	}
 
-	article {
-		display: grid;
-		/* O link desce para a base mesmo quando os textos têm alturas diferentes. */
-		grid-template-rows: auto 1fr auto;
-		gap: 0.5rem;
-		padding: 1.25rem;
+	/*
+	 * A pílula do poke5e: muito arredondada, com o ícone sangrando na borda direita.
+	 * `overflow: hidden` é o que recorta o ícone contra a curva, e é ele que dá o efeito.
+	 */
+	.cartao {
+		position: relative;
+		display: flex;
+		gap: 1rem;
+		align-items: center;
+		justify-content: space-between;
+		overflow: hidden;
+		min-height: 7.5rem;
+		padding: 1.5rem 0 1.5rem 2rem;
 		background: var(--superficie);
 		border: 1px solid var(--borda);
-		border-radius: var(--raio-grande);
+		border-left: 6px solid var(--secao);
+		border-radius: 999px;
+		color: inherit;
+		text-decoration: none;
 		box-shadow: var(--sombra-1);
+		transition: box-shadow 150ms ease, transform 150ms ease, border-color 150ms ease;
 	}
 
-	article h2 {
+	.cartao:hover {
+		border-color: var(--secao);
+		box-shadow: var(--sombra-2);
+		transform: translateY(-2px);
+	}
+
+	.texto {
+		display: grid;
+		gap: 0.3rem;
+		min-width: 0;
+		/* Acima do ícone, que avança por baixo do texto em telas estreitas. */
+		position: relative;
+		z-index: 1;
+	}
+
+	.titulo {
 		font-size: var(--txt-gg);
+		font-weight: 700;
+		letter-spacing: -0.01em;
 	}
 
-	article p {
+	.cartao:hover .titulo {
+		color: var(--secao);
+	}
+
+	.descricao {
+		max-width: 46ch;
 		color: var(--texto-suave);
 		font-size: var(--txt-pequeno);
+		line-height: 1.5;
 	}
 
-	article a {
-		font-size: var(--txt-pequeno);
-		font-weight: 650;
-		text-decoration: none;
+	/* O ícone encosta na borda e é cortado pela curva da pílula, como no poke5e. */
+	.cartao :global(.icone) {
+		margin-right: -1.5rem;
 	}
 
-	article a:hover {
-		text-decoration: underline;
+	@media (width < 40rem) {
+		.cartao {
+			/* Pílula inteira em tela estreita viraria um comprimido: cantos grandes, mas
+			   não redondos, para o texto não bater na curva. */
+			min-height: 0;
+			padding: 1.25rem 0 1.25rem 1.25rem;
+			border-radius: var(--raio-grande);
+		}
+
+		.cartao :global(.icone) {
+			width: 5rem;
+			height: 5rem;
+			margin-right: -0.75rem;
+			opacity: 0.55;
+		}
 	}
 </style>
