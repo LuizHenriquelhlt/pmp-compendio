@@ -12,6 +12,10 @@ import { interpretarEfeitos } from "./efeitos.mjs"
 import { criarInterpretadorDeEvolucao } from "./evolucao.mjs"
 import { CLIMA_POR_MOVE, interpretarHabilidade, regraAusente } from "./habilidades.mjs"
 import {
+	aparicaoDaCelulaDePreco, contaminacao, interpretarPreco, precoDivergente, referenciaDePagina,
+	textoCortado,
+} from "./itens.mjs"
+import {
 	contaminacaoNaDescricao, habilidadePendente, interpretarDeslocamentoConcedido,
 	interpretarOutrosEfeitos, pesEmMetros, prosaDaDescricao,
 } from "./megas.mjs"
@@ -76,6 +80,12 @@ const relatorio = {
 	camposDeMegaNaoInterpretados: [],
 	categoriasDeMegaDesconhecidas: [],
 	habilidadesSemPortador: [],
+	precosDeItemDivergentes: [],
+	celulasDePrecoEmItens: [],
+	textosDeItemContaminados: [],
+	textosDeItemCortados: [],
+	referenciasDePaginaEmItens: [],
+	itensDeEvolucaoNaoResolvidos: [],
 }
 
 const dex = carregar("pokedex")
@@ -785,6 +795,132 @@ const indiceDeHabilidades = habilidades.map((h) => ({
 	megas: h.megas.length,
 }))
 
+// ------------------------------------------------------------------ Itens
+// Os itens NÃO estão no pack chamado `items`, que tem dois documentos: uma pasta e o
+// Fator Terastal. Os 343 estão em `trainer-features.json`, um saco misto de 522
+// documentos e doze categorias — talentos, naturezas, classes de treinador, as mecânicas
+// Terastal e Dynamax — do qual `category: "item-treinador"` é uma fatia.
+//
+// A taxonomia vem da PASTA, e cobre só um quarto do catálogo: 259 dos 343 caem num balde
+// chamado "Itens", e as outras quatro pastas (Berries, Hortelãs, Doces, Poções) dividem
+// 84. É o mesmo padrão de `PROCEDENCIA_POR_PASTA` na Pokédex — o documento-pasta é um
+// registro do próprio pack, com `type: "Item"` e sem `category`.
+//
+// Por isso o índice publica também `consumivel` e `especie` do dnd5e (`equipment` /
+// `consumable` / `container` cruzado com `trinket` / `food` / `potion`): essa divisão
+// separa os 343 de verdade, e é independente da pasta.
+//
+// O preço e o texto são lidos em `itens.mjs`, isolado e com testes — ver o cabeçalho de
+// lá para as quatro formas de contaminação da tabela do PDF.
+const documentosDeTreinador = carregarOpcional("trainer-features") ?? []
+const documentosDeItem = documentosDeTreinador.filter((d) => flags(d).category === "item-treinador")
+
+// As pastas são documentos do próprio pack, como as gerações na Pokédex.
+const PASTA_DE_ITEM = new Map(documentosDeTreinador
+	.filter((d) => flags(d).category == null && typeof d.name === "string")
+	.map((d) => [ d._id, d.name ]))
+
+const NOMES_DE_ITEM = new Set(documentosDeItem.map((d) => d.name))
+
+const itens = []
+const idsDeItemUsados = new Set()
+
+for (const documento of documentosDeItem) {
+	let id = slug(documento.name)
+	while (idsDeItemUsados.has(id)) id = `${id}-2`
+	idsDeItemUsados.add(id)
+
+	const bruto = flags(documento).priceRaw
+	const precoNoTexto = String(bruto ?? "").trim()
+	const temPreco = precoNoTexto !== ""
+	const preco = interpretarPreco(precoNoTexto)
+
+	// O módulo leu a vírgula de "₽20,000" como decimal e gravou 20. Publicamos o valor do
+	// TEXTO, que é a fonte, e relatamos — como `prioridadeDeMoveDivergente` nos Moves. Dá
+	// para afirmar que a vírgula é separador de milhar porque nenhum dos 343 preços tem
+	// centavos.
+	if (precoDivergente(precoNoTexto, documento.system?.price?.value ?? 0)) {
+		relatorio.precosDeItemDivergentes.push({
+			item: documento.name,
+			texto: precoNoTexto,
+			campo: documento.system?.price?.value ?? 0,
+			valor: preco,
+		})
+	}
+
+	// A célula de preço vazia da tabela, anexada ao fim do texto. Aparar é seguro só
+	// quando os dois sinais concordam: o token está no fim E o item não tem preço.
+	const { descricao: semCelula, aparado } = aparicaoDaCelulaDePreco(
+		textoSimples(documento.system?.description?.value ?? ""), temPreco)
+
+	if (aparado != null) {
+		relatorio.celulasDePrecoEmItens.push({ item: documento.name, aparado })
+	}
+
+	const sujeira = contaminacao(semCelula, {
+		temPreco,
+		outrosNomes: new Set([ ...NOMES_DE_ITEM ].filter((n) => n !== documento.name)),
+	})
+
+	if (sujeira != null) {
+		relatorio.textosDeItemContaminados.push({ item: documento.name, marca: sujeira, texto: semCelula })
+	}
+
+	// Sem contaminação, o texto é publicado como está — inclusive a referência à página do
+	// livro, que é o livro falando de si e não defeito de extração. Contaminado, ele não
+	// vai para a página: a de Balm Mushroom traria as descrições de Pearl, Big Pearl e
+	// Pearl String emendadas, e a de Mega Pedra diria "durante a NÃO batalha", o oposto da
+	// regra. Mesmo trato das descrições de Mega e das 74 habilidades sem regra.
+	const descricao = sujeira != null ? "" : semCelula
+
+	if (sujeira == null && referenciaDePagina(descricao)) {
+		relatorio.referenciasDePaginaEmItens.push({ item: documento.name, texto: descricao })
+	}
+
+	if (sujeira == null && textoCortado(descricao)) {
+		relatorio.textosDeItemCortados.push({ item: documento.name, texto: descricao })
+	}
+
+	itens.push({
+		id,
+		nome: documento.name,
+		descricao,
+		textoContaminado: sujeira != null,
+		// `null` e não 0: 15 itens-chave do livro não são vendidos (Mega Pedra, Pedra-Chave,
+		// Bracelete-Z…), e "₽0" diria que são de graça.
+		preco,
+		precoTexto: precoNoTexto,
+		grupo: PASTA_DE_ITEM.get(documento.folder) ?? null,
+		// A divisão do dnd5e, que separa os 343 onde a pasta não separa.
+		consumivel: documento.type === "consumable",
+		recipiente: documento.type === "container",
+		especie: documento.system?.type?.value ?? null,
+		// Só URL: 113 dos 343 apontam para a biblioteca de ícones do próprio Foundry
+		// (`icons/equipment/…`), que não é publicada com o site e daria 404 em cada
+		// cartão. Mesmo filtro das outras fatias.
+		imagem: typeof documento.img === "string" && documento.img.startsWith("http") ? documento.img : null,
+	})
+}
+
+itens.sort((a, b) => a.nome.localeCompare(b.nome, "pt-BR"))
+
+// O elo com a evolução. `interpretarEvolucao` já achava o nome do item no texto do livro,
+// mas não tinha catálogo onde resolvê-lo: o nome saía como texto solto. Agora vira link,
+// e a ficha do item mostra a relação inversa (quais espécies evoluem com ele), que é
+// calculada na leitura, como `evoluiDe` — a pedra declara o item, não o contrário.
+const ID_DE_ITEM_POR_NOME = new Map(itens.map((i) => [ i.nome, i.id ]))
+
+for (const especie of especies) {
+	for (const evolucao of especie.evolucoes) {
+		if (evolucao.item == null) continue
+
+		evolucao.itemId = ID_DE_ITEM_POR_NOME.get(evolucao.item) ?? null
+		if (evolucao.itemId == null) {
+			relatorio.itensDeEvolucaoNaoResolvidos.push({ especie: especie.nome, item: evolucao.item })
+		}
+	}
+}
+
 // A fatia de Mega que a listagem e a busca carregam. Fica de fora o que só a ficha usa —
 // a descrição, a prosa de `outrosTextos` e os fatos de deslocamento, que são de 5 a 10
 // casos cada e não sustentam filtro.
@@ -822,6 +958,22 @@ const indiceDeMegas = megas.map((m) => ({
 	imagem: m.imagem,
 }))
 
+// A fatia de Item que a listagem e a busca carregam. Fica de fora a descrição, que é o
+// que só a ficha usa.
+const indiceDeItens = itens.map((i) => ({
+	id: i.id,
+	nome: i.nome,
+	preco: i.preco,
+	precoTexto: i.precoTexto,
+	grupo: i.grupo,
+	consumivel: i.consumivel,
+	recipiente: i.recipiente,
+	especie: i.especie,
+	// O cartão precisa saber que a ficha não tem texto para mostrar, sem carregar o texto.
+	textoContaminado: i.textoContaminado,
+	imagem: i.imagem,
+}))
+
 function escrever(nome, dados) {
 	writeFileSync(join(saida, `${nome}.json`), JSON.stringify(dados))
 	const total = Array.isArray(dados) ? dados.length : Object.keys(dados).length
@@ -839,6 +991,8 @@ escrever("habilidades", habilidades)
 escrever("indice-habilidades", indiceDeHabilidades)
 escrever("megas", megas)
 escrever("indice-megas", indiceDeMegas)
+escrever("itens", itens)
+escrever("indice-itens", indiceDeItens)
 writeFileSync(join(saida, "relatorio.json"), JSON.stringify(relatorio, null, 1))
 
 console.log(`\nQualidade do dado-fonte (detalhes em ${saida}/relatorio.json):`)
@@ -860,5 +1014,10 @@ console.log(`  habilidades de Mega sem ficha no pack: ${relatorio.habilidadesDeM
 console.log(`  Megas cuja espécie-base não casa com a Pokédex: ${relatorio.megasSemEspecieBase.length}`)
 console.log(`  descrições de Mega contaminadas na fonte: ${relatorio.descricoesDeMegaContaminadas.length}`)
 console.log(`  efeitos de Mega declarados e não interpretados: ${relatorio.efeitosDeMegaNaoInterpretados.length}`)
+console.log(`  preços de item divergentes do texto: ${relatorio.precosDeItemDivergentes.length}`)
+console.log(`  textos de item contaminados na fonte: ${relatorio.textosDeItemContaminados.length}`)
+console.log(`  textos de item cortados na fonte: ${relatorio.textosDeItemCortados.length}`)
+console.log(`  células de preço aparadas de itens: ${relatorio.celulasDePrecoEmItens.length}`)
+console.log(`  itens de evolução não resolvidos: ${relatorio.itensDeEvolucaoNaoResolvidos.length}`)
 console.log(`  Moves de clima ausentes do compêndio: ${relatorio.movesDeClimaAusentes.length}`)
 console.log(`  Moves concedidos por habilidade não resolvidos: ${relatorio.movesDeHabilidadeNaoResolvidos.length}`)

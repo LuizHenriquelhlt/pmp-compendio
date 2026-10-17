@@ -12,6 +12,7 @@ import { existsSync, readFileSync } from "node:fs"
 import { join } from "node:path"
 import type { Especie } from "$pmp/especie"
 import type { Habilidade, IdClima } from "$pmp/habilidade"
+import type { Item, ItemNoIndice } from "$pmp/item"
 import type { Mega, MegaNoIndice } from "$pmp/mega"
 import type { IdModo, IdResolucao, IdStatus, Move } from "$pmp/move"
 import type { IdTamanho } from "$pmp/tamanhos"
@@ -120,6 +121,65 @@ export function idsDeMega(): string[] {
  */
 export function megasDaEspecie(especieId: string): MegaNoIndice[] {
 	return lerIndiceDeMegas().filter((m) => m.especieId === especieId)
+}
+
+// ------------------------------------------------------------------ Itens
+
+export function lerItens(): Item[] {
+	return ler<Item[]>("itens")
+}
+
+export function lerIndiceDeItens(): ItemNoIndice[] {
+	return ler<ItemNoIndice[]>("indice-itens")
+}
+
+let itemPorId: Map<string, Item> | undefined
+
+export function acharItem(id: string): Item | undefined {
+	// Mesma regra do cache de arquivos: memoiza no build, relê em desenvolvimento.
+	if (!building) return new Map(lerItens().map((i) => [ i.id, i ])).get(id)
+
+	itemPorId ??= new Map(lerItens().map((i) => [ i.id, i ]))
+	return itemPorId.get(id)
+}
+
+/** Todos os `id` de Item, para o gerador de rotas do prerender. */
+export function idsDeItem(): string[] {
+	return lerIndiceDeItens().map((i) => i.id)
+}
+
+/** Uma evolução que depende de um item, vista do lado do item. */
+export type EvolucaoPorItem = {
+	de: { id: string, nome: string, numero: number }
+	para: { id: string | null, nome: string }
+}
+
+/**
+ * Quem evolui com este item — a relação inversa de `evolucoes.itemId`.
+ *
+ * Calculada na leitura e não gravada no pipeline, pela mesma razão que `evoluiDe` e
+ * `especiesComHabilidade`: é o avesso do caminho natural do dado. O livro declara o item
+ * dentro da condição de evolução da espécie, e duplicar a volta na ficha do item criaria
+ * duas cópias da mesma ligação para divergirem.
+ *
+ * São 80 evoluções por item nas 1.149 espécies — varrer é barato, e não precisa da
+ * memoização que o índice inverso de Moves exigiu.
+ */
+export function especiesQueEvoluemCom(itemId: string): EvolucaoPorItem[] {
+	const encontradas: EvolucaoPorItem[] = []
+
+	for (const especie of lerEspecies()) {
+		for (const evolucao of especie.evolucoes) {
+			if (evolucao.itemId !== itemId) continue
+
+			encontradas.push({
+				de: { id: especie.id, nome: especie.nome, numero: especie.numero },
+				para: { id: evolucao.paraId, nome: evolucao.para },
+			})
+		}
+	}
+
+	return encontradas.sort((a, b) => a.de.numero - b.de.numero || a.de.nome.localeCompare(b.de.nome, "pt-BR"))
 }
 
 let porId: Map<string, Especie> | undefined

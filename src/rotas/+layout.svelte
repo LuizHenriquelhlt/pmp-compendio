@@ -13,6 +13,7 @@
 		{ href: "/moves", rotulo: t("nav.moves") },
 		{ href: "/habilidades", rotulo: t("nav.habilidades") },
 		{ href: "/megas", rotulo: t("nav.megas") },
+		{ href: "/itens", rotulo: t("nav.itens") },
 		{ href: "/sobre", rotulo: t("nav.sobre") },
 	]
 

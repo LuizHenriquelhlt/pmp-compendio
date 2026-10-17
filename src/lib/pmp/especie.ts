@@ -26,6 +26,13 @@ export type Evolucao = {
 	paraId: string | null
 	nivel: number
 	item?: string
+	/**
+	 * `id` do item, quando o nome casa com o catálogo — o que faz a condição virar link.
+	 *
+	 * Casa nas 80 evoluções por item da v1.33.0. `null` continua previsto: o nome vem do
+	 * texto do livro, e nada garante que a próxima versão do módulo o escreva igual.
+	 */
+	itemId?: string | null
 	lealdade?: number
 	periodo?: "dia" | "noite" | "crepusculo"
 	tipoDeMove?: IdTipo

@@ -223,8 +223,13 @@
 									<span class="alvo">{evolucao.para}</span>
 								{/if}
 								<span class="condicoes">
-									{#each descreverCondicoes(evolucao) as condicao (condicao)}
-										<span class="condicao">{condicao}</span>
+									{#each descreverCondicoes(evolucao) as condicao (condicao.texto)}
+										<!-- A condição que nomeia um item vira link para a ficha dele. -->
+										{#if condicao.itemId != null}
+											<a class="condicao" href="/itens/{condicao.itemId}">{condicao.texto}</a>
+										{:else}
+											<span class="condicao">{condicao.texto}</span>
+										{/if}
 									{/each}
 								</span>
 							</li>

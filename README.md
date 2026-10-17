@@ -3,7 +3,8 @@
 *Referência do sistema **Pokémon Mundo Perfeito**, em português do Brasil.*
 
 Site estático de consulta para o PMP: statblocks de espécies, fichas de Move, Habilidade
-Passiva e Mega Evolução, com busca e filtros, pensado para ser aberto no meio de uma sessão.
+Passiva, Mega Evolução e item, com busca e filtros, pensado para ser aberto no meio de uma
+sessão.
 Construído em
 [SvelteKit](https://svelte.dev/docs/kit), sem servidor e sem banco — tudo é gerado no build.
 
@@ -45,7 +46,7 @@ npm run dados:construir -- ../pmp-rpg/data/raw dados
 
 | Comando | O que faz |
 |---|---|
-| `npm run build` | Gera o site estático em `build/` (uma página por espécie, Move, Habilidade e Mega) |
+| `npm run build` | Gera o site estático em `build/` (uma página por espécie, Move, Habilidade, Mega e item) |
 | `npm run preview` | Serve o build de produção |
 | `npm run teste` | Roda a suíte de testes |
 | `npm run verificar` | Checagem de tipos (`svelte-check`) |
@@ -148,6 +149,39 @@ pedras** (Charizard, Mewtwo e Raichu com X e Y; Garchomp, Absol e Lucario com a 
 e **a relação Mega↔habilidade é N:N** — Magic Bounce e Tough Claws são concedidas por
 quatro pedras cada.
 
+Os **itens** não estão no pack chamado `items`, que tem dois documentos: uma pasta e o
+Fator Terastal. Os 343 estão em `trainer-features.json`, um saco misto de 522 documentos e
+doze categorias (talentos, naturezas, classes de treinador, as mecânicas Terastal e
+Dynamax), do qual `category: "item-treinador"` é uma fatia:
+
+| Campo do módulo | Por que não dá para usar direto |
+|---|---|
+| `system.price.value` | Está **1000x menor** em 2 itens: o módulo leu a vírgula de `"₽20,000"` como decimal e gravou 20. O pack mistura as duas convenções de milhar — 150 itens escrevem `₽1.500` e 2 escrevem `₽20,000` —, e nenhum dos 343 tem centavos |
+| `system.price.value: 0` | Não é "de graça": 15 itens-chave (Mega Pedra, Pedra-Chave, Bracelete-Z, Cristal-Z…) o livro não vende. É `null`, como o `armorClassDelta` das Megas |
+| `system.description.value` | A tabela do PDF vazou para dentro em 10 itens, de quatro jeitos — ver abaixo |
+| `folder` | É a única taxonomia do pack, e cobre um quarto dele: 259 dos 343 caem num balde chamado "Itens"; Berries, Hortelãs, Doces e Poções dividem 84 |
+| `img` | 113 dos 343 apontam para a biblioteca de ícones do próprio Foundry (`icons/equipment/…`), que não é publicada com o site. Só os 230 que são URL viram imagem |
+
+As quatro formas de contaminação do texto, todas da extração do PDF:
+
+1. **A célula de preço no FIM** (7 itens): "Permite que Hoopa mude de forma. **N/A**". É o
+   único caso seguro de aparar, porque dois sinais independentes concordam — o token está
+   no fim *e* o item não tem preço.
+2. **A célula no MEIO da frase** (6): "o dano duas **N/A** vezes".
+3. **O rótulo "Não vendido" partido** (2): em Mega Pedra o "Não" caiu no meio e o
+   "vendido" no fim, e lido como está a regra vira o oposto — "durante a **não** batalha".
+4. **A descrição de outro item emendada** (5): Balm Mushroom traz Pearl, Big Pearl e Pearl
+   String juntos; Soul Dew e Everstone trazem a tabela dos Genesect Drives.
+
+Nos 10 contaminados a descrição **não é publicada**, como nas descrições de Mega e nas 74
+habilidades sem regra: publicá-la atribuiria ao item uma regra que não é dele. Os 7 do
+caso 1 são aparados e publicados normalmente.
+
+Cinco Berries (Iapapa, Aguav, Wiki, Figy e Mago) compartilham uma descrição cortada
+exatamente na palavra que as distingue — "causa confusão caso seja de Natureza" —, e seis
+itens mandam o leitor virar a página do livro ("veja a página seguinte"), que num site não
+existe. Os dois casos ficam visíveis e vão para o relatório.
+
 **O pipeline não inventa dado.** O que não for possível interpretar com segurança vai
 para `dados/relatorio.json`, com o texto original, para conferência no livro e correção
 na fonte. O relatório cobre:
@@ -173,6 +207,12 @@ na fonte. O relatório cobre:
 | `descricoesDeMegaContaminadas` | Descrições de Mega com texto de outro documento do livro, com a marca que o denunciou e o original (4 na v1.33.0) |
 | `efeitosDeMegaNaoInterpretados` | Frases de `otherEffects` que declaram um efeito que o parser não estruturou (1 na v1.33.0: o tamanho "Imenso") |
 | `tiposDeMegaDesconhecidos`, `tamanhosDeMegaDesconhecidos`, `deslocamentosDeMegaDesconhecidos`, `camposDeMegaNaoInterpretados`, `categoriasDeMegaDesconhecidas` | Valores de Mega fora do vocabulário ou do formato esperado (0 na v1.33.0) |
+| `precosDeItemDivergentes` | Itens em que o número do módulo discorda do preço impresso (2 na v1.33.0, os dois 1000x menores) |
+| `textosDeItemContaminados` | Itens cujo texto carrega conteúdo de outra linha da tabela, com a marca e o original (10 na v1.33.0) |
+| `celulasDePrecoEmItens` | Células de preço aparadas do fim do texto (7 na v1.33.0) |
+| `textosDeItemCortados` | Itens cujo texto foi cortado antes de dizer a regra (8 na v1.33.0) |
+| `referenciasDePaginaEmItens` | Itens que mandam virar a página do livro (6 na v1.33.0) |
+| `itensDeEvolucaoNaoResolvidos` | Itens citados numa evolução que não têm ficha (0 na v1.33.0) |
 | `movesDeClimaAusentes`, `movesDeHabilidadeNaoResolvidos` | Moves nomeados por uma habilidade que não existem no compêndio (0 na v1.33.0) |
 
 Boa parte dessas categorias aponta lacunas no texto do próprio livro, não falhas do
@@ -196,10 +236,11 @@ ferramentas/        pipeline de dados (Node puro, fora do app)
   efeitos.mjs         efeitos mecânicos do texto do Move (a parte mais frágil de todas)
   habilidades.mjs     imunidade, clima e Move concedido no texto da Habilidade
   megas.mjs           habilidade, tamanho e deslocamento no texto da pedra Mega; contaminação
+  itens.mjs           preço do item e as quatro contaminações da tabela do PDF
   texto.mjs           HTML→texto, slug, deslocamento, sentidos
 mensagens/          catálogos de interface, um por idioma
 src/
-  lib/pmp/            domínio: tipos, atributos, tamanhos, busca, espécie, move, habilidade, mega
+  lib/pmp/            domínio: tipos, atributos, tamanhos, busca, espécie, move, habilidade, mega, item
   lib/dados/          leitura dos JSONs durante o prerender (só servidor)
   lib/i18n/           acesso às mensagens
   lib/ui/             design system e componentes
@@ -207,8 +248,8 @@ src/
 testes/             testes do pipeline
 ```
 
-Os cinco módulos de interpretação (`evolucao`, `moves`, `efeitos`, `habilidades`,
-`megas`) são separados de `construir.mjs` pela mesma razão: leem prosa do livro, cada
+Os seis módulos de interpretação (`evolucao`, `moves`, `efeitos`, `habilidades`, `megas`,
+`itens`) são separados de `construir.mjs` pela mesma razão: leem prosa do livro, cada
 padrão novo é uma chance de ler errado, e isolados cada padrão vira um teste. As
 entradas dos testes são frases do corpus real, não inventadas.
 
@@ -224,6 +265,13 @@ acidente. Por isso os testes trazem as dez na íntegra, e não uma amostra, e ca
 está anotada com o campo estruturado que ela contradiz. A detecção de contaminação da
 descrição é conferida nos dois sentidos: pega as 4 sujas e não acusa a maior das 89
 limpas.
+
+Em `itens.mjs` a armadilha é a vírgula — a mesma que estas ferramentas repetem desde o
+pack de Moves, desta vez cometida pela própria fonte. E um caso que só apareceu rodando:
+o detector de texto cortado usava `` antes da palavra, e `/a\s*$/` **casa dentro de
+"Força"** — sem a flag `u`, o `\w` do JavaScript é só ASCII, "ç" não é caractere de
+palavra e abre uma fronteira ali. As 20 Hortelãs, que terminam em "-2 Força" e estão
+completas, iam todas para o relatório. A âncora passou a ser um espaço.
 
 Os dados são lidos de `dados/` **durante o prerender** e ficam assados em cada página.
 Eles não vão para `static/`: o site publicado contém as páginas renderizadas, não um
