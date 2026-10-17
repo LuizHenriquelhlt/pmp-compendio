@@ -30,7 +30,7 @@ npm run dados:desempacotar -- "../pokemon-mundo-perfeito"
 # 2. Normaliza para o formato do site (dados/)
 npm run dados:construir
 
-# 3. Procura na PokéAPI a arte dos itens que o módulo deixou sem URL (opcional)
+# 3. Baixa a arte dos itens da PokéAPI para static/itens/ (opcional)
 npm run dados:arte
 
 # 4. Sobe o site em http://localhost:5173
@@ -56,7 +56,7 @@ npm run dados:construir -- ../pmp-rpg/data/raw dados
 | Comando | O que faz |
 |---|---|
 | `npm run build` | Gera o site estático em `build/` (uma página por espécie, Move, Habilidade, Mega e item) |
-| `npm run dados:arte` | Procura na PokéAPI a arte dos itens sem URL no módulo (faz rede) |
+| `npm run dados:arte` | Baixa a arte dos itens da PokéAPI para `static/itens/` (faz rede) |
 | `npm run preview` | Serve o build de produção |
 | `npm run teste` | Roda a suíte de testes |
 | `npm run verificar` | Checagem de tipos (`svelte-check`) |
@@ -202,19 +202,44 @@ existe. Os dois casos ficam visíveis e vão para o relatório.
 
 ### A arte dos itens
 
+Todo cartão tem imagem: **290 sprites** baixados da PokéAPI e **130 ícones desenhados**
+pelo compêndio.
+
 O módulo preenche `img` com uma URL da PokéAPI em 230 dos 420 itens e deixa os outros 190
 apontando para a biblioteca de ícones interna do Foundry, que não é publicada com o site.
 Mas boa parte desses 190 são itens Pokémon de verdade que a PokéAPI tem — o módulo só não
-linkou. `npm run dados:arte` acha e confere: **66 itens** ganham arte assim, subindo a
-cobertura de 230 para 296.
+linkou. `npm run dados:arte` acha, confere e **baixa** para `static/itens/`.
 
-Ela roda **fora** do pipeline de propósito, porque faz rede e `construir.mjs` precisa ser
-offline e determinístico. O resultado é `ferramentas/arte-de-item.json`, que o pipeline lê
-como qualquer outro dado — e que é opcional: sem ele o site constrói igual, só com menos
-ícones. Cada candidato leva um pedido HEAD e **só entra o que responder 200**, que é o que
-impede o site de voltar a mostrar 404 no lugar de um ícone.
+Baixar, e não apontar, é o ponto. Antes o site linkava direto para
+`raw.githubusercontent.com`, e isso quebrava de forma **intermitente**: o endpoint `raw`
+não é uma CDN e estrangula quando a listagem pede algumas dezenas de imagens de uma vez —
+o leitor via o ícone de imagem quebrada em alguns cartões, sempre em cartões diferentes.
+Servindo de `static/`, nada depende da rede na hora da visita, e o container fica servível
+offline, que é como ele é usado na mesa.
 
-Os 124 que continuam sem arte não são um problema a resolver com outra fonte:
+A ferramenta roda **fora** do pipeline porque faz rede, e `construir.mjs` precisa ser
+offline e determinístico. Ela lê o `img` original do **pack cru**, não de
+`dados/itens.json` — depois da primeira execução esse arquivo já traz o caminho local que
+ela mesma gerou, e ler de lá faria cada ciclo perder um pouco mais de arte.
+
+Duas defesas contra publicar imagem ruim:
+
+- **A assinatura PNG é conferida** antes de gravar. Um 200 com corpo errado — página de
+  erro, resposta de estrangulamento — passaria por um `HEAD`, e foi assim que imagens
+  quebradas chegaram ao site da primeira vez.
+- **Seis sprites são recusados por estarem quebrados na origem**: os doces de atributo de
+  Let's Go (`health-candy`, `quick-candy`, `tough-candy`…) têm, no repositório da PokéAPI,
+  um PNG que não é um desenho — quatro borrões de pixels, os seis com os mesmos 444–448
+  pixels opacos. A lista é curada e não um limiar automático: o sprite legítimo mais
+  esparso do catálogo fica a três pontos percentuais dos quebrados.
+
+Os 130 sem sprite recebem um ícone desenhado em `IconeDeItem.svelte` — traçado simples em
+`currentColor`, escolhido por palavra no nome (mochila, tenda, lanterna, óculos, kit,
+corda, livro…). Sem dependência externa, sem questão de licença, e acompanha o tema. Os 19
+Tera Shards saem **tingidos com a cor do próprio tipo**, que o compêndio já tem: um glifo
+vira 19 ícones distintos.
+
+Não são um problema a resolver com outra fonte:
 
 - **A maior parte é equipamento de aventura que o PMP inventou** — Chaleira, Cantil,
   Bússola, Canivete de Bolso, Tenda, Saco de Dormir, Pacote de Explorador. Não são itens
@@ -230,6 +255,9 @@ Os 124 que continuam sem arte não são um problema a resolver com outra fonte:
 
 A tabela de tradução de `arte.mjs` só aceita o que é **inequívoco** — as três máscaras de
 Ogerpon, os quatro Nectares, Orbe Tera, Pedra-Chave, Bracelete-Z, Pulseira Dynamax.
+
+O Bulbapedia não resolveria nada disto: os itens inventados não existem lá, e para o resto
+a PokéAPI tem o mesmo conteúdo com URL direta e estável.
 
 **O pipeline não inventa dado.** O que não for possível interpretar com segurança vai
 para `dados/relatorio.json`, com o texto original, para conferência no livro e correção

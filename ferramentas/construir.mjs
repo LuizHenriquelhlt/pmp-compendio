@@ -912,13 +912,14 @@ for (const documento of documentosDeItem) {
 		consumivel: documento.type === "consumable",
 		recipiente: documento.type === "container",
 		especie: documento.system?.type?.value ?? null,
-		// Só URL: 190 dos 420 apontam para a biblioteca de ícones do próprio Foundry
-		// (`icons/equipment/…`), que não é publicada com o site e daria 404 em cada
-		// cartão. Mesmo filtro das outras fatias. O que o módulo não preencheu, mas a
-		// PokéAPI tem, entra por `ARTE_DE_ITEM`.
-		imagem: typeof documento.img === "string" && documento.img.startsWith("http")
-			? documento.img
-			: ARTE_DE_ITEM[documento.name] ?? null,
+		// A arte vem do mapa que `arte.mjs` gera, e aponta para `static/itens/` — o site
+		// serve de si mesmo. Apontar direto para `raw.githubusercontent.com`, como o
+		// módulo faz, quebrava de forma intermitente: o endpoint `raw` não é CDN e
+		// estrangula quando a listagem pede algumas dezenas de imagens de uma vez.
+		//
+		// `null` enquanto `dados:arte` não rodar, e nos itens sem arte nenhuma — a página
+		// desenha um ícone próprio nesses casos.
+		imagem: ARTE_DE_ITEM[documento.name] ?? null,
 	})
 }
 

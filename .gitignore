@@ -11,3 +11,6 @@ node_modules/
 # O mapa de arte tem nomes de item do PMP como chaves — mesma regra. Regenere com
 # `npm run dados:arte`; sem ele o site constrói igual, só com menos ícones.
 /ferramentas/arte-de-item.json
+
+# A arte baixada da PokéAPI: obra de terceiros, gerada na máquina de quem executa.
+/static/itens/

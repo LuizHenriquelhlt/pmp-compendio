@@ -2,6 +2,7 @@
 	import type { ItemNoIndice } from "$pmp/item"
 	import { t } from "$i18n"
 	import { formatarPreco } from "$pmp/item"
+	import IconeDeItem from "./IconeDeItem.svelte"
 
 	type Props = { item: ItemNoIndice }
 
@@ -21,7 +22,8 @@
 			     o item duas vezes. -->
 			<img src={item.imagem} alt="" loading="lazy" width="40" height="40" />
 		{:else}
-			<span class="sem-arte" aria-hidden="true"></span>
+			<!-- Sem sprite: um ícone desenhado, que ao menos diz que coisa é o item. -->
+			<IconeDeItem {item} tamanho={34} />
 		{/if}
 
 		<span class="nome">{item.nome}</span>
@@ -89,16 +91,11 @@
 		min-width: 0;
 	}
 
-	img, .sem-arte {
+	img {
 		flex: none;
 		width: 2.5rem;
 		height: 2.5rem;
 		object-fit: contain;
-	}
-
-	.sem-arte {
-		background: var(--superficie-afundada);
-		border-radius: var(--raio);
 	}
 
 	.nome {

@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { t } from "$i18n"
 	import { formatarPreco } from "$pmp/item"
+	import IconeDeItem from "$ui/IconeDeItem.svelte"
 	import type { PageData } from "./$types"
 
 	let { data }: { data: PageData } = $props()
@@ -28,6 +29,8 @@
 	<header class="cabecalho">
 		{#if item.imagem != null}
 			<img src={item.imagem} alt="" width="96" height="96" />
+		{:else}
+			<IconeDeItem {item} tamanho={80} />
 		{/if}
 
 		<div class="identidade">
