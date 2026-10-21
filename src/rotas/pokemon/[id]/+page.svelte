@@ -15,6 +15,26 @@ import BotaoVoltar from "$ui/BotaoVoltar.svelte"
 	const especie = $derived(data.especie)
 	const numeroFormatado = $derived(String(especie.numero).padStart(3, "0"))
 
+	/**
+	 * A arte brilhante é alternativa: a normal é a principal, e é com ela que a ficha abre.
+	 *
+	 * Só existe uma `<img>`, com o `src` trocado - e não duas empilhadas. Empilhar faria
+	 * toda ficha baixar as DUAS artes, inclusive para quem nunca alterna, e a arte vem do
+	 * `raw.githubusercontent.com`, que estrangula quando se pedem muitas de uma vez. Foi
+	 * esse estrangulamento que obrigou a baixar a arte dos itens. Assim a brilhante só é
+	 * pedida no primeiro clique, e o navegador a guarda daí em diante.
+	 */
+	let mostrarShiny = $state(false)
+
+	// Trocar de espécie volta para a arte normal. Sem isto a escolha vazaria de uma ficha
+	// para a outra na navegação pelo cliente, que reaproveita o componente.
+	$effect(() => {
+		void especie.id
+		mostrarShiny = false
+	})
+
+	const arteVisivel = $derived(mostrarShiny ? especie.imagemShiny : especie.imagem)
+
 	/** Ficha de identidade: só as linhas que a espécie realmente tem. */
 	const ficha = $derived.by(() => {
 		// Uma linha ou traz texto, ou traz o gênero para a barra desenhar. O discriminante
@@ -118,8 +138,29 @@ import BotaoVoltar from "$ui/BotaoVoltar.svelte"
 		</div>
 
 		<div class="arte">
-			{#if especie.imagem != null}
-				<img src={especie.imagem} alt={especie.nome} width="200" height="200" />
+			{#if arteVisivel != null}
+				<img
+					src={arteVisivel}
+					alt={mostrarShiny ? t("especie.arte.shiny", { nome: especie.nome }) : especie.nome}
+					width="200"
+					height="200"
+				/>
+			{/if}
+
+			<!--
+				O alternador só aparece quando há arte brilhante para mostrar. Uma única
+				espécie não tem (Terapagos Forma Estelar), e oferecer o controle ali daria um
+				clique que quebra a imagem - ver `imagemShiny` em `especie.ts`.
+
+				`role="switch"` e não uma caixa de seleção comum: o leitor de tela anuncia
+				"ativado/desativado", que é o que este controle faz, em vez de "marcado".
+			-->
+			{#if especie.imagemShiny != null}
+				<label class="shiny">
+					<input type="checkbox" role="switch" bind:checked={mostrarShiny} />
+					<span class="trilho" aria-hidden="true"></span>
+					<span>{t("especie.shiny")}</span>
+				</label>
 			{/if}
 		</div>
 	</header>
@@ -385,6 +426,81 @@ import BotaoVoltar from "$ui/BotaoVoltar.svelte"
 	.arte {
 		display: grid;
 		place-items: center;
+		gap: var(--espaco-3);
+		align-content: center;
+	}
+
+	/*
+	 * O alternador de arte brilhante, sob a imagem.
+	 *
+	 * A caixa de seleção nativa fica fora da tela em vez de `display: none`: escondida
+	 * assim ela continua recebendo foco do teclado e sendo anunciada, e o `:focus-visible`
+	 * dela desenha o anel no trilho. Com `display: none` o controle sairia da ordem de
+	 * tabulação e viraria um enfeite clicável só com mouse.
+	 */
+	.shiny {
+		display: inline-flex;
+		gap: var(--espaco-2);
+		align-items: center;
+		color: var(--texto-suave);
+		font-size: var(--txt-pequeno);
+		font-weight: 600;
+		cursor: pointer;
+		user-select: none;
+	}
+
+	.shiny input {
+		position: absolute;
+		width: 1px;
+		height: 1px;
+		margin: -1px;
+		overflow: hidden;
+		clip-path: inset(50%);
+	}
+
+	.trilho {
+		position: relative;
+		display: block;
+		flex: none;
+		width: 2.25rem;
+		height: 1.25rem;
+		background: var(--superficie-afundada);
+		border: 1px solid var(--borda-forte);
+		border-radius: var(--raio-pilula);
+		transition: background 150ms ease, border-color 150ms ease;
+	}
+
+	.trilho::after {
+		content: "";
+		position: absolute;
+		top: 50%;
+		left: 0.175rem;
+		width: 0.85rem;
+		height: 0.85rem;
+		background: var(--texto-tenue);
+		border-radius: 50%;
+		transform: translateY(-50%);
+		transition: transform 150ms ease, background 150ms ease;
+	}
+
+	.shiny input:checked + .trilho {
+		background: var(--secao);
+		border-color: var(--secao);
+	}
+
+	.shiny input:checked + .trilho::after {
+		background: var(--cromo-texto);
+		/* 2.25rem - 0.85rem - 2x0.175rem de folga - 2px de borda. */
+		transform: translateY(-50%) translateX(0.925rem);
+	}
+
+	.shiny input:focus-visible + .trilho {
+		outline: 2px solid var(--foco);
+		outline-offset: 2px;
+	}
+
+	.shiny:hover {
+		color: var(--texto);
 	}
 
 	/* 11rem = 176px. O `width="200"` da marcação é só dica de layout para o navegador

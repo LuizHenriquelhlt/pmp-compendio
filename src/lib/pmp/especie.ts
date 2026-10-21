@@ -123,6 +123,15 @@ export type Especie = {
 	/** Resistências/fraquezas que fogem da tabela de tipos padrão. */
 	defesasAlteradas: Record<string, string> | null
 	imagem: string | null
+	/**
+	 * A mesma arte na variante shiny, ou `null` quando ela não existe.
+	 *
+	 * Derivada da URL normal - o repositório da PokéAPI guarda as duas lado a lado -, então
+	 * não custa download nem disco. `null` em uma única espécie, Terapagos Forma Estelar,
+	 * e em qualquer arte que venha de fora daquele repositório: a ficha usa isso para
+	 * decidir se oferece o alternador, em vez de oferecer e quebrar a imagem.
+	 */
+	imagemShiny: string | null
 }
 
 /** `9m de caminhada, 7,5m de natação` - números no formato brasileiro. */

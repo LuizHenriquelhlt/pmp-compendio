@@ -161,6 +161,40 @@ const interpretarEvolucao = criarInterpretadorDeEvolucao({
 	tipoPorChave: TIPO_POR_CHAVE,
 })
 
+// ------------------------------------------------------------------ Arte da espécie
+//
+// A arte continua sendo servida do repositório da PokéAPI, ao contrário da dos itens, que
+// precisou ser baixada - ver `arte.mjs`.
+//
+// O shiny vive no MESMO repositório, num diretório paralelo: basta inserir `shiny/` antes
+// do nome do arquivo. Não há download, campo novo no pack nem byte a mais em disco; a URL
+// é derivada da que já temos.
+//
+// Medido em 20/10/2026 contra a árvore do repositório, pela API de TREES e não a de
+// contents (que trunca em 1000 arquivos por diretório sem avisar, e na primeira medição me
+// fez "descobrir" que Squirtle não tem shiny): 1538 artes normais, 1531 shiny, e das 1149
+// espécies do compêndio 1148 têm a sua. A única sem é Terapagos Forma Estelar.
+//
+// Essa exceção fica aqui, medida e nomeada, e não num `onerror` na página: a ficha precisa
+// saber ANTES se pode oferecer o alternador, em vez de oferecer e falhar.
+const SEM_ARTE_SHINY = new Set([ "10277.png" ])
+
+const CAMINHO_DA_ARTE = "/official-artwork/"
+
+function arteNormal(bruto) {
+	return typeof bruto === "string" && bruto.startsWith("http") ? bruto : null
+}
+
+function arteShiny(imagem) {
+	// `null` quando não dá para derivar: se a arte vier de outro lugar, trocar o caminho
+	// não acharia nada, e devolver a URL normal faria a ficha mostrar o Pokémon comum
+	// dizendo que é shiny.
+	if (imagem == null || !imagem.includes(CAMINHO_DA_ARTE)) return null
+	if (SEM_ARTE_SHINY.has(imagem.split("/").pop())) return null
+
+	return imagem.replace(CAMINHO_DA_ARTE, `${CAMINHO_DA_ARTE}shiny/`)
+}
+
 // ------------------------------------------------------------------ Espécies
 // O módulo gravou espécies sem gênero como 50/50; a lista correta vem do PDF.
 const SEM_GENERO = new Set(carregarOpcional("sem-genero") ?? [])
@@ -251,7 +285,8 @@ for (const documento of documentosDeEspecie) {
 		movesDeOvo: listaDeMoves(s.eggMoves ?? [], documento.name),
 		defesas,
 		defesasAlteradas: Object.keys(s.typeDefenseOverrides ?? {}).length > 0 ? s.typeDefenseOverrides : null,
-		imagem: typeof documento.img === "string" && documento.img.startsWith("http") ? documento.img : null,
+		imagem: arteNormal(documento.img),
+		imagemShiny: arteShiny(arteNormal(documento.img)),
 	})
 }
 

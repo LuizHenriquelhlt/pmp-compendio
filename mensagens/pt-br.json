@@ -52,6 +52,8 @@
 	"especie.ca": "CA",
 	"especie.pv": "PV",
 	"especie.dadoDeVida": "Dado de Vida",
+	"especie.shiny": "Shiny",
+	"especie.arte.shiny": "{nome} na variante brilhante",
 	"especie.tamanho": "Tamanho",
 	"especie.altura": "Altura",
 	"especie.nivelMinimo": "Nível mínimo encontrado",
