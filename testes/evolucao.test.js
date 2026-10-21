@@ -1,5 +1,7 @@
 import { describe, expect, it } from "vitest"
-import { criarInterpretadorDeEvolucao } from "../ferramentas/evolucao.mjs"
+import {
+	alvoDaMesmaRegiao, criarInterpretadorDeEvolucao, regiaoDaForma,
+} from "../ferramentas/evolucao.mjs"
 
 // Vocabulário mínimo, com os nomes ordenados do mais longo para o mais curto - é
 // assim que o pipeline os entrega, e a ordem importa para as formas regionais.
@@ -127,5 +129,73 @@ describe("espécies que não evoluem", () => {
 
 	it("aceita texto vazio", () => {
 		expect(interpretar("", "Mew")).toEqual([])
+	})
+})
+
+describe("regiaoDaForma", () => {
+	it.each([
+		[ "Growlithe de Hisui", "Hisui" ],
+		[ "Ponyta de Galar", "Galar" ],
+		[ "Raichu de Alola", "Alola" ],
+		[ "Wooper de Paldea", "Paldea" ],
+	])("lê a região de %j", (nome, esperado) => {
+		expect(regiaoDaForma(nome)).toBe(esperado)
+	})
+
+	// O sufixo " de X" também nomeia formas que não são região. Tratá-las como regionais
+	// faria o pipeline procurar "Mothim de Planta", que não existe.
+	it.each([
+		"Wormadam de Planta", "Wormadam de Areia", "Wormadam de Lixo",
+		"Darmanitan de Gelo", "Arcanine", "Pikachu", "",
+	])("não vê região em %j", (nome) => {
+		expect(regiaoDaForma(nome)).toBe(null)
+	})
+
+	it.each([ undefined, null ])("aguenta %j", (nome) => {
+		expect(regiaoDaForma(nome)).toBe(null)
+	})
+})
+
+describe("alvoDaMesmaRegiao", () => {
+	const CONHECIDOS = new Set([
+		"Arcanine", "Arcanine de Hisui", "Zoroark", "Zoroark de Hisui",
+		"Perrserker", "Sliggoo", "Sliggoo de Hisui", "Rapidash", "Rapidash de Galar",
+	])
+
+	// Os cinco casos do corpus da v1.35.0: o livro escreve o alvo sem a região.
+	it.each([
+		[ "Growlithe de Hisui", "Arcanine", "Arcanine de Hisui" ],
+		[ "Ponyta de Galar", "Rapidash", "Rapidash de Galar" ],
+		[ "Zorua de Hisui", "Zoroark", "Zoroark de Hisui" ],
+	])("%s -> %s vira a forma da mesma região", (de, para, esperado) => {
+		expect(alvoDaMesmaRegiao(de, para, CONHECIDOS)).toBe(esperado)
+	})
+
+	it("não mexe quando quem evolui não é forma regional", () => {
+		expect(alvoDaMesmaRegiao("Growlithe", "Arcanine", CONHECIDOS)).toBe("Arcanine")
+	})
+
+	// Goomy não é regional, então Sliggoo de Hisui continua sem antecessor declarado - o
+	// livro não o declara, e inventá-lo seria pior que a lacuna.
+	it("não liga Goomy à forma de Hisui", () => {
+		expect(alvoDaMesmaRegiao("Goomy", "Sliggoo", CONHECIDOS)).toBe("Sliggoo")
+	})
+
+	it("não mexe quando o alvo já traz a região - o livro foi explícito", () => {
+		expect(alvoDaMesmaRegiao("Zorua de Hisui", "Zoroark de Hisui", CONHECIDOS))
+			.toBe("Zoroark de Hisui")
+	})
+
+	// Meowth de Galar evolui para Perrserker, que não tem forma regional nenhuma.
+	it("não mexe quando não existe forma da mesma região", () => {
+		expect(alvoDaMesmaRegiao("Meowth de Galar", "Perrserker", CONHECIDOS)).toBe("Perrserker")
+	})
+
+	it("não confunde forma não regional com regional", () => {
+		expect(alvoDaMesmaRegiao("Wormadam de Planta", "Arcanine", CONHECIDOS)).toBe("Arcanine")
+	})
+
+	it("sem vocabulário, devolve o que o livro escreveu", () => {
+		expect(alvoDaMesmaRegiao("Growlithe de Hisui", "Arcanine")).toBe("Arcanine")
 	})
 })

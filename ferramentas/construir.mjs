@@ -11,7 +11,7 @@ import { join } from "node:path"
 import { interpretarEfeitos } from "./efeitos.mjs"
 import { interpretarDefesas } from "./defesas.mjs"
 import { interpretarRegras } from "./regras.mjs"
-import { criarInterpretadorDeEvolucao } from "./evolucao.mjs"
+import { alvoDaMesmaRegiao, criarInterpretadorDeEvolucao } from "./evolucao.mjs"
 import { CLIMA_POR_MOVE, interpretarHabilidade, regraAusente } from "./habilidades.mjs"
 import {
 	aparicaoDaCelulaDePreco, contaminacao, interpretarPreco, itensApontadosPorEvolucao,
@@ -62,6 +62,9 @@ const relatorio = {
 	movesNaoResolvidos: [],
 	evolucoesNaoResolvidas: [],
 	evolucoesSuspeitas: [],
+	// Formas regionais cujo alvo o livro escreveu sem a região. É inferência do pipeline,
+	// e fica listada para poder ser conferida contra o livro.
+	evolucoesRegionaisRedirecionadas: [],
 	tiposDesconhecidos: [],
 	tamanhosDesconhecidos: [],
 	tiposDeMoveDesconhecidos: [],
@@ -256,8 +259,25 @@ for (const documento of documentosDeEspecie) {
 const ID_POR_NOME = new Map(especies.map((e) => [ e.nome, e.id ]))
 const ESPECIE_POR_ID = new Map(especies.map((e) => [ e.id, e ]))
 
+const NOMES_CONHECIDOS = new Set(especies.map((e) => e.nome))
+
 for (const especie of especies) {
 	for (const evolucao of especie.evolucoes) {
+		// O livro escreve a evolução da forma regional citando a espécie COMUM ("Growlithe
+		// de Hisui … evoluir para Arcanine"). Ao pé da letra, ela evoluiria para o Arcanine
+		// de Kanto, e o de Hisui ficaria órfão. Ver `alvoDaMesmaRegiao` para a guarda.
+		const alvoEscrito = evolucao.para
+		const alvoRegional = alvoDaMesmaRegiao(especie.nome, alvoEscrito, NOMES_CONHECIDOS)
+
+		if (alvoRegional !== alvoEscrito) {
+			evolucao.para = alvoRegional
+			relatorio.evolucoesRegionaisRedirecionadas.push({
+				especie: especie.nome,
+				textoDoLivro: alvoEscrito,
+				alvo: alvoRegional,
+			})
+		}
+
 		evolucao.paraId = ID_POR_NOME.get(evolucao.para) ?? null
 
 		if (evolucao.paraId == null) {
@@ -1155,6 +1175,7 @@ console.log(`  tags descartadas das páginas de regra: ${relatorio.tagsDeRegraDe
 console.log(`  evoluções com alvo não resolvido: ${relatorio.evolucoesNaoResolvidas.length}`)
 console.log(`  evoluções a conferir no livro: ${relatorio.evolucoesSuspeitas.length}`)
 console.log(`  formas sem antecessor declarado: ${relatorio.formasOrfas.length}`)
+console.log(`  evoluções regionais redirecionadas: ${relatorio.evolucoesRegionaisRedirecionadas.length}`)
 console.log(`  alcance de Move truncado no módulo: ${relatorio.alcanceDeMoveTruncado.length}`)
 console.log(`  prioridade de Move divergente do texto: ${relatorio.prioridadeDeMoveDivergente.length}`)
 console.log(`  dados de Move sem classificar (dano ou cura): ${relatorio.dadosDeMoveNaoClassificados.length}`)

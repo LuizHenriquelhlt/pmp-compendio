@@ -135,3 +135,53 @@ export function criarInterpretadorDeEvolucao({ nomesDeEspecie, itensEvolutivos =
 		return resultado.filter((e, i, todas) => todas.findIndex((x) => x.para === e.para) === i)
 	}
 }
+
+/**
+ * As quatro regiões que dão forma alternativa a uma espécie, como o livro as nomeia.
+ *
+ * Lista fechada de propósito. O sufixo " de X" também aparece em formas que NÃO são
+ * região - "Wormadam de Planta", "de Areia", "de Lixo", "de Combate", "de Gelo" -, e um
+ * padrão genérico trataria essas como regionais.
+ */
+export const REGIOES = [ "Alola", "Galar", "Hisui", "Paldea" ]
+
+// `String.raw` porque `\s` num template literal comum vira apenas `s`, e o padrão passa a
+// casar "sde Hisui" - que nunca acontece, e some calado.
+const SUFIXO_REGIONAL = new RegExp(String.raw`\sde (${REGIOES.join("|")})$`)
+
+/** `"Growlithe de Hisui"` → `"Hisui"`; `"Wormadam de Planta"` → `null`. */
+export function regiaoDaForma(nome = "") {
+	return SUFIXO_REGIONAL.exec(String(nome ?? ""))?.[1] ?? null
+}
+
+/**
+ * O alvo de evolução que o livro quis dizer, quando quem evolui é uma forma regional.
+ *
+ * O livro escreve a evolução da forma regional citando a espécie COMUM: "Growlithe de
+ * Hisui … pode evoluir para Arcanine", e não "para Arcanine de Hisui". Lido ao pé da
+ * letra, Growlithe de Hisui evolui para o Arcanine de Kanto - e o Arcanine de Hisui fica
+ * órfão, sem ninguém que evolua para ele.
+ *
+ * Isto é inferência, e por isso vem com a guarda mais estreita que cobre os casos:
+ *
+ *   - quem evolui TEM de ser uma forma regional;
+ *   - o alvo escrito NÃO pode já ser regional (senão o livro foi explícito e manda ele);
+ *   - a forma da MESMA região tem de existir no compêndio, com o nome exato.
+ *
+ * As três condições juntas deixam de fora o que não deve ser mexido: Meowth de Galar
+ * evolui para Perrserker, que não tem forma regional; Goomy evolui para Sliggoo, e Goomy
+ * não é regional, então Sliggoo de Hisui continua órfã - o livro não declara quem evolui
+ * para ela, e não cabe inventar.
+ *
+ * Medido na v1.35.0: 5 casos (Growlithe e Voltorb e Zorua e Sliggoo de Hisui, Ponyta de
+ * Galar). O pipeline registra cada redirecionamento em `relatorio.json`, para a
+ * inferência ficar visível em vez de calada.
+ */
+export function alvoDaMesmaRegiao(nomeDaEspecie, nomeDoAlvo, nomesConhecidos = new Set()) {
+	const regiao = regiaoDaForma(nomeDaEspecie)
+	if (regiao == null) return nomeDoAlvo
+	if (regiaoDaForma(nomeDoAlvo) != null) return nomeDoAlvo
+
+	const mesmaRegiao = `${nomeDoAlvo} de ${regiao}`
+	return nomesConhecidos.has(mesmaRegiao) ? mesmaRegiao : nomeDoAlvo
+}
