@@ -17,11 +17,19 @@
 	)
 
 	const paragrafos = (texto: string) => texto.split("\n").filter((p) => p !== "")
+
+	/**
+	 * Rótulo de seção dentro do texto: o item que está em duas tabelas do livro (King's
+	 * Rock, Metal Coat, Razor Claw e Razor Fang, nos Itens Evolutivos e nos Seguráveis)
+	 * traz o efeito de cada uma sob "Itens Evolutivos:" e "Itens Seguráveis não
+	 * consumíveis:". Linha curta terminada em dois-pontos é título, não regra.
+	 */
+	const rotulo = (paragrafo: string) => paragrafo.length <= 60 && paragrafo.endsWith(":")
 </script>
 
 <svelte:head>
 	<title>{item.nome} - {t("site.nome")}</title>
-	<meta name="description" content={paragrafos(item.descricao)[0] ?? item.nome} />
+	<meta name="description" content={paragrafos(item.descricao).find((p) => !rotulo(p)) ?? item.nome} />
 </svelte:head>
 
 <article class="pagina">
@@ -41,8 +49,8 @@
 				{#if preco != null}
 					<span class="etiqueta preco numero">{preco}</span>
 				{:else}
-					<!-- "Não vendido" e não "₽0": 15 itens-chave do livro não têm preço, e
-					     zero diria que são de graça. -->
+					<!-- "Não vendido" e não "₽0": 32 itens não têm preço no livro, e zero
+					     diria que são de graça. -->
 					<span class="etiqueta aviso">{t("item.semPreco")}</span>
 				{/if}
 
@@ -61,10 +69,11 @@
 				<h2>{t("item.efeito")}</h2>
 
 				<!--
-					Dez itens têm o texto costurado com conteúdo de outra linha da tabela do
-					livro. Publicar atribuiria a eles regra alheia - e em Mega Pedra inverteria
-					a regra, porque o "Não" de "Não vendido" caiu no meio da frase ("durante a
-					Não batalha"). A página diz o que houve; o original fica no relatório.
+					Texto costurado com conteúdo de outra linha da tabela do livro (dez itens
+					até a v1.35.0 do módulo; nenhum desde a v1.36.0, que releu o capítulo).
+					Publicar atribuiria ao item regra alheia - em Mega Pedra inverteria a regra,
+					porque o "Não" de "Não vendido" caiu no meio da frase ("durante a Não
+					batalha"). A página diz o que houve; o original fica no relatório.
 				-->
 				{#if item.textoContaminado}
 					<p class="ressalva">{t("item.textoContaminado")}</p>
@@ -80,7 +89,11 @@
 						<p class="ressalva">{t("item.textoIncompleto")}</p>
 					{/if}
 					{#each paragrafos(item.descricao) as paragrafo (paragrafo)}
-						<p>{paragrafo}</p>
+						{#if rotulo(paragrafo)}
+							<h3 class="rotulo">{paragrafo.slice(0, -1)}</h3>
+						{:else}
+							<p>{paragrafo}</p>
+						{/if}
 					{/each}
 				{/if}
 			</section>
@@ -89,8 +102,9 @@
 		<div class="coluna">
 			{#if item.secao != null}
 				<!--
-					Só os 77 itens das expansões de Galar e Paldea declaram a seção: ela vem do
-					cabeçalho que o livro deixou colado no fim da descrição deles.
+					Só 101 itens declaram a seção: os 77 das expansões de Galar e Paldea, pelo
+					cabeçalho que o livro deixou colado no fim da descrição, e os 24 que a
+					v1.36.0 do módulo trouxe do Livro de Regras, por um campo próprio.
 				-->
 				<section class="painel">
 					<h2>{t("item.secao")}</h2>
@@ -218,6 +232,20 @@
 
 	.painel p + p {
 		margin-top: var(--espaco-4);
+	}
+
+	.rotulo {
+		color: var(--texto-suave);
+		font-size: var(--txt-pequeno);
+		font-weight: 700;
+	}
+
+	.rotulo:not(:first-of-type) {
+		margin-top: var(--espaco-6);
+	}
+
+	.rotulo + p {
+		margin-top: var(--espaco-2);
 	}
 
 	.ressalva {

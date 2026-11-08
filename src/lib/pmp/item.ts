@@ -1,9 +1,8 @@
 /**
- * Um item de treinador como o compêndio o consome. Deriva de `trainer-features.json` via
- * `ferramentas/construir.mjs`.
- *
- * Repare no pack de origem: os itens NÃO estão no pack chamado `items`, que tem dois
- * documentos. Os 343 estão no pack de treinador, junto de talentos, naturezas e classes.
+ * Um item de treinador como o compêndio o consome. Deriva do pack `items` (desde a v1.37.0
+ * do módulo; até a v1.36.0, de `trainer-features`, junto de talentos, naturezas e classes)
+ * via `ferramentas/construir.mjs`, que lê os dois packs e filtra por
+ * `category: "item-treinador"` - 444 itens na v1.38.0.
  *
  * Os nomes ficam como o módulo os publica - a maioria em inglês (Thunder Stone, Oran
  * Berry), alguns em português (Mega Pedra, Pedra-Chave, Tênis Reforçados). É a mesma
@@ -16,7 +15,7 @@ export type Item = {
 	/**
 	 * O texto da regra, já sem a célula de preço que a tabela do PDF anexou ao fim.
 	 *
-	 * Vazia nos 10 itens em que a extração costurou conteúdo de outro item dentro - ver
+	 * Vazia quando a extração costurou conteúdo de outro item dentro - ver
 	 * `textoContaminado`.
 	 */
 	descricao: string
@@ -27,6 +26,7 @@ export type Item = {
 	 * N/A vezes"), o rótulo "Não vendido" partido ("durante a **Não** batalha … **vendido**",
 	 * que inverte a regra de Mega Pedra), a descrição de outro item emendada, e três itens
 	 * fundidos num texto só (Balm Mushroom). Publicar seria atribuir ao item regra alheia.
+	 * Nenhum desde a v1.36.0 do módulo, que releu o capítulo de Itens; a guarda continua.
 	 */
 	textoContaminado: boolean
 	/**
@@ -36,24 +36,27 @@ export type Item = {
 	 * Natureza", três em "Fornece +1 em") e um cortado no começo - a descrição inteira do
 	 * Extender é "tenham sido ativados por ele…", e sem o início não dá para saber o que
 	 * é "ele". O texto é publicado assim mesmo, com a ressalva ao lado: é o que o livro
-	 * tem, e metade da regra ainda ajuda quem conhece o item.
+	 * tem, e metade da regra ainda ajuda quem conhece o item. Nenhum desde a v1.36.0 (o
+	 * Extender virou Terrain Extender, com o texto inteiro).
 	 */
 	textoIncompleto: boolean
 	/**
 	 * Preço em Pokédólares, ou `null` quando o livro não vende o item.
 	 *
-	 * `null` e não 0 de propósito: 15 itens-chave (Mega Pedra, Pedra-Chave, Bracelete-Z,
-	 * Cristal-Z…) não têm preço, e "₽0" diria que são de graça.
+	 * `null` e não 0 de propósito: 32 itens (Mega Pedra, Pedra-Chave, Bracelete-Z,
+	 * Cristal-Z…) não têm preço no livro, e "₽0" diria que são de graça.
 	 *
-	 * Vem do TEXTO do livro, não do número que o módulo extraiu: em dois itens o módulo
-	 * leu a vírgula de "₽20,000" como decimal e gravou 20 - mil vezes menos.
+	 * Vem do TEXTO do livro, não do número que o módulo extraiu: até a v1.35.0, em dois
+	 * itens o módulo leu a vírgula de "₽20,000" como decimal e gravou 20 - mil vezes menos.
 	 */
 	preco: number | null
 	/** O preço como o livro imprime, incluindo o símbolo: `"₽1.400"`. Vazio quando não há. */
 	precoTexto: string
 	/**
 	 * A pasta do módulo, que é a única taxonomia que o pack oferece - e cobre um quarto
-	 * dele: 259 dos 343 caem em "Itens", e Berries, Hortelãs, Doces e Poções dividem 84.
+	 * dele: na v1.38.0, 334 dos 444 ficam na raiz do pack (`null`), e Berries, Hortelãs,
+	 * Tera Shards, Doces e Poções dividem 110. Até a v1.36.0 os da raiz caíam numa pasta
+	 * chamada "Itens", e é por isso que as fichas ainda escondem esse nome.
 	 *
 	 * Fica como o nome que o módulo dá, e não um `id` nosso, pela mesma razão que `regiao`
 	 * na ficha de espécie: é conteúdo do livro, não vocabulário do sistema.
@@ -66,8 +69,10 @@ export type Item = {
 	 * cabeçalho da seção anexado ao fim da descrição - vazamento de diagramação que, ao
 	 * contrário da célula de preço, carrega informação. Extraído, vira a taxonomia que a
 	 * pasta não dá: "Itens Evolutivos", "Fósseis", "Lista de Tera Shards", "Itens-Chave".
+	 * Os 24 que a v1.36.0 trouxe do Livro de Regras (Gems, Nugget, Pearl…) a gravam num
+	 * campo próprio, `flags.section`, e também entram aqui - sem expansão.
 	 *
-	 * `null` nos 343 da v1.33.0, que não declaram seção.
+	 * `null` nos outros itens do livro base, que não declaram seção.
 	 *
 	 * Sai como o livro escreve, sem uniformizar a caixa: ele mesmo alterna "Itens
 	 * Seguráveis consumíveis" e "Itens Seguráveis Consumíveis".
@@ -75,14 +80,14 @@ export type Item = {
 	secao: string | null
 	/** A expansão de onde o item vem: `"Expansão da Nona Geração (Paldea)"`. */
 	expansao: string | null
-	/** Gasta-se no uso (128 dos 343). */
+	/** Gasta-se no uso (137 dos 444 na v1.38.0). */
 	consumivel: boolean
 	/** Carrega outros itens - só Mochila e Mochila Energizada. */
 	recipiente: boolean
 	/**
 	 * A subdivisão do dnd5e: `trinket`, `food` ou `potion`.
 	 *
-	 * Junto com `consumivel`, é o que separa os 343 onde a pasta não separa.
+	 * Junto com `consumivel`, é o que separa os 444 onde a pasta não separa.
 	 */
 	especie: string | null
 	/**

@@ -8,6 +8,8 @@ import {
 const interpretar = criarInterpretadorDeEvolucao({
 	nomesDeEspecie: [
 		"Raichu de Alola", "Weezing de Galar", "Meowstic Macho", "Meowstic Fêmea",
+		"Wormadam Manto de Planta", "Mr. Mime de Galar", "Mr. Mime", "Mime Jr.", "Mothim", "Burmy",
+		"Shedinja", "Ninjask", "Nincada",
 		"Charmeleon", "Charmander", "Butterfree", "Infernape", "Chimchar", "Monferno",
 		"Vaporeon", "Jolteon", "Flareon", "Espeon", "Umbreon", "Sylveon",
 		"Slowking", "Slowbro", "Slowpoke", "Caterpie", "Metapod", "Flapple", "Appletun",
@@ -63,6 +65,37 @@ describe("evolução para a frente", () => {
 		)
 		expect(r.map((e) => e.para)).toContain("Flapple")
 		expect(r[0].nivel).toBe(6)
+	})
+
+	// Duas frases, duas ramificações: lidas como uma só, Mothim saía "apenas fêmea" (a
+	// palavra da segunda frase) e a Wormadam não aparecia.
+	it("separa as ramificações que o livro escreve em frases diferentes (Burmy)", () => {
+		const r = interpretar(
+			"Um Burmy macho pode evoluir para Mothim no nível 7 ou superior. Uma Burmy fêmea pode evoluir "
+				+ "para Wormadam no nível 7 ou superior, assumindo um manto com base no local onde evoluiu.",
+			"Burmy",
+		)
+		expect(r).toHaveLength(2)
+		expect(r[0]).toMatchObject({ para: "Mothim", nivel: 7, genero: "M" })
+		expect(r[1]).toMatchObject({ para: "Wormadam Manto de Planta", nivel: 7, genero: "F" })
+	})
+
+	it("não leva a condição de uma frase para a ramificação da frase anterior (Nincada)", () => {
+		const r = interpretar(
+			"Nincada pode evoluir para Ninjask no nível 7 ou superior. Se o seu treinador possuir um Pokéslot "
+				+ "vazio e uma Poké Bola vazia (de qualquer tipo), ele também adquire um Shedinja no mesmo nível.",
+			"Nincada",
+		)
+		expect(r).toEqual([ { para: "Ninjask", paraId: null, nivel: 7 } ])
+	})
+
+	it("não toma o ponto de 'Mr.' e 'Jr.' por fim de frase", () => {
+		const r = interpretar(
+			"Mime Jr. pode evoluir para Mr. Mime no momento em que aprende o Move 'Mimic' caso esteja fora de "
+				+ "Galar, ou para Mr. Mime de Galar caso esteja em Galar.",
+			"Mime Jr.",
+		)
+		expect(r.map((e) => e.para)).toEqual([ "Mr. Mime", "Mr. Mime de Galar" ])
 	})
 
 	it("guarda como 'especial' a condição que não sabe estruturar", () => {

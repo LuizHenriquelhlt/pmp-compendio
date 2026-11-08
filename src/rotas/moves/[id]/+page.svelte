@@ -4,6 +4,7 @@
 	import {
 		descreverEfeito, formatarEscalonamento, formatarPP, nomeDaResolucao, nomeDoModo,
 	} from "$pmp/move"
+	import type { Move } from "$pmp/move"
 	import EmblemaTipo from "$ui/EmblemaTipo.svelte"
 	import type { PageData } from "./$types"
 
@@ -15,8 +16,14 @@
 	const ficha = $derived.by(() => {
 		const linhas: { rotulo: string, valor: string }[] = [
 			{ rotulo: t("move.poder"), valor: move.poder.texto },
-			{ rotulo: t("move.duracao"), valor: move.duracao.texto },
 		]
+
+		// Thunder Punch perdeu a duração quando o módulo sincronizou com a edição revisada do
+		// livro (v1.37.0; o livro ainda traz "Instantânea"): uma linha "Duração" vazia diria
+		// menos que nenhuma.
+		if (move.duracao.texto !== "") {
+			linhas.push({ rotulo: t("move.duracao"), valor: move.duracao.texto })
+		}
 
 		if (move.prioridade !== 0) {
 			linhas.push({ rotulo: t("move.prioridade"), valor: String(move.prioridade) })
@@ -58,6 +65,8 @@
 	].filter((g) => g.especies.length > 0))
 
 	const paragrafos = (texto: string) => texto.split("\n").filter((p) => p !== "")
+
+	const naoPublicado = (campo: Move["textosNaoPublicados"][number]) => move.textosNaoPublicados.includes(campo)
 </script>
 
 <svelte:head>
@@ -139,25 +148,39 @@
 
 	<div class="colunas">
 		<div class="coluna">
+			<!--
+				Campo com texto de outro documento do livro não é publicado (Nihil Light na
+				v1.38.0); a seção fica, com o aviso no lugar do texto, para o leitor saber que
+				o livro tem algo ali.
+			-->
 			<section class="painel">
 				<h2>{t("move.descricao")}</h2>
+				{#if naoPublicado("descricao")}
+					<p class="ressalva">{t("move.textoContaminado")}</p>
+				{/if}
 				{#each paragrafos(move.descricao) as paragrafo (paragrafo)}
 					<p>{paragrafo}</p>
 				{/each}
 			</section>
 
-			{#if move.niveisSuperiores !== ""}
+			{#if move.niveisSuperiores !== "" || naoPublicado("niveisSuperiores")}
 				<section class="painel">
 					<h2>{t("move.niveisSuperiores")}</h2>
+					{#if naoPublicado("niveisSuperiores")}
+						<p class="ressalva">{t("move.textoContaminado")}</p>
+					{/if}
 					{#each paragrafos(move.niveisSuperiores) as paragrafo (paragrafo)}
 						<p>{paragrafo}</p>
 					{/each}
 				</section>
 			{/if}
 
-			{#if move.observacoes !== ""}
+			{#if move.observacoes !== "" || naoPublicado("observacoes")}
 				<section class="painel">
 					<h2>{t("move.observacoes")}</h2>
+					{#if naoPublicado("observacoes")}
+						<p class="ressalva">{t("move.textoContaminado")}</p>
+					{/if}
 					{#each paragrafos(move.observacoes) as paragrafo (paragrafo)}
 						<p>{paragrafo}</p>
 					{/each}
@@ -352,6 +375,11 @@
 		border-radius: 0 var(--raio) var(--raio) 0;
 		color: var(--texto-tenue);
 		font-size: var(--txt-pequeno);
+	}
+
+	/* Dentro do painel, o aviso ocupa o lugar do texto: o espaço vem do título. */
+	.painel .ressalva {
+		margin-top: 0;
 	}
 
 	.tenue {

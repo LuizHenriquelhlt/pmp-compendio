@@ -20,6 +20,8 @@ export const load: PageServerLoad = ({ params }) => {
 
 	return {
 		mega,
+		// Para a descrição da página quando a Mega não tem texto (Mega Zygarde na v1.38.0).
+		totalDeMegas: idsDeMega().length,
 		base: base == null ? null : {
 			id: base.id,
 			nome: base.nome,

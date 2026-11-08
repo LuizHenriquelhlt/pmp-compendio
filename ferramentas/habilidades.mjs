@@ -98,11 +98,12 @@ export const TIPO_POR_NOME = {
  * de granizo. Mesclar os dois inventaria uma regra.
  *
  * `graniz` cobre "granizo" e "granizando" com um padrão só; `nevad` cobre "condições
- * frias e nevadas" (Forecast).
+ * frias e nevadas" (Forecast). `sol extremamente forte` é o de Desolate Land (Groudon
+ * Primal), o par da "chuva pesada" de Primordial Sea.
  */
 const CLIMAS = [
 	[ /chuva|chovendo/i, "chuva" ],
-	[ /luz\s+(?:do\s+sol|solar)|sol\s+intenso/i, "sol" ],
+	[ /luz\s+(?:do\s+sol|solar)|sol\s+intenso|sol\s+extremamente\s+forte/i, "sol" ],
 	[ /tempestade\s+de\s+areia/i, "tempestade-de-areia" ],
 	[ /graniz/i, "granizo" ],
 	[ /nevand|nevasc|nevad|\bneve\b/i, "neve" ],

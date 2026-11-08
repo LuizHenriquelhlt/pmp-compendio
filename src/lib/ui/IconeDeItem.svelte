@@ -16,8 +16,8 @@
 	 * dependência nem arquivo para baixar, não levanta questão de licença de biblioteca de
 	 * terceiros, e acompanha o tema claro/escuro sozinho.
 	 *
-	 * A escolha é por PALAVRA no nome, e não por pasta, porque a pasta não distingue: 310
-	 * dos 420 itens caem num balde chamado "Itens". A ordem importa - "Kit de Mergulho"
+	 * A escolha é por PALAVRA no nome, e não por pasta, porque a pasta não distingue: 334
+	 * dos 444 itens ficam sem pasta nenhuma. A ordem importa - "Kit de Mergulho"
 	 * casaria tanto em `kit` quanto em nada, e o primeiro padrão que casar vence.
 	 */
 	const FAMILIAS: { glifo: Glifo, padrao: RegExp }[] = [

@@ -31,8 +31,8 @@
 
 	<div class="rodape">
 		<!--
-			"Não vendido" e não "₽0": 15 itens-chave do livro (Mega Pedra, Pedra-Chave,
-			Bracelete-Z) não têm preço, e zero diria que são de graça.
+			"Não vendido" e não "₽0": 32 itens (Mega Pedra, Pedra-Chave, Bracelete-Z…) não
+			têm preço no livro, e zero diria que são de graça.
 		-->
 		{#if preco != null}
 			<span class="preco numero">{preco}</span>
@@ -41,8 +41,9 @@
 		{/if}
 
 		{#if item.grupo != null && item.grupo !== "Itens"}
-			<!-- O grupo "Itens" é o balde genérico de 259 dos 343: como etiqueta não diz
-			     nada, e só ocuparia espaço em três de cada quatro cartões. -->
+			<!-- "Itens" era o balde genérico de três quartos do catálogo até a v1.36.0 do
+			     módulo (hoje esses itens ficam sem pasta, e o grupo vem `null`): como
+			     etiqueta não diria nada, e só ocuparia espaço em três de cada quatro cartões. -->
 			<span class="pilula">{item.grupo}</span>
 		{/if}
 

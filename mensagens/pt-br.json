@@ -159,6 +159,7 @@
 	"move.descricao": "Descrição",
 	"move.niveisSuperiores": "Níveis Superiores",
 	"move.observacoes": "Observações",
+	"move.textoContaminado": "O módulo gravou neste campo texto que pertence a outro documento do livro - aqui, um trecho do capítulo de Mega Evoluções. O compêndio não publica esse texto para não atribuir ao Move regras que não são dele; os dados de dano e o escalonamento, que vêm de campos próprios, continuam na página, e o original fica no relatório de qualidade dos dados.",
 	"move.zPower": "Efeito do Z-Power",
 	"move.efeitos": "Efeitos mecânicos",
 	"move.efeitos.nota": "Resumo lido da descrição. O texto do livro, acima, é a regra.",
@@ -181,6 +182,7 @@
 
 	"move.efeito.limite": "(até {n})",
 	"move.efeito.dreno": "Dreno de {fracao} do dano",
+	"move.efeito.dreno.total": "Dreno de todo o dano",
 	"move.efeito.recuo.dano": "Recuo de {fracao} do dano",
 	"move.efeito.recuo.vida": "Recuo de {fracao} da vida máxima",
 	"move.efeito.cura.dados": "Cura {dados}",
@@ -253,7 +255,7 @@
 	"catalogoMegas.resultado": "{n} Mega encontrada",
 	"catalogoMegas.resultados": "{n} Megas encontradas",
 	"catalogoMegas.vazio": "Nenhuma Mega corresponde aos filtros.",
-	"catalogoMegas.vazio.dica": "Tente outro termo, ou limpe os filtros para ver as 93.",
+	"catalogoMegas.vazio.dica": "Tente outro termo, ou limpe os filtros para ver as {n}.",
 	"buscaMegas.rotulo": "Buscar Mega",
 	"buscaMegas.exemplo": "Forma, pedra, espécie, tipo ou habilidade…",
 
@@ -329,7 +331,7 @@
 
 	"catalogoItens.titulo": "Itens",
 	"catalogoItens.subtitulo": "{n} itens de treinador do Pokémon Mundo Perfeito, com preço e efeito.",
-	"catalogoItens.nota": "O preço vem do texto do livro: em dois itens o número que o módulo extraiu está mil vezes menor.",
+	"catalogoItens.nota": "O preço é o que o livro imprime. Itens-chave que o livro não vende aparecem como \"Não vendido\", e não como gratuitos.",
 	"catalogoItens.resultado": "{n} item encontrado",
 	"catalogoItens.resultados": "{n} itens encontrados",
 	"catalogoItens.evolutivos": "{n} evoluem alguma espécie",

@@ -239,20 +239,24 @@ pedras** (Charizard, Mewtwo e Raichu com X e Y; Garchomp, Absol e Lucario com a 
 e **a relação Mega↔habilidade é N:N** - Magic Bounce e Tough Claws são concedidas por
 quatro pedras cada.
 
-Os **itens** não estão no pack chamado `items`, que tem dois documentos: uma pasta e o
-Fator Terastal. Os 420 estão em `trainer-features.json`, um saco misto de 600 documentos e
-onze categorias mais 64 pastas (talentos, naturezas, classes de treinador, as mecânicas
-Terastal e Dynamax), do qual `category: "item-treinador"` é a maior fatia:
+Os **itens** são `category: "item-treinador"`: 444 na v1.38.0 do módulo. Até a v1.36.0 eles
+eram a maior fatia de `trainer-features.json`, um saco misto com talentos, naturezas,
+classes de treinador e as mecânicas Terastal e Dynamax; a v1.37.0 os mudou para o pack
+`items`. O pipeline lê os dois packs e filtra pela categoria, então constrói com qualquer
+versão. Duas outras categorias do pack `items` ficam de fora de propósito: o Fator Terastal
+(`tera-factor`), que é a mecânica, e as Personalizações de Pokébola
+(`personalizacao-pokebola`: a Cápsula de Bola e dez Selos), que o módulo criou para a
+animação de soltura no Foundry, com preço próprio - não são itens do livro.
 
 | Campo do módulo | Por que não dá para usar direto |
 |---|---|
-| `system.price.value` | Está **1000x menor** em 2 itens: o módulo leu a vírgula de `"₽20,000"` como decimal e gravou 20. O pack mistura as duas convenções de milhar - 150 itens escrevem `₽1.500` e 2 escrevem `₽20,000` -, e nenhum dos 343 tem centavos |
-| `system.price.value: 0` | Não é "de graça": 31 itens-chave (Mega Pedra, Pedra-Chave, Bracelete-Z, Cristal-Z…) o livro não vende. É `null`, como o `armorClassDelta` das Megas |
-| `system.description.value` | A tabela do PDF vazou para dentro em 10 itens, de quatro jeitos - ver abaixo |
-| `folder` | É a taxonomia mais fraca do pack: 310 dos 420 caem num balde chamado "Itens"; Berries, Tera Shards, Hortelãs, Doces e Poções dividem 110 |
-| `img` | 190 dos 420 apontam para a biblioteca de ícones do próprio Foundry (`icons/equipment/…`), que não é publicada com o site. Destes, 66 são itens Pokémon que a PokéAPI tem e o módulo só não linkou - ver "A arte dos itens" |
+| `system.price.value` | Até a v1.35.0 estava **1000x menor** em 2 itens: o módulo leu a vírgula de `"₽20,000"` como decimal e gravou 20. O pack mistura as duas convenções de milhar - 205 itens escrevem `₽1.500` e 12 escrevem `₽20,000` -, e nenhum tem centavos. O pipeline publica o preço do TEXTO e acusa a divergência |
+| `system.price.value: 0` | Não é "de graça": 32 itens-chave (Mega Pedra, Pedra-Chave, Bracelete-Z, Cristal-Z…) o livro não vende. É `null`, como o `armorClassDelta` das Megas |
+| `system.description.value` | A tabela do PDF vazou para dentro em 10 itens até a v1.35.0, de quatro jeitos - ver abaixo. A v1.36.0 releu o capítulo e zerou os casos; a guarda continua |
+| `folder` | É a taxonomia mais fraca do pack: 334 dos 444 ficam na raiz (até a v1.36.0, num balde chamado "Itens"); Berries, Tera Shards, Hortelãs, Doces e Poções dividem 110 |
+| `img` | 193 dos 444 apontam para arte que não é publicada com o site: 116 para a biblioteca de ícones do próprio Foundry (`icons/equipment/…`) e 77 para os ícones das expansões que o módulo extraiu do PDF. Boa parte são itens Pokémon que a PokéAPI tem e o módulo só não linkou - ver "A arte dos itens" |
 
-As quatro formas de contaminação do texto, todas da extração do PDF:
+As quatro formas de contaminação do texto, todas da extração do PDF (medidas na v1.35.0):
 
 1. **A célula de preço no FIM** (7 itens): "Permite que Hoopa mude de forma. **N/A**". É o
    único caso seguro de aparar, porque dois sinais independentes concordam - o token está
@@ -265,37 +269,46 @@ As quatro formas de contaminação do texto, todas da extração do PDF:
 
 Nos 10 contaminados a descrição **não é publicada**, como nas descrições de Mega
 contaminadas: publicá-la atribuiria ao item uma regra que não é dele. Os 7 do
-caso 1 são aparados e publicados normalmente.
+caso 1 são aparados e publicados normalmente. A v1.36.0 do módulo releu o capítulo de Itens
+e zerou os quatro casos; as guardas continuam, e o relatório diz se algum voltar.
 
-A v1.35.0 trouxe um quinto padrão, e esse **carrega informação**: os 77 itens das
+A v1.34.0 trouxe um quinto padrão, e esse **carrega informação**: os 77 itens das
 expansões de Galar e Paldea têm o cabeçalho da seção do livro colado no fim da descrição
 ("Itens Evolutivos - Expansão da Nona Geração (Paldea)"). Em vez de descartar, o pipeline
 o extrai para `secao` e `expansao` - vira a taxonomia que a pasta não dá, com 12 seções
 ("Itens Evolutivos", "Fósseis", "Lista de Tera Shards", "Itens-Chave"…). O padrão exige o
 travessão e a forma "Expansão da … Geração (…)" na última linha, porque quatro itens
-antigos têm segundo parágrafo legítimo e não podem perder nada.
+antigos têm segundo parágrafo legítimo e não podem perder nada. Os 24 itens que a v1.36.0
+trouxe do Livro de Regras (Gems, Nugget, Pearl…) gravam a seção num campo próprio,
+`flags.section`, que o pipeline usa quando a descrição não traz o cabeçalho.
 
-Nove itens têm **só um pedaço da regra**, e esses continuam visíveis, ao contrário dos
-contaminados: o texto é o que o livro tem e não atribui ao item regra alheia - o que não
-pode é o leitor achar que a frase pela metade é a regra inteira, então a ficha avisa
-acima dela. Oito estão cortados no fim: cinco Berries (Iapapa, Aguav, Wiki, Figy e Mago)
-param exatamente na palavra que as distingue, "causa confusão caso seja de Natureza", e
-três param em "Fornece +1 em". Um está cortado no **começo** - a descrição inteira do
-Extender no módulo é "tenham sido ativados por ele, seja por Move ou por habilidade
-passiva", e sem o início não dá para saber o que é "ele".
+Na v1.35.0, nove itens tinham **só um pedaço da regra**, e esses continuam visíveis, ao
+contrário dos contaminados: o texto é o que o livro tem e não atribui ao item regra alheia -
+o que não pode é o leitor achar que a frase pela metade é a regra inteira, então a ficha
+avisa acima dela. Oito estavam cortados no fim: cinco Berries (Iapapa, Aguav, Wiki, Figy e
+Mago) paravam exatamente na palavra que as distingue, "causa confusão caso seja de
+Natureza", e três paravam em "Fornece +1 em". Um estava cortado no **começo** - a descrição
+inteira do Extender no módulo era "tenham sido ativados por ele, seja por Move ou por
+habilidade passiva", e sem o início não dava para saber o que é "ele". Nenhum desde a
+v1.36.0 (o Extender virou Terrain Extender, com o texto inteiro).
 
-Seis itens mandam o leitor virar a página do livro ("veja a página seguinte"), que num
-site não existe. Ficam visíveis e vão para o relatório.
+Seis itens mandavam o leitor virar a página do livro ("veja a página seguinte"), que num
+site não existe. Desde a v1.36.0 o módulo traz o texto citado (Pokédex, Rotom Dex,
+Pedra-Chave) ou aponta o Guia de Pesca do compêndio de Regras (as três varas). A regra
+continua: referência de página fica visível e vai para o relatório.
 
 ### A arte dos itens
 
-Todo cartão tem imagem: **290 sprites** baixados da PokéAPI e **130 ícones desenhados**
-pelo compêndio.
+Na última execução de `npm run dados:arte` (v1.35.0, 420 itens), todo cartão tinha
+imagem: **290 sprites** baixados da PokéAPI e **130 ícones desenhados** pelo compêndio.
+Com os dados da v1.38.0 são 290 sprites e 154 ícones, até a ferramenta rodar de novo: os
+24 itens que a v1.36.0 acrescentou ainda não foram procurados.
 
-O módulo preenche `img` com uma URL da PokéAPI em 230 dos 420 itens e deixa os outros 190
-apontando para a biblioteca de ícones interna do Foundry, que não é publicada com o site.
-Mas boa parte desses 190 são itens Pokémon de verdade que a PokéAPI tem - o módulo só não
-linkou. `npm run dados:arte` acha, confere e **baixa** para `static/itens/`.
+O módulo preenche `img` com uma URL da PokéAPI em 251 dos 444 itens (v1.38.0) e deixa os
+outros 193 apontando para arte que não é publicada com o site: a biblioteca de ícones
+interna do Foundry (116) e os ícones das expansões que o módulo extraiu do PDF (77). Mas
+boa parte deles são itens Pokémon de verdade que a PokéAPI tem - o módulo só não linkou.
+`npm run dados:arte` acha, confere e **baixa** para `static/itens/`.
 
 Baixar, e não apontar, é o ponto. Antes o site linkava direto para
 `raw.githubusercontent.com`, e isso quebrava de forma **intermitente**: o endpoint `raw`
@@ -320,7 +333,7 @@ Duas defesas contra publicar imagem ruim:
   pixels opacos. A lista é curada e não um limiar automático: o sprite legítimo mais
   esparso do catálogo fica a três pontos percentuais dos quebrados.
 
-Os 130 sem sprite recebem um ícone desenhado em `IconeDeItem.svelte` - traçado simples em
+Os itens sem sprite recebem um ícone desenhado em `IconeDeItem.svelte` - traçado simples em
 `currentColor`, escolhido por palavra no nome (mochila, tenda, lanterna, óculos, kit,
 corda, livro…). Sem dependência externa, sem questão de licença, e acompanha o tema. Os 19
 Tera Shards saem **tingidos com a cor do próprio tipo**, que o compêndio já tem: um glifo
@@ -363,7 +376,7 @@ na fonte. O relatório cobre:
 | `prioridadeDeMoveDivergente` | Moves em que o campo `priority` discorda do texto (3 na v1.35.0) |
 | `dadosDeMoveNaoClassificados` | Moves cujos dados não deu para dizer se são de dano ou de cura (1 na v1.35.0) |
 | `efeitosDeMoveNaoInterpretados` | Frases que **declaram** um efeito mecânico que o parser não estruturou (24 na v1.35.0) |
-| `textosDeMoveContaminados` | Texto de regra com conteúdo vazado de outro lugar, como crédito de arte (1 na v1.35.0) |
+| `textosDeMoveContaminados` | Texto de regra com conteúdo vazado de outro lugar, campo a campo, com a marca: `credito-de-arte` e `sobra-no-fim` (o resto de um crédito partido) continuam visíveis; `capitulo-de-mega` (Nihil Light na v1.36.0) não é publicado, e o Move lista o campo em `textosNaoPublicados` (1 na v1.35.0; 18 na v1.38.0) |
 | `habilidadesSemRegra` | Habilidades cuja regra o módulo não achou no livro, com a nota original (**0** na v1.35.0; eram 74 na v1.34.0) |
 | `efeitosDeHabilidadeNaoInterpretados` | Frases que declaram um efeito de habilidade que o parser não estruturou (20 na v1.35.0 - subiu de 13 quando a v1.35.0 deu texto às 74 que não tinham) |
 | `habilidadesSemPortador` | Habilidades que nenhuma espécie e nenhuma Mega têm (8 na v1.35.0) |

@@ -186,10 +186,17 @@ describe("clima", () => {
 		expect(efeitos(frase)).toEqual([ { tipo: "clima", relacao: "gera", clima, move } ])
 	})
 
-	// Delta Stream é a única que cria clima sem nomear um Move.
+	// Delta Stream, Primordial Sea e Desolate Land criam clima sem nomear um Move.
 	it("lê o clima criado diretamente, sem Move", () => {
 		expect(efeitos("Delta Stream cria ventos fortes quando a habilidade é ativada."))
 			.toEqual([ { tipo: "clima", relacao: "gera", clima: "ventos-fortes" } ])
+	})
+
+	it("lê o 'sol extremamente forte' de Desolate Land como sol", () => {
+		const desolateLand = "Desolate Land cria um sol extremamente forte quando a habilidade é ativada "
+			+ "(por Groudon revertendo para sua forma Primal)."
+
+		expect(efeitos(desolateLand)).toEqual([ { tipo: "clima", relacao: "gera", clima: "sol" } ])
 	})
 
 	/**

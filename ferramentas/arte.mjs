@@ -4,10 +4,12 @@
 //
 // Duas coisas, e a segunda é a que importa:
 //
-// 1. **Acha o que falta.** O módulo preenche `img` com uma URL da PokéAPI em 230 dos 420
-//    itens e deixa os outros 190 apontando para a biblioteca de ícones interna do Foundry
-//    (`icons/equipment/…`), que não é publicada com o site. Boa parte desses 190 são itens
-//    Pokémon de verdade que a PokéAPI tem - o módulo só não linkou.
+// 1. **Acha o que falta.** O módulo preenche `img` com uma URL da PokéAPI em 251 dos 444
+//    itens (v1.38.0) e deixa os outros 193 apontando para arte que não é publicada com o
+//    site: 116 para a biblioteca de ícones interna do Foundry (`icons/equipment/…`) e 77
+//    para os ícones das expansões que o módulo extraiu do PDF (`modules/…/assets/items/`).
+//    Boa parte deles são itens Pokémon de verdade que a PokéAPI tem - o módulo só não
+//    linkou.
 //
 // 2. **Para de depender do GitHub em tempo de visita.** Antes o site apontava direto para
 //    `raw.githubusercontent.com`, e isso quebrava de forma intermitente: o endpoint `raw`
@@ -96,17 +98,20 @@ const itens = JSON.parse(readFileSync(join(dados, "itens.json"), "utf8"))
  * palpite por nome e perderia a arte de todo item cujo nome não casa com a PokéAPI - a
  * cada ciclo um pouco mais. O pack cru é a única fonte que não se autodestrói.
  */
-const CRU = join("dados-crus", "trainer-features.json")
+// O catálogo mora em `items` desde a v1.37.0 do módulo, e em `trainer-features` até a
+// v1.36.0 - os dois packs são lidos, como em `construir.mjs`.
+const CRUS = [ "items", "trainer-features" ].map((nome) => join("dados-crus", `${nome}.json`)).filter((c) => existsSync(c))
 const imgOriginal = new Map()
 
-if (existsSync(CRU)) {
-	for (const d of JSON.parse(readFileSync(CRU, "utf8"))) {
+for (const cru of CRUS) {
+	for (const d of JSON.parse(readFileSync(cru, "utf8"))) {
 		if (d.flags?.["pokemon-mundo-perfeito"]?.category === "item-treinador") {
 			imgOriginal.set(d.name, typeof d.img === "string" ? d.img : "")
 		}
 	}
-} else {
-	console.warn(`  (não achei ${CRU} - sem as URLs originais do módulo, só o palpite por nome)`)
+}
+if (imgOriginal.size === 0) {
+	console.warn("  (nenhum item em dados-crus/items.json nem em trainer-features.json - sem as URLs originais do módulo, só o palpite por nome)")
 }
 
 // Pasta limpa a cada execução: um item que mudou de nome na fonte não pode deixar o

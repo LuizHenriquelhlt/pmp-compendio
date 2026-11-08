@@ -85,7 +85,23 @@ export function criarInterpretadorDeEvolucao({ nomesDeEspecie, itensEvolutivos =
 		// "ou" e "e" só separam ramificações quando vêm antes de nome próprio: isso
 		// distingue "…para Flapple … e Appletun …" (duas ramificações) de
 		// "…no nível 6 e apenas durante a noite" (uma só, com duas condições).
-		for (const bruta of frase.split(/,\s*(?:ou\s+)?|\s+(?:ou|e)\s+(?=[A-ZÀ-Ý])/)) {
+		//
+		// O fim de frase também separa: "Um Burmy macho pode evoluir para Mothim no nível 7
+		// ou superior. Uma Burmy fêmea pode evoluir para Wormadam…" são duas ramificações, e
+		// lidas como uma só davam Mothim "apenas fêmea" e nenhuma Wormadam. O ponto de "Mr."
+		// e "Jr." não é fim de frase ("para Mr. Mime").
+		//
+		// E a frase é o limite da cláusula sem espécie: ela completa a ramificação da MESMA
+		// frase, nunca a de uma anterior. Em Nincada, "Se o seu treinador possuir um
+		// Pokéslot vazio…" é a condição do Shedinja, e virava requisito do Ninjask.
+		const clausulas = frase
+			.split(/(?<!\b(?:Mr|Jr))\.\s+(?=[A-ZÀ-Ý])/)
+			.flatMap((sentenca, n) => sentenca
+				.split(/,\s*(?:ou\s+)?|\s+(?:ou|e)\s+(?=[A-ZÀ-Ý])/)
+				.map((bruta) => ({ bruta, sentenca: n })))
+		let sentencaDaAnterior = -1
+
+		for (const { bruta, sentenca } of clausulas) {
 			const clausula = bruta.replace(/ou_superior/g, "ou superior")
 
 			const alvo = acharAlvo(clausula, propriaEspecie, nomesDeEspecie)
@@ -118,12 +134,14 @@ export function criarInterpretadorDeEvolucao({ nomesDeEspecie, itensEvolutivos =
 					nivel: nivel != null ? Number(nivel[1]) : nivelGlobal ?? 1,
 					...condicao,
 				})
+				sentencaDaAnterior = sentenca
 				continue
 			}
 
-			// Cláusula sem espécie: complementa a anterior ("…, apenas durante a noite").
+			// Cláusula sem espécie: complementa a anterior da mesma frase ("…, apenas
+			// durante a noite").
 			const anterior = resultado.at(-1)
-			if (anterior != null && Object.keys(condicao).length > 0) {
+			if (anterior != null && sentenca === sentencaDaAnterior && Object.keys(condicao).length > 0) {
 				for (const [ chave, valor ] of Object.entries(condicao)) {
 					if (anterior[chave] === undefined) anterior[chave] = valor
 				}

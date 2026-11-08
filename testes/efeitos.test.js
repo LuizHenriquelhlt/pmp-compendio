@@ -206,6 +206,32 @@ describe("mudanças de estágio", () => {
 		expect(efeitos(texto)).toHaveLength(1)
 	})
 
+	// A edição revisada do livro (v1.37.0 do módulo) trocou "podendo ser acumulado em até"
+	// por "podendo acumular um aumento / uma redução de até", com o número sem sinal.
+	it("lê o limite na redação revisada de aumento (Acid Armor)", () => {
+		const acidArmor = "Você é cercado por um escudo de ácido espesso. Sua Defesa aumenta em 2 estágios, "
+			+ "podendo acumular um aumento de até 6 estágios."
+
+		expect(efeitos(acidArmor)).toEqual([ { tipo: "estagio", atributo: "defesa", delta: 2, alvo: "usuario", limite: 6 } ])
+	})
+
+	it("aceita um adjunto curto entre a mudança e o limite (String Shot)", () => {
+		const stringShot = "Qualquer criatura pega no cone deve ter sucesso em um teste de resistência de DES contra "
+			+ "uma CD igual a 16 + MOVE, reduzindo a Velocidade em 2 estágios em caso de falha, podendo ser "
+			+ "acumulado em até -6 estágios."
+
+		expect(efeitos(stringShot).find((e) => e.tipo === "estagio")).toMatchObject({ atributo: "velocidade", delta: -2, limite: -6 })
+	})
+
+	it("tira o sinal da palavra 'redução' e aceita 'após …' antes do limite (King's Shield)", () => {
+		const kingsShield = "Se uma criatura direcionar um ataque corpo a corpo a você ou tentar agarrá-lo durante o "
+			+ "efeito de King's Shield, ela tem seu Ataque reduzido em 2 estágios após a tentativa, podendo "
+			+ "acumular uma redução de até 6 estágios."
+
+		expect(efeitos(kingsShield).find((e) => e.tipo === "estagio"))
+			.toEqual({ tipo: "estagio", atributo: "ataque", delta: -2, alvo: "alvo", limite: -6 })
+	})
+
 	it.each([
 		"Para cada estágio positivo que você tiver no aumento de qualquer Mudança de Status, acrescente mais um dado de dano.",
 		"Ao usar este Move, suas Mudança de Status são redefinidas, e você copia todos os estágios de Mudança de Status de um alvo.",
@@ -248,6 +274,22 @@ describe("dreno", () => {
 		const leechSeed = "O dano causado retorna como cura ao usuário, ou qualquer outra criatura ativa que o treinador tenha na batalha."
 		expect(efeitos(leechSeed)).toEqual([])
 		expect(naoLido(leechSeed).map((n) => n.familia)).toContain("dreno")
+	})
+
+	// Leech Seed na edição revisada (v1.37.0 do módulo): "DE dano causado" e a fração inteira
+	// por extenso. Antes do conserto o sinal não casava, e o Move sumia do relatório sem ter
+	// sido lido.
+	it("lê o dreno com a cura antes do dano (Parabolic Charge)", () => {
+		const parabolicCharge = "Recupere pontos de vida iguais à metade de todo dano causado, mas não mais que 5 vezes o seu nível."
+
+		expect(efeitos(parabolicCharge)).toEqual([ { tipo: "dreno", fracao: { numerador: 1, denominador: 2 } } ])
+	})
+
+	it("lê 'a mesma quantidade de dano causado' como dreno total", () => {
+		const leechSeed = "A mesma quantidade de dano causado é recuperada como pontos de vida pelo usuário, ou "
+			+ "qualquer outra criatura ativa que o treinador tenha na batalha."
+
+		expect(efeitos(leechSeed)).toEqual([ { tipo: "dreno", fracao: { numerador: 1, denominador: 1 } } ])
 	})
 })
 

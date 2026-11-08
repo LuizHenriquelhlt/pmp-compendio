@@ -24,6 +24,7 @@ import {
 import {
 	CHAVE_DE_TIPO_VARIAVEL, TIPO_DE_MOVE_POR_CHAVE, classificarResolucao, criarReparadorDeMoves,
 	interpretarAlcance, interpretarAtivacao, interpretarDados, interpretarDuracao, prioridadeDeclarada,
+	vazamentoNoTextoDeMove,
 } from "./moves.mjs"
 import { interpretarDeslocamento, interpretarSentidos, slug, textoSimples } from "./texto.mjs"
 
@@ -147,9 +148,17 @@ function tabelaDeMoves(linhas, nomeDaEspecie) {
 const NOMES_DE_ESPECIE = [ ...new Set(documentosDeEspecie.map((d) => d.name)) ]
 	.sort((a, b) => b.length - a.length)
 
-const PADRAO_ITEM_EVOLUTIVO = /Stone|Scale|Coat|Claw|Fang|Disc|Cloth|Upgrade|Protector|Electirizer|Magmarizer|Apple|Sweet|Pedra|Ring|Fossil|Chipped|Cracked|Tart|Auspicious|Malicious|Metal Alloy|Peat|Scroll|Leek|Sachet|Whipped|Gimmighoul|Oval/i
+// King's Rock pelo nome inteiro: "Rock" sozinho traria Damp, Heat, Icy e Smooth Rock, que
+// são itens de clima. Tooth, Cuff, Wreath e Teacup são Deep Sea Tooth (Clamperl), Galarica
+// Cuff/Wreath (Slowpoke de Galar) e as duas Teacups (Poltchageist).
+const PADRAO_ITEM_EVOLUTIVO = /Stone|Scale|Coat|Claw|Fang|Disc|Cloth|Upgrade|Protector|Electirizer|Magmarizer|Apple|Sweet|Pedra|Ring|Fossil|Chipped|Cracked|Tart|Auspicious|Malicious|Metal Alloy|Peat|Scroll|Leek|Sachet|Whipped|Gimmighoul|Oval|King's Rock|Tooth|Cuff|Wreath|Teacup/i
 
-const ITENS_EVOLUTIVOS = (carregarOpcional("trainer-features") ?? [])
+// O catálogo de itens mudou de pack na v1.37.0 do módulo: até a v1.36.0 era uma fatia de
+// `trainer-features`, e desde então mora em `items`. Lemos os dois, para construir com
+// qualquer versão - e um item nunca está nos dois ao mesmo tempo. Ver a seção "Itens".
+const DOCUMENTOS_DE_CATALOGO = [ ...(carregarOpcional("items") ?? []), ...(carregarOpcional("trainer-features") ?? []) ]
+
+const ITENS_EVOLUTIVOS = DOCUMENTOS_DE_CATALOGO
 	.filter((f) => flags(f).category === "item-treinador")
 	.filter((f) => PADRAO_ITEM_EVOLUTIVO.test(f.name))
 	.map((f) => ({ id: slug(f.name), nome: f.name }))
@@ -369,9 +378,26 @@ for (const documento of documentosDeMove) {
 		relatorio.tiposDeMoveDesconhecidos.push({ move: documento.name, chave: m.moveType })
 	}
 
-	const descricao = textoSimples(m.description ?? "")
-	const niveisSuperiores = textoSimples(m.higherLevels ?? "")
-	const observacoes = textoSimples(m.observations ?? "")
+	// Texto de outro documento do livro dentro de um campo - ver `vazamentoNoTextoDeMove`.
+	// O crédito de arte vazado (Swallow na v1.33.0; Comet Punch, Outrage e outros na
+	// v1.38.0) é uma linha no fim que não muda a regra: fica visível como está e vai para o
+	// relatório, porque limpar em silêncio escondia o defeito da fonte. O capítulo de Mega
+	// Evoluções colado em Nihil Light, não: são 11.900 caracteres de regras de OUTRAS
+	// pedras, e o campo não é publicado - o mesmo trato da descrição contaminada de Mega e
+	// de item. O escalonamento de dano continua na página, porque vem de `damage.scaling`.
+	const textosNaoPublicados = []
+	const lerCampo = (campo, bruto) => {
+		const texto = textoSimples(bruto ?? "")
+		const marca = vazamentoNoTextoDeMove(texto)
+		if (marca == null) return texto
+		relatorio.textosDeMoveContaminados.push({ move: documento.name, campo, marca, texto })
+		if (marca !== "capitulo-de-mega") return texto
+		textosNaoPublicados.push(campo)
+		return ""
+	}
+	const descricao = lerCampo("descricao", m.description)
+	const niveisSuperiores = lerCampo("niveisSuperiores", m.higherLevels)
+	const observacoes = lerCampo("observacoes", m.observations)
 
 	const alcance = interpretarAlcance(m.range?.raw ?? "", m.range?.meters ?? 0, m.range?.melee === true)
 	if (alcance.truncado) {
@@ -399,13 +425,6 @@ for (const documento of documentosDeMove) {
 		relatorio.efeitosDeMoveNaoInterpretados.push({ move: documento.name, ...item })
 	}
 
-	// Um crédito de arte vazado para dentro do texto de regra (Swallow, na v1.33.0).
-	// Fica visível na página como está: limpar em silêncio escondia o defeito da fonte.
-	const contaminado = [ descricao, niveisSuperiores, observacoes ].find((t) => /Arte feita por|Arte por/i.test(t))
-	if (contaminado != null) {
-		relatorio.textosDeMoveContaminados.push({ move: documento.name, texto: contaminado })
-	}
-
 	moves.push({
 		id,
 		nome: documento.name,
@@ -426,6 +445,7 @@ for (const documento of documentosDeMove) {
 		descricao,
 		niveisSuperiores,
 		observacoes,
+		textosNaoPublicados,
 		zPower: m.zPowerEffect != null && m.zPowerEffect !== "" ? m.zPowerEffect : null,
 		imagem: typeof documento.img === "string" && documento.img.startsWith("http") ? documento.img : null,
 	})
@@ -866,27 +886,34 @@ const indiceDeHabilidades = habilidades.map((h) => ({
 }))
 
 // ------------------------------------------------------------------ Itens
-// Os itens NÃO estão no pack chamado `items`, que tem dois documentos: uma pasta e o
-// Fator Terastal. Os 343 estão em `trainer-features.json`, um saco misto de 522
-// documentos e doze categorias - talentos, naturezas, classes de treinador, as mecânicas
-// Terastal e Dynamax - do qual `category: "item-treinador"` é uma fatia.
+// O catálogo é `category: "item-treinador"` (444 itens na v1.38.0). Até a v1.36.0 ele era
+// uma fatia de `trainer-features`, um saco misto com talentos, naturezas, classes de
+// treinador e as mecânicas Terastal e Dynamax; a v1.37.0 o mudou para o pack `items`.
+// `DOCUMENTOS_DE_CATALOGO` junta os dois packs, então quem decide é a categoria, não o
+// pack.
 //
-// A taxonomia vem da PASTA, e cobre só um quarto do catálogo: 259 dos 343 caem num balde
-// chamado "Itens", e as outras quatro pastas (Berries, Hortelãs, Doces, Poções) dividem
-// 84. É o mesmo padrão de `PROCEDENCIA_POR_PASTA` na Pokédex - o documento-pasta é um
-// registro do próprio pack, com `type: "Item"` e sem `category`.
+// Duas outras categorias do pack `items` ficam de fora de propósito, por não serem itens
+// do livro: o Fator Terastal (`tera-factor`), que é a mecânica, e as Personalizações de
+// Pokébola (`personalizacao-pokebola`: a Cápsula de Bola e os dez Selos), que o módulo
+// criou para a animação de soltura no Foundry, com preço próprio. Publicá-las aqui seria
+// apresentar invenção do módulo como regra do PMP.
+//
+// A taxonomia vem da PASTA, e cobre só um quarto do catálogo: 334 dos 444 ficam na raiz
+// do pack, e Berries, Hortelãs, Tera Shards, Doces e Poções dividem 110. (Até a v1.36.0
+// os da raiz caíam numa pasta chamada "Itens".) É o mesmo padrão de `PROCEDENCIA_POR_PASTA`
+// na Pokédex - o documento-pasta é um registro do próprio pack, com `type: "Item"` e sem
+// `category`.
 //
 // Por isso o índice publica também `consumivel` e `especie` do dnd5e (`equipment` /
 // `consumable` / `container` cruzado com `trinket` / `food` / `potion`): essa divisão
-// separa os 343 de verdade, e é independente da pasta.
+// separa os 444 de verdade, e é independente da pasta.
 //
 // O preço e o texto são lidos em `itens.mjs`, isolado e com testes - ver o cabeçalho de
 // lá para as quatro formas de contaminação da tabela do PDF.
-const documentosDeTreinador = carregarOpcional("trainer-features") ?? []
-const documentosDeItem = documentosDeTreinador.filter((d) => flags(d).category === "item-treinador")
+const documentosDeItem = DOCUMENTOS_DE_CATALOGO.filter((d) => flags(d).category === "item-treinador")
 
 // As pastas são documentos do próprio pack, como as gerações na Pokédex.
-const PASTA_DE_ITEM = new Map(documentosDeTreinador
+const PASTA_DE_ITEM = new Map(DOCUMENTOS_DE_CATALOGO
 	.filter((d) => flags(d).category == null && typeof d.name === "string")
 	.map((d) => [ d._id, d.name ]))
 
@@ -912,10 +939,10 @@ for (const documento of documentosDeItem) {
 	const temPreco = precoNoTexto !== ""
 	const preco = interpretarPreco(precoNoTexto)
 
-	// O módulo leu a vírgula de "₽20,000" como decimal e gravou 20. Publicamos o valor do
-	// TEXTO, que é a fonte, e relatamos - como `prioridadeDeMoveDivergente` nos Moves. Dá
-	// para afirmar que a vírgula é separador de milhar porque nenhum dos 343 preços tem
-	// centavos.
+	// Até a v1.35.0 o módulo leu a vírgula de "₽20,000" como decimal e gravou 20. Publicamos
+	// o valor do TEXTO, que é a fonte, e relatamos - como `prioridadeDeMoveDivergente` nos
+	// Moves. Dá para afirmar que a vírgula é separador de milhar porque nenhum dos 412 preços
+	// da v1.38.0 tem centavos.
 	if (precoDivergente(precoNoTexto, documento.system?.price?.value ?? 0)) {
 		relatorio.precosDeItemDivergentes.push({
 			item: documento.name,
@@ -925,11 +952,22 @@ for (const documento of documentosDeItem) {
 		})
 	}
 
-	// O cabeçalho da seção do livro, que a v1.34.0 anexou ao fim dos 77 itens novos. Sai
-	// da descrição e vira dado: é a taxonomia que o pack não tem, porque `folder` joga 259
-	// itens num balde chamado "Itens".
-	const { descricao: semTitulo, secao, expansao } = tituloDeSecao(
-		textoSimples(documento.system?.description?.value ?? ""))
+	// O cabeçalho da seção do livro, que a v1.34.0 anexou ao fim dos 77 itens das expansões.
+	// Sai da descrição e vira dado: é a taxonomia que o pack não tem, porque a pasta deixa
+	// 334 itens na raiz. Os 24 que a v1.36.0 trouxe do Livro de Regras (as Gems, Nugget,
+	// Pearl, Arceus Plate…) gravam a seção num campo próprio, `flags.section`, e sem
+	// expansão: são do livro base.
+	const lido = tituloDeSecao(textoSimples(documento.system?.description?.value ?? ""))
+	const secaoNoCampo = typeof flags(documento).section === "string" && flags(documento).section.trim() !== ""
+		? flags(documento).section.trim()
+		: null
+	const secao = lido.secao ?? secaoNoCampo
+	const { expansao } = lido
+
+	// "No módulo: o botão ✨ Terastalizar da ficha…" (Orbe Tera) é instrução de uso do
+	// Foundry, não regra do PMP - e aponta o Fator Terastal, que este compêndio deixa de
+	// fora. O parágrafo inteiro sai; o resto da descrição fica.
+	const semTitulo = lido.descricao.split("\n").filter((p) => !/^No módulo:/.test(p.trim())).join("\n")
 
 	// A célula de preço vazia da tabela, anexada ao fim do texto. Aparar é seguro só
 	// quando os dois sinais concordam: o token está no fim E o item não tem preço.
@@ -981,8 +1019,8 @@ for (const documento of documentosDeItem) {
 		textoContaminado: sujeira != null,
 		/** O módulo tem só um pedaço da regra - ver `textosDeItemCortados`. */
 		textoIncompleto: incompleto,
-		// `null` e não 0: 15 itens-chave do livro não são vendidos (Mega Pedra, Pedra-Chave,
-		// Bracelete-Z…), e "₽0" diria que são de graça.
+		// `null` e não 0: 32 itens o livro não vende (Mega Pedra, Pedra-Chave, Bracelete-Z…),
+		// e "₽0" diria que são de graça.
 		preco,
 		precoTexto: precoNoTexto,
 		grupo: PASTA_DE_ITEM.get(documento.folder) ?? null,
@@ -991,7 +1029,7 @@ for (const documento of documentosDeItem) {
 		// caixa seria corrigir a fonte por conta própria.
 		secao,
 		expansao,
-		// A divisão do dnd5e, que separa os 343 onde a pasta não separa.
+		// A divisão do dnd5e, que separa os 444 onde a pasta não separa.
 		consumivel: documento.type === "consumable",
 		recipiente: documento.type === "container",
 		especie: documento.system?.type?.value ?? null,

@@ -366,10 +366,24 @@ function atributosLogoDepois(depois) {
 	return achado != null ? [ achado[1] ] : []
 }
 
+/**
+ * O teto de acúmulo logo depois da mudança de estágio.
+ *
+ * Duas redações: "podendo ser acumulado em até 6 estágios" e, desde a edição revisada do
+ * livro (v1.37.0 do módulo), "podendo acumular um aumento de até 6 estágios" (Acid Armor)
+ * ou "uma redução de até 6 estágios" (King's Shield) - nesta, o número vem sem sinal e é a
+ * palavra que diz o sentido.
+ *
+ * Entre a mudança e o limite pode vir um adjunto curto, fechado por vírgula: "após a
+ * tentativa," (King's Shield), "após atacar," (Superpower), "em caso de falha," (String
+ * Shot), "em 1 estágio cada," (Parting Shot), "antes de receber o dano," (Withdraw).
+ * "Podendo acumular até +6 e -6 estágios, respectivamente" (Scale Shot) fica de fora: são
+ * dois limites para duas mudanças.
+ */
 function lerLimite(depois) {
-	const casa = depois.match(/^[,\s]*podendo\s+(?:ser\s+)?acumulad[oa]s?\s+em\s+até\s*(-?)\s*(\d+)\s*está?gios?/i)
+	const casa = depois.match(/^[,\s]*(?:[^,.]{1,30},\s*)?podendo\s+(?:(?:ser\s+)?acumulad[oa]s?\s+em|acumular\s+(?:um\s+aumento|uma\s+(redução))\s+de)\s+até\s*(-?)\s*(\d+)\s*está?gios?/i)
 	if (casa == null) return null
-	return (casa[1] === "-" ? -1 : 1) * Number(casa[2])
+	return (casa[1] != null || casa[2] === "-" ? -1 : 1) * Number(casa[3])
 }
 
 // ------------------------------------------------------------------ Dreno
@@ -380,15 +394,26 @@ function lerLimite(depois) {
  * O livro escreve de quatro jeitos - "retorna como cura ao usuário", "é convertido em
  * cura para o usuário", "ganhando … em pontos de vida" e "recuperando … como pontos de
  * vida" -, e usa "drenar" também para coisas que não curam ninguém. Daí o `falsoSinal`.
+ *
+ * A edição revisada do livro (v1.37.0 do módulo) reescreveu Leech Seed como "A mesma
+ * quantidade de dano causado é recuperada como pontos de vida": "DE dano causado", e não
+ * "do", e a fração inteira por extenso - por isso `d[eo]` e `a mesma quantidade`.
+ *
+ * Parabolic Charge inverte a ordem: "Recupere pontos de vida iguais à metade de todo dano
+ * causado" - a cura vem antes, e o dano é "todo dano".
  */
-const SINAL_DRENO = /\bdren(?:a|ar|am|ando|o)\b|convertid[oa]\s+em\s+cura|retorna\s+como\s+cura|do\s+dano\s+causado[^.]{0,60}(?:em|como)\s+pontos\s+de\s+vida/i
+const SINAL_DRENO = /\bdren(?:a|ar|am|ando|o)\b|convertid[oa]\s+em\s+cura|retorna\s+como\s+cura|d[eo]\s+dano\s+causado[^.]{0,60}(?:em|como)\s+pontos\s+de\s+vida|recuper\w*\s+pontos\s+de\s+vida\s+iguais\s+[^.]{0,30}d[eo]\s+(?:todo\s+(?:o\s+)?)?dano\s+causado/i
 const DRENO_FALSO = /dren\w*\s+sua\s+energia|drena\s+suas\s+forças|drenar?\s+os\s+PP|drenando\s+também/i
-const DRENO_DESTINO = /convertid[oa]\s+em\s+cura|retorna\s+como\s+cura|(?:em|como)\s+pontos\s+de\s+vida|em\s+cura\s+para/i
+const DRENO_DESTINO = /convertid[oa]\s+em\s+cura|retorna\s+como\s+cura|(?:em|como)\s+pontos\s+de\s+vida|em\s+cura\s+para|recuper\w*\s+pontos\s+de\s+vida\s+iguais/i
 
 function lerDreno(frase) {
 	if (!DRENO_DESTINO.test(frase)) return []
 
-	const casa = frase.match(new RegExp(`${PADRAO_FRACAO.source}\\s+d[oe]\\s+dano`, "i"))
+	if (/\ba\s+mesma\s+quantidade\s+d[eo]\s+dano/i.test(frase)) {
+		return [ { tipo: "dreno", fracao: { numerador: 1, denominador: 1 } } ]
+	}
+
+	const casa = frase.match(new RegExp(`${PADRAO_FRACAO.source}\\s+d[oe]\\s+(?:todo\\s+(?:o\\s+)?)?dano`, "i"))
 	if (casa == null) return []
 
 	const fracao = lerFracao(casa[0])

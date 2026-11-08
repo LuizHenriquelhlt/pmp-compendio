@@ -36,6 +36,13 @@ export type Move = {
 	descricao: string
 	niveisSuperiores: string
 	observacoes: string
+	/**
+	 * Campos que o pipeline NÃO publica porque o módulo gravou neles texto de outro
+	 * documento do livro - na v1.38.0, os Níveis Superiores de Nihil Light, que levaram o
+	 * capítulo de Mega Evoluções. O campo vem vazio, e a página avisa em vez de sumir com
+	 * a seção. Ver `vazamentoNoTextoDeMove` em `ferramentas/moves.mjs`.
+	 */
+	textosNaoPublicados: ("descricao" | "niveisSuperiores" | "observacoes")[]
 	/** Efeito do Move na forma Z, quando o livro o descreve. */
 	zPower: string | null
 	imagem: string | null
@@ -232,7 +239,10 @@ function descreverOQue(efeito: Efeito): string {
 		}
 
 		case "dreno":
-			return t("move.efeito.dreno", { fracao: formatarFracao(efeito.fracao) })
+			// "A mesma quantidade de dano causado é recuperada" (Leech Seed): 1/1 por extenso.
+			return efeito.fracao.numerador === efeito.fracao.denominador
+				? t("move.efeito.dreno.total")
+				: t("move.efeito.dreno", { fracao: formatarFracao(efeito.fracao) })
 
 		case "recuo":
 			return "fracaoDeVida" in efeito

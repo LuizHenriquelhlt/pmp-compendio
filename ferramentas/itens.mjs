@@ -4,30 +4,35 @@
 // prosa e números do livro, e um erro aqui não deixa um campo vazio - ele publica uma
 // regra ou um preço errado.
 //
-// Os 343 itens vivem em `trainer-features.json`, não no pack chamado `items` (que tem
-// DOIS documentos). Dos campos do documento só cinco variam: `name`, a descrição, o preço
-// em número, o preço em texto e `img`. O resto é constante nos 343.
+// Os itens são `category: "item-treinador"` - no pack `items` desde a v1.37.0 do módulo,
+// e em `trainer-features.json` até a v1.36.0; `construir.mjs` lê os dois. Do documento, o
+// pipeline usa `name`, a descrição, o preço em número e em texto (`priceRaw`), `img`, a
+// pasta, `flags.section` e a divisão do dnd5e (`type` e `system.type.value`).
 //
 // Duas coisas exigem leitura, e as duas estão medidas na nota do pack:
 //
-//   1. O PREÇO. `system.price.value` está 1000x menor em dois itens porque o módulo leu a
-//      vírgula de `"₽20,000"` como decimal - a armadilha de pt-BR que estas ferramentas
-//      repetem desde o pack de Moves, desta vez cometida pela fonte.
+//   1. O PREÇO. Até a v1.35.0, `system.price.value` estava 1000x menor em dois itens
+//      porque o módulo leu a vírgula de `"₽20,000"` como decimal - a armadilha de pt-BR
+//      que estas ferramentas repetem desde o pack de Moves, desta vez cometida pela fonte.
 //
 //   2. A DESCRIÇÃO. A extração do PDF costurou colunas e linhas vizinhas ao texto da
 //      regra: a célula de preço (`N/A`), o rótulo "Não vendido" partido no meio da frase,
 //      e descrições inteiras de outros itens emendadas no fim.
+//
+// A v1.36.0 do módulo releu o capítulo de Itens e zerou os dois casos; as funções daqui
+// continuam como guarda, e o relatório diz se algum voltar.
 
 /**
  * `"₽12.500"` → `12500`, `""` → `null`.
  *
  * Os dois separadores do pack são de MILHAR, e isso é afirmável e não suposto: nenhum dos
- * 343 preços tem centavos - não existe um só `₽N,NN` ou `₽N.NN` terminando em dois
- * dígitos. O pack mistura as duas convenções (150 itens escrevem `₽1.500` à brasileira e
- * 2 escrevem `₽20,000` à inglesa), então os dois caracteres somem antes da conversão.
+ * 412 preços da v1.38.0 tem centavos - não existe um só `₽N,NN` ou `₽N.NN` terminando em
+ * dois dígitos. O pack mistura as duas convenções (205 itens escrevem `₽1.500` à
+ * brasileira e 12 escrevem `₽20,000` à inglesa), então os dois caracteres somem antes da
+ * conversão.
  *
- * Devolve `null`, e não 0, para o campo vazio: 15 itens-chave do livro não são vendidos
- * (Mega Pedra, Pedra-Chave, Bracelete-Z…), e "₽0" diria que são de graça.
+ * Devolve `null`, e não 0, para o campo vazio: 32 itens o livro não vende (Mega Pedra,
+ * Pedra-Chave, Bracelete-Z…), e "₽0" diria que são de graça.
  */
 export function interpretarPreco(bruto = "") {
 	const digitos = String(bruto ?? "").replace(/[₽\s]/g, "").replace(/[.,]/g, "")
@@ -65,7 +70,7 @@ export function precoDivergente(bruto, campo) {
  * É vazamento de diagramação como os outros - ninguém quer ler isso no meio da regra -,
  * mas ao contrário da célula de preço ele CARREGA informação: diz a seção do livro e a
  * expansão. Então em vez de descartar, extraímos: vira a taxonomia que o pack não tem
- * (`folder` joga 259 itens num balde chamado "Itens").
+ * (a pasta deixa 334 dos 444 itens na raiz).
  *
  * O padrão é estreito de propósito - exige o travessão e a forma "Expansão da … Geração
  * (…)" na última linha -, porque quatro itens antigos têm segundo parágrafo legítimo

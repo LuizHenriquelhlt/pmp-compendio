@@ -186,7 +186,7 @@ describe("título de seção", () => {
 	// A v1.34.0 acrescentou 77 itens (expansões de Galar e Paldea) e TODOS trazem o
 	// cabeçalho da seção do livro como última linha. É vazamento de diagramação, mas ao
 	// contrário da célula de preço ele carrega informação: vira a taxonomia que o pack não
-	// tem, já que `folder` joga 259 itens num balde chamado "Itens".
+	// tem, já que a pasta deixa 334 dos 444 itens na raiz.
 	it.each([
 		[ "Evolui Charcadet para Armarouge.", "Itens Evolutivos", "Expansão da Nona Geração (Paldea)" ],
 		[ "Um broto de bambu raro.", "Tesouros e itens destinados à venda", "Expansão da Nona Geração (Paldea)" ],

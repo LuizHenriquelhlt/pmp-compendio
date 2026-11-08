@@ -202,7 +202,7 @@
 	{#if filtradas.length === 0}
 		<div class="vazio">
 			<p class="vazio-titulo">{t("catalogoMegas.vazio")}</p>
-			<p>{t("catalogoMegas.vazio.dica")}</p>
+			<p>{t("catalogoMegas.vazio.dica", { n: data.megas.length.toLocaleString("pt-BR") })}</p>
 		</div>
 	{:else}
 		<ul class="grade">

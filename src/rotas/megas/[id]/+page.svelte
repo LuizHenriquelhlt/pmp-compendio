@@ -42,7 +42,7 @@
 	<meta
 		name="description"
 		content={paragrafos(mega.descricao)[0]
-			?? t("catalogoMegas.subtitulo", { n: String(93) })}
+			?? t("catalogoMegas.subtitulo", { n: String(data.totalDeMegas) })}
 	/>
 </svelte:head>
 

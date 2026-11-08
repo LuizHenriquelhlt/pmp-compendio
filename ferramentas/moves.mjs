@@ -66,6 +66,16 @@ export function sobrouEmPes(convertido) {
 	return /p[ée]s?(?![a-zà-ÿ])/i.test(convertido)
 }
 
+/**
+ * O campo para no meio da frase: termina em preposição, conjunção ou num "+" solto.
+ * Teleport, na edição revisada do livro (v1.37.0 do módulo): "30 pés (9 metros) + 5 pés
+ * (1,5 metros) para cada ponto de" - falta "modificador de Sabedoria". Os pés foram todos
+ * convertidos, e por isso `sobrouEmPes` não via o corte.
+ */
+export function terminaNoMeio(texto) {
+	return /(?:\s(?:de|da|do|das|dos|para|por|e|ou|com|em)|[+\/(,])\s*$/i.test(texto)
+}
+
 const FORMAS_DE_AREA = [
 	[ /\bcone\b/i, "cone" ],
 	[ /\blinha\b/i, "linha" ],
@@ -91,7 +101,7 @@ export function interpretarAlcance(bruto = "", metros = 0, corpoACorpo = false) 
 		pessoal: /^pessoal/i.test(bruto),
 		variavel: /^vari[áa]vel$/i.test(bruto.trim()),
 		forma: FORMAS_DE_AREA.find(([ padrao ]) => padrao.test(bruto))?.[1] ?? null,
-		truncado: sobrouEmPes(texto),
+		truncado: sobrouEmPes(texto) || terminaNoMeio(bruto),
 	}
 }
 
@@ -138,6 +148,52 @@ export function interpretarDuracao(bruto = "") {
 	}
 }
 
+// ------------------------------------------------------------------ Texto de outro documento
+
+/**
+ * O capítulo de Mega Evoluções colado num campo de Move. Na v1.36.0 do módulo, os Níveis
+ * Superiores de Nihil Light (o Move que Zygarde ganha na Mega) levaram 11.900 caracteres
+ * das pedras seguintes: "…10d10 no nível 17. Crabominite Permite que Crabominable Mega
+ * Evolua para…". A frase-âncora das pedras não aparece em regra de Move nenhuma.
+ */
+const VAZAMENTO_DE_MEGA = /Permite\s+que\s+[^.]{1,60}?\s+Mega\s+Evolua/i
+
+/**
+ * Crédito de arte do PDF. As letras chegam separadas de jeitos diferentes - "Arte feita
+ * por", "A rte feita por dr eamgate_gad" (Comet Punch), "Art e f e i t a p or" (Outrage) -,
+ * e por isso cada letra admite um espaço depois de si. A fronteira de palavra no começo
+ * impede casar "parte por".
+ *
+ * Sem a palavra "Arte" ("Feito por Yusiso" em Bubble Beam, "fei ta por muds aw" em Swift),
+ * só vale no FIM do campo e depois de uma frase fechada: "um ataque à distância feito por
+ * uma criatura" (Smokescreen) é regra.
+ */
+const CREDITO_DE_ARTE = /\bA\s?r\s?t\s?e\s*(?:f\s?e\s?i\s?t\s?a\s*)?p\s?o\s?r\b|[.!?]\s+f\s?e\s?i\s?t\s?[ao]\s*p\s?o\s?r\s+\S+(?:\s\S+)?\s*$/i
+
+/**
+ * Um resto curto solto depois da última frase do campo: o que sobrou de um crédito de
+ * arte que a extração partiu ("… no nível 17. po r" em Strength, "… fica Queimado. Cri" em
+ * Will-O-Wisp, "… (Descansar) amemoriii" em Relic Song). Regra de Move sempre fecha a
+ * frase; no corpus da v1.38.0 os 16 campos que terminam assim são todos sobra.
+ */
+const SOBRA_NO_FIM = /[.!?:)]\s+[^.!?:]{1,45}$/
+
+/**
+ * Texto de outro documento do livro dentro de um campo de Move, ou `null`.
+ *
+ * Os casos pedem tratos opostos, e por isso a marca diz qual é: o crédito de arte e a
+ * sobra dele são uma linha no fim, que não muda a regra; o capítulo de Mega troca a regra
+ * por outra.
+ *
+ * @returns {"capitulo-de-mega" | "credito-de-arte" | "sobra-no-fim" | null}
+ */
+export function vazamentoNoTextoDeMove(texto = "") {
+	if (VAZAMENTO_DE_MEGA.test(texto)) return "capitulo-de-mega"
+	if (CREDITO_DE_ARTE.test(texto)) return "credito-de-arte"
+	if (SOBRA_NO_FIM.test(texto.trim().split("\n").at(-1) ?? "")) return "sobra-no-fim"
+	return null
+}
+
 // ------------------------------------------------------------------ Resolução
 
 /**
@@ -151,8 +207,15 @@ export function interpretarDuracao(bruto = "") {
  * resultado quando o texto não declara rolagem alguma - os buffs pessoais e os Moves de
  * campo -, e não um "não sei".
  */
+//
+// "Ataque corpo a corpo" sozinho não diz quem ataca. Os Moves de defesa também falam dele -
+// "o dano recebido de ataques corpo a corpo" (Reflect, Aurora Veil), "quando sujeito a um
+// ataque corpo a corpo" (Withdraw), "se uma criatura direcionar um ataque corpo a corpo a
+// você" (King's Shield, Spiky Shield) - e eram rotulados de ataque. Por isso a alternativa
+// exige o verbo de quem FAZ o ataque: "fazer / realizando / desferir um ataque", "para um
+// ataque" (Skull Bash), "em um ataque" (Fly, Dig), "use sua ação para atacar".
 const RESOLUCOES = [
-	[ "ataque", /Faça\s+(?:um|uma|dois|duas|três|quatro|novamente|\d+)[^.]{0,40}ataques?|ataques?\s+(?:corpo\s+a\s+corpo|à\s+distância)|rolage(?:m|ns)\s+de\s+ataque|realiz(?:a|e|ar)\s+um\s+ataque|fazendo\s+(?:dois|duas|três)\s+ataques?/i ],
+	[ "ataque", /Faça\s+(?:um|uma|dois|duas|três|quatro|novamente|\d+)[^.]{0,40}ataques?|(?:fa(?:ça|zer|zendo)|realiz\w*|desferi\w*|para|em)\s+(?:até\s+)?(?:um|uma|dois|duas|três)\s+ataques?\s+(?:corpo\s+a\s+corpo|à\s+distância)|use\s+sua\s+ação\s+para\s+atacar|rolage(?:m|ns)\s+de\s+ataque|realiz(?:a|e|ar)\s+um\s+ataque|fazendo\s+(?:dois|duas|três)\s+ataques?/i ],
 	[ "salvaguarda", /teste\s+de\s+(?:resistência\s+de\s+)?(?:FOR|DES|CON|INT|SAB|CAR)|deve(?:m)?\s+fazer\s+um\s+teste|jogada\s+de\s+resistência/i ],
 	[ "disputa", /Role\s+1d20\s*\+\s*MOVE[^.]{0,60}compare\s+o\s+resultado\s+com\s+10\s*\+/i ],
 	[ "automatico", /garantid[oa]\s+(?:de|para)\s+acertar|com\s+acerto\s+garantido|garantia\s+de\s+acertar|sempre\s+acerta|sempre\s+atinge|nunca\s+err\w+|sem\s+chance\s+de\s+errar|automaticamente\s+acertará|sem\s+testes\s+de\s+resistência/i ],

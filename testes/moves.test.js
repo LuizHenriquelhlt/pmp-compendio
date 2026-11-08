@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest"
 import {
 	classificarResolucao, criarReparadorDeMoves, emMetros, interpretarAlcance, interpretarAtivacao,
-	interpretarDados, interpretarDuracao, normalizarMove, prioridadeDeclarada,
+	interpretarDados, interpretarDuracao, normalizarMove, prioridadeDeclarada, vazamentoNoTextoDeMove,
 } from "../ferramentas/moves.mjs"
 
 // Como em `efeitos.test.js`, as entradas vêm do corpus da v1.33.0.
@@ -48,6 +48,20 @@ describe("alcance em metros", () => {
 		const teraStarstorm = "50 pés (15 metros) / Corpo a Corpo / cone (50 pés / 15"
 		expect(interpretarAlcance(teraStarstorm, 15, true).truncado).toBe(true)
 	})
+
+	// Teleport na edição revisada (v1.37.0 do módulo): todos os pés convertidos, e a frase
+	// para em "de" - falta "modificador de Sabedoria".
+	it("acusa o alcance que termina no meio da frase", () => {
+		const teleport = "30 pés (9 metros) + 5 pés (1,5 metros) para cada ponto de"
+		expect(interpretarAlcance(teleport, 9, false).truncado).toBe(true)
+	})
+
+	it.each([ "40 pés (12 metros)", "Pessoal (cone de 15 pés (4,5 metros))", "Variável", "Toque" ])(
+		"não acusa o alcance inteiro %j",
+		(bruto) => {
+			expect(interpretarAlcance(bruto, 0, false).truncado).toBe(false)
+		},
+	)
 })
 
 describe("ativação", () => {
@@ -133,6 +147,70 @@ describe("categoria de resolução", () => {
 	it("diz 'nenhuma' quando o Move não pede rolagem, em vez de adivinhar", () => {
 		expect(classificarResolucao("Você gera uma energia de cura para recuperar 2d6 + MOVE pontos de vida."))
 			.toEqual([ "nenhuma" ])
+	})
+
+	// Aurora Veil na edição revisada (v1.37.0 do módulo): o Move SE DEFENDE de ataques.
+	it("não chama de ataque o 'dano recebido de ataques corpo a corpo'", () => {
+		const auroraVeil = "Enquanto estiver protegido por ele, o dano recebido de ataques corpo a corpo e à "
+			+ "distância é reduzido pela metade durante cinco rodadas."
+
+		expect(classificarResolucao(auroraVeil)).toEqual([ "nenhuma" ])
+	})
+
+	it.each([
+		"Quando sujeito a um ataque corpo a corpo, você pode gastar sua reação para aumentar sua Defesa.",
+		"Se uma criatura direcionar um ataque corpo a corpo a você ou tentar agarrá-lo, ela sofre 1d8 de dano.",
+		"Se algum ataque corpo a corpo for direcionado a você durante o efeito, o atacante tem a Defesa reduzida.",
+	])("não chama de ataque o Move que se defende de um em %j", (descricao) => {
+		expect(classificarResolucao(descricao)).toEqual([ "nenhuma" ])
+	})
+
+	it.each([
+		"Você pode se mover até 15 pés (4,5 metros) e fazer um ataque corpo a corpo contra um alvo.",
+		"Você pode usar sua reação para desferir um ataque corpo a corpo contra a criatura que o atingiu.",
+		"Você salta no ar e, no seu próximo turno, desce em um ataque corpo a corpo com vantagem.",
+		"Faça até três ataques corpo a corpo -1, um depois do outro.",
+	])("continua lendo o ataque que o Move faz em %j", (descricao) => {
+		expect(classificarResolucao(descricao)).toEqual([ "ataque" ])
+	})
+})
+
+describe("texto de outro documento num campo de Move", () => {
+	// Nihil Light na v1.36.0: os Níveis Superiores levaram o capítulo de Mega Evoluções.
+	it("acusa o capítulo de Mega Evoluções", () => {
+		const nihilLight = "Os dados de dano para este Move mudam para 6d10 no nível 5, 8d10 no nível 10 e 10d10 "
+			+ "no nível 17. Crabominite Permite que Crabominable Mega Evolua para Mega Crabominable enquanto "
+			+ "estiver segurando esta pedra."
+
+		expect(vazamentoNoTextoDeMove(nihilLight)).toBe("capitulo-de-mega")
+	})
+
+	it.each([
+		"Os dados de dano para este Move mudam para 3d10 no nível 5, 4d10 no nível 10 e 5d10 no nível 17. A rte feita por freqrexy",
+		"Os dados de dano mudam para 4d10 no nível 5 e 6d10 no nível 17. Overheat Art e f e i t a p or (Superaquecimento) 1 3 a l r o g",
+		"Swallow não pode ser escolhido pelo Move Assist. Arte feita por alguém",
+		"Os dados de dano para este Move mudam para 2d10 no nível 5, 4d6 no nível 10 e 4d8 no nível 17. Feito por Yusiso",
+		"Os dados de dano mudam para 3d6 no nível 5, 3d8 no nível 10 e 5d6 no nível 17. fei ta por muds aw",
+	])("acusa o crédito de arte com as letras separadas em %j", (texto) => {
+		expect(vazamentoNoTextoDeMove(texto)).toBe("credito-de-arte")
+	})
+
+	it.each([
+		"Os dados de dano para este Move mudam para 4d6 no nível 5, 4d8 no nível 10 e 4d10 no nível 17. po r",
+		"Em uma falha, o alvo fica Queimado. Cri",
+		"Os dados de dano mudam para 2d10 no nível 5 e 6d6 no nível 17. (Descansar) amemoriii",
+	])("acusa a sobra de crédito no fim em %j", (texto) => {
+		expect(vazamentoNoTextoDeMove(texto)).toBe("sobra-no-fim")
+	})
+
+	it.each([
+		"Você ataca com a parte por baixo da carapaça.",
+		"Este Move permite que o usuário Mega Evoluído mantenha o tipo.",
+		"Os dados de dano para este Move mudam para 2d8 no nível 5.",
+		"Impõe desvantagem em qualquer ataque à distância feito por uma criatura mirando em outra.",
+		"O alvo recupera pontos de vida (mínimo 1)",
+	])("deixa em paz o texto legítimo %j", (texto) => {
+		expect(vazamentoNoTextoDeMove(texto)).toBe(null)
 	})
 })
 
