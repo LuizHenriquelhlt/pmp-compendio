@@ -152,6 +152,34 @@ banal. O `publicar.mjs` continua existindo para hosts que recebem .zip.
 Como o build é portátil, qualquer host estático serve igual - Cloudflare Pages e Netlify
 aceitam a pasta `build/` direto, sem zip e sem arquivo de configuração.
 
+### Na Vercel (plano Hobby, gratuito)
+
+O mesmo repositório de publicação serve à Vercel: o `publicar-github.mjs` leva junto o
+[`vercel.json`](vercel.json) e o [`.vercelignore`](.vercelignore), e o Square Cloud
+ignora os dois. Uma vez só, no painel da Vercel: *Add New → Project*, importar
+`LuizHenriquelhlt/pmp-compendio-site`, preset **Other**, sem comando de build e sem
+diretório de saída (o repositório já é o site). Depois disso, cada
+`node ferramentas/publicar-github.mjs` publica nos dois hosts.
+
+O `vercel.json` faz três coisas:
+
+- `trailingSlash: false` - a URL canônica é a dos links do compêndio, sem barra no fim
+  (`/pokemon/charizard`), e `/pokemon/charizard/` redireciona para ela, em `https`. A
+  Vercel entrega `pokemon/charizard/index.html` para a URL sem barra sozinha, porque o
+  build é portátil.
+- Cache de um ano, `immutable`, para `/_app/immutable/`: o nome de cada arquivo traz o
+  hash do conteúdo, então um build novo gera nomes novos.
+- `framework: null` - não há o que detectar nem construir.
+
+O `.vercelignore` tira do ar os arquivos de bastidor do repositório (`squarecloud.app`,
+`.gitattributes`). A `404.html` da raiz a Vercel usa sozinha.
+
+Limites do Hobby que importam aqui (medidos em 13/11/2026): uso pessoal, sem fins
+comerciais; 100 GB de tráfego por mês, e passar disso suspende o recurso até completar 30
+dias; 100 deploys por dia; e, só para deploy pela linha de comando, 100 MB e 15.000
+arquivos por envio - o build tem 96 MB e 6.130 arquivos, por isso o caminho é o do GitHub,
+que não tem teto de tamanho publicado.
+
 **Lembre que `dados/` é conteúdo do PMP.** O build assa esse conteúdo dentro das páginas:
 publicar o site é publicar o compêndio. Isso é decisão de quem tem os direitos, não do
 deploy - veja "Conteúdo não acompanha o código", no começo deste arquivo.

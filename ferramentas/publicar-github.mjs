@@ -25,6 +25,14 @@ import { conferirArquivo } from "./configuracao-square.mjs"
 
 const BUILD = "build"
 const CONFIG = "squarecloud.app"
+// A configuração da Vercel vai junto, e o mesmo repositório serve aos dois hosts: o Square
+// Cloud ignora estes arquivos, e a Vercel ignora o squarecloud.app (ver .vercelignore).
+//
+// vercel.json: URL canônica SEM barra no fim, como os links do compêndio (/pokemon/charizard;
+// /pokemon/charizard/ redireciona para lá, em https), e cache longo para /_app/immutable/,
+// cujos nomes trazem o hash do conteúdo. "framework": null porque não há build a detectar -
+// o repositório já é o site pronto.
+const CONFIGS_VERCEL = [ "vercel.json", ".vercelignore" ]
 const CLONE = join("publicacao", "site")
 const RAMO = "main"
 const REPO = process.env.REPO_SITE ?? "LuizHenriquelhlt/pmp-compendio-site"
@@ -40,6 +48,9 @@ function git(argumentos, cwd = CLONE) {
 
 if (!existsSync(join(BUILD, "index.html"))) pare("Falta o build. Rode 'npm run build' antes.")
 if (!existsSync(CONFIG)) pare(`Falta o ${CONFIG} na raiz do projeto.`)
+for (const arquivo of CONFIGS_VERCEL) {
+	if (!existsSync(arquivo)) pare(`Falta o ${arquivo} na raiz do projeto.`)
+}
 if (existsSync(join(BUILD, "pokemon.html"))) {
 	pare("O build está na forma pasta.html. Rode 'npm run build' (que termina em ferramentas/portatil.mjs).")
 }
@@ -80,6 +91,7 @@ for (const entrada of readdirSync(CLONE)) {
 
 cpSync(BUILD, CLONE, { recursive: true })
 copyFileSync(CONFIG, join(CLONE, CONFIG))
+for (const arquivo of CONFIGS_VERCEL) copyFileSync(arquivo, join(CLONE, arquivo))
 writeFileSync(
 	join(CLONE, ".gitattributes"),
 	"# Conteúdo gerado: o que for servido tem de ser byte a byte o que o build produziu.\n" +
